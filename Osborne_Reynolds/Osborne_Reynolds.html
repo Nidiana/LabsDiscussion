@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Osborne Reynolds Number Experiment Discussion</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 800px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #2c3e50;
+        }
+        .question {
+            margin-top: 20px;
+            padding: 10px;
+            border-left: 5px solid #3498db;
+            background: #ecf0f1;
+        }
+        .options {
+            margin-top: 10px;
+        }
+        .options button {
+            display: block;
+            margin: 5px 0;
+            padding: 10px;
+            background: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .options button:hover {
+            background: #2980b9;
+        }
+        .answer {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            background: #d1f2eb;
+            border-left: 5px solid #1abc9c;
+        }
+        .correct {
+            background: #2ecc71 !important;
+        }
+        .incorrect {
+            background: #e74c3c !important;
+        }
+    </style>
+    <script>
+        let responses = [];
+
+        function checkAnswer(selected, correct) {
+            let buttons = document.querySelectorAll('.options button');
+            buttons.forEach(button => {
+                button.classList.remove('correct', 'incorrect');
+            });
+            
+            if (selected === correct) {
+                document.getElementById(selected).classList.add('correct');
+            } else {
+                document.getElementById(selected).classList.add('incorrect');
+            }
+            document.getElementById('answer1').style.display = 'block';
+            saveAnswer('1', selected);
+        }
+
+        function saveAnswer(question, answer) {
+            let benchNumber = document.getElementById('benchNumber').value || "Unknown";
+            let existingResponse = responses.find(r => r.bench === benchNumber);
+            
+            if (existingResponse) {
+                existingResponse[`question${question}`] = answer;
+            } else {
+                let newResponse = { bench: benchNumber };
+                newResponse[`question${question}`] = answer;
+                responses.push(newResponse);
+            }
+        }
+
+        function downloadData() {
+            let data = "Number of Bench,Question 1,Answer,Question 2,Answer,Question 3,Answer\n";
+            responses.forEach(row => {
+                data += `${row.bench},${row.question1 || ""},${row.question2 || ""},${row.question3 || ""}\n`;
+            });
+            
+            let blob = new Blob([data], { type: "text/plain" });
+            let a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = "responses.dat";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Discussion of the Osborne Reynolds Number Experiment</h1>
+        
+        <div>
+            <label for="benchNumber"><strong>Enter Bench Number:</strong></label>
+            <input type="text" id="benchNumber" placeholder="Bench No. X">
+        </div>
+
+        <div class="question">
+            <h2>1. What is the theoretical critical Reynolds number of internal flow in pipes?</h2>
+            <p>How did you determine the critical Reynolds number?</p>
+            <div class="options">
+                <button id="optionA" onclick="checkAnswer('optionA', 'optionA')">Option A: After Re 2300</button>
+                <button id="optionB" onclick="checkAnswer('optionB', 'optionA')">Option B: After Re 5000</button>
+                <button id="optionC" onclick="checkAnswer('optionC', 'optionA')">Option C: After Re 100 000</button>
+                <button id="optionD" onclick="checkAnswer('optionD', 'optionA')">Option D: After Re 500 000</button>
+            </div>
+            <div id="answer1" class="answer">
+                <p><strong>Answer:</strong> The critical Reynolds number should be about 2300. It was determined by gradually increasing the flow rate and observing the transition from laminar to turbulent flow using the dye injection method.</p>
+            </div>
+        </div>
+        <button onclick="downloadData()">Download Responses (.dat)</button>
+    </div>
+</body>
+</html>
