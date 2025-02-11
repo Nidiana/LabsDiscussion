@@ -57,7 +57,10 @@
         }
     </style>
     <script>
-        let responses = [];
+        const GITHUB_USERNAME = "your-github-username";  // Replace with your GitHub username
+        const GITHUB_REPO = "LabsDiscussion"; // Your repository name
+        const FILE_PATH = "Osborne_Reynolds/responses.dat";
+        const GITHUB_TOKEN = "your-personal-access-token"; // Replace with your GitHub token
 
         function checkAnswer(selected, correct) {
             let buttons = document.querySelectorAll('.options button');
@@ -76,30 +79,40 @@
 
         function saveAnswer(question, answer) {
             let benchNumber = document.getElementById('benchNumber').value || "Unknown";
-            let existingResponse = responses.find(r => r.bench === benchNumber);
-            
-            if (existingResponse) {
-                existingResponse[`question${question}`] = answer;
-            } else {
-                let newResponse = { bench: benchNumber };
-                newResponse[`question${question}`] = answer;
-                responses.push(newResponse);
-            }
+            let data = `\n${benchNumber},${question},${answer}`;
+            uploadToGitHub(data);
         }
 
-        function downloadData() {
-            let data = "Number of Bench,Question 1,Answer,Question 2,Answer,Question 3,Answer\n";
-            responses.forEach(row => {
-                data += `${row.bench},${row.question1 || ""},${row.question2 || ""},${row.question3 || ""}\n`;
-            });
+        async function uploadToGitHub(newData) {
+            let url = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${FILE_PATH}`;
             
-            let blob = new Blob([data], { type: "text/plain" });
-            let a = document.createElement("a");
-            a.href = URL.createObjectURL(blob);
-            a.download = "responses.dat";
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+            try {
+                let response = await fetch(url, {
+                    headers: { "Authorization": `token ${GITHUB_TOKEN}` }
+                });
+                let json = await response.json();
+                let sha = json.sha; // Required for updating the file
+                let oldContent = atob(json.content);
+                let updatedContent = oldContent + newData;
+                
+                let commit = {
+                    message: "Update responses",
+                    content: btoa(updatedContent),
+                    sha: sha
+                };
+                
+                await fetch(url, {
+                    method: "PUT",
+                    headers: {
+                        "Authorization": `token ${GITHUB_TOKEN}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(commit)
+                });
+                console.log("Response saved to GitHub");
+            } catch (error) {
+                console.error("Error saving response: ", error);
+            }
         }
     </script>
 </head>
@@ -125,7 +138,6 @@
                 <p><strong>Answer:</strong> The critical Reynolds number should be about 2300. It was determined by gradually increasing the flow rate and observing the transition from laminar to turbulent flow using the dye injection method.</p>
             </div>
         </div>
-        <button onclick="downloadData()">Download Responses (.dat)</button>
     </div>
 </body>
 </html>
