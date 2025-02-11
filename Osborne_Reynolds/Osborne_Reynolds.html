@@ -55,64 +55,64 @@
         .incorrect {
             background: #e74c3c !important;
         }
+        .save-btn {
+            display: block;
+            margin-top: 20px;
+            padding: 10px;
+            background: #e67e22;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .save-btn:hover {
+            background: #d35400;
+        }
     </style>
     <script>
-        const GITHUB_USERNAME = "your-github-username";  // Replace with your GitHub username
-        const GITHUB_REPO = "LabsDiscussion"; // Your repository name
-        const FILE_PATH = "Osborne_Reynolds/responses.dat";
-        const GITHUB_TOKEN = "your-personal-access-token"; // Replace with your GitHub token
+        let answers = {
+            question1: "",
+            question2: ""
+        };
 
-        function checkAnswer(selected, correct) {
-            let buttons = document.querySelectorAll('.options button');
+        function checkAnswer(question, selected, correct) {
+            let buttons = document.querySelectorAll(`#${question} .options button`);
             buttons.forEach(button => {
                 button.classList.remove('correct', 'incorrect');
             });
-            
+
             if (selected === correct) {
                 document.getElementById(selected).classList.add('correct');
+                answers[question] = document.getElementById(selected).innerText;
             } else {
                 document.getElementById(selected).classList.add('incorrect');
+                answers[question] = document.getElementById(selected).innerText;
             }
-            document.getElementById('answer1').style.display = 'block';
-            saveAnswer('1', selected);
+            document.getElementById(`${question}-answer`).style.display = 'block';
         }
 
-        function saveAnswer(question, answer) {
+        function saveToFile() {
             let benchNumber = document.getElementById('benchNumber').value || "Unknown";
-            let data = `\n${benchNumber},${question},${answer}`;
-            uploadToGitHub(data);
-        }
-
-        async function uploadToGitHub(newData) {
-            let url = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${FILE_PATH}`;
+            let timestamp = new Date().toLocaleString(); // Get current date and time
             
-            try {
-                let response = await fetch(url, {
-                    headers: { "Authorization": `token ${GITHUB_TOKEN}` }
-                });
-                let json = await response.json();
-                let sha = json.sha; // Required for updating the file
-                let oldContent = atob(json.content);
-                let updatedContent = oldContent + newData;
-                
-                let commit = {
-                    message: "Update responses",
-                    content: btoa(updatedContent),
-                    sha: sha
-                };
-                
-                await fetch(url, {
-                    method: "PUT",
-                    headers: {
-                        "Authorization": `token ${GITHUB_TOKEN}`,
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(commit)
-                });
-                console.log("Response saved to GitHub");
-            } catch (error) {
-                console.error("Error saving response: ", error);
-            }
+            let content = `Bench Number: ${benchNumber}\n`;
+            content += `Timestamp: ${timestamp}\n\n`;
+            content += `Question 1: ${answers.question1 || "No answer selected"}\n`;
+            content += `Question 2: ${answers.question2 || "No answer selected"}\n`;
+
+            let filename = `responses_${benchNumber}.txt`;
+
+            // Create a Blob with the content
+            let blob = new Blob([content], { type: "text/plain" });
+
+            // Create a temporary <a> element to trigger download
+            let a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
         }
     </script>
 </head>
@@ -125,19 +125,35 @@
             <input type="text" id="benchNumber" placeholder="Bench No. X">
         </div>
 
-        <div class="question">
+        <div class="question" id="question1">
             <h2>1. What is the theoretical critical Reynolds number of internal flow in pipes?</h2>
             <p>How did you determine the critical Reynolds number?</p>
             <div class="options">
-                <button id="optionA" onclick="checkAnswer('optionA', 'optionA')">Option A: After Re 2300</button>
-                <button id="optionB" onclick="checkAnswer('optionB', 'optionA')">Option B: After Re 5000</button>
-                <button id="optionC" onclick="checkAnswer('optionC', 'optionA')">Option C: After Re 100 000</button>
-                <button id="optionD" onclick="checkAnswer('optionD', 'optionA')">Option D: After Re 500 000</button>
+                <button id="optionA" onclick="checkAnswer('question1', 'optionA', 'optionA')">Option A: After Re 2300</button>
+                <button id="optionB" onclick="checkAnswer('question1', 'optionB', 'optionA')">Option B: After Re 5000</button>
+                <button id="optionC" onclick="checkAnswer('question1', 'optionC', 'optionA')">Option C: After Re 100,000</button>
+                <button id="optionD" onclick="checkAnswer('question1', 'optionD', 'optionA')">Option D: After Re 500,000</button>
             </div>
-            <div id="answer1" class="answer">
+            <div id="question1-answer" class="answer">
                 <p><strong>Answer:</strong> The critical Reynolds number should be about 2300. It was determined by gradually increasing the flow rate and observing the transition from laminar to turbulent flow using the dye injection method.</p>
             </div>
         </div>
+
+        <div class="question" id="question2">
+            <h2>2. What factors influence the Reynolds number?</h2>
+            <p>Select the correct option:</p>
+            <div class="options">
+                <button id="optionE" onclick="checkAnswer('question2', 'optionE', 'optionF')">Option A: Pipe Length</button>
+                <button id="optionF" onclick="checkAnswer('question2', 'optionF', 'optionF')">Option B: Fluid Velocity</button>
+                <button id="optionG" onclick="checkAnswer('question2', 'optionG', 'optionF')">Option C: Temperature Only</button>
+                <button id="optionH" onclick="checkAnswer('question2', 'optionH', 'optionF')">Option D: Pipe Color</button>
+            </div>
+            <div id="question2-answer" class="answer">
+                <p><strong>Answer:</strong> The Reynolds number is influenced by **fluid velocity**, pipe diameter, and fluid viscosity.</p>
+            </div>
+        </div>
+
+        <button class="save-btn" onclick="saveToFile()">Save Responses</button>
     </div>
 </body>
 </html>
