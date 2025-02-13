@@ -32,6 +32,23 @@
             gap: 10px;
             flex-wrap: wrap;
         }
+        .options button {
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background 0.3s;
+            background: #f39c12; /* Soft orange color */
+            color: white;
+        }
+        .correct {
+            background: #2ecc71 !important;
+            color: white;
+        }
+        .incorrect {
+            background: #e74c3c !important;
+            color: white;
+        }
         .checkbox-options {
             display: flex;
             justify-content: space-between;
@@ -60,12 +77,14 @@
             let buttons = document.querySelectorAll(`#${question} .options button`);
             buttons.forEach(button => {
                 button.classList.remove('correct', 'incorrect');
+                button.style.background = "#f39c12";
             });
             
+            let selectedButton = document.getElementById(selected);
             if (selected === correct) {
-                document.getElementById(selected).classList.add('correct');
+                selectedButton.classList.add('correct');
             } else {
-                document.getElementById(selected).classList.add('incorrect');
+                selectedButton.classList.add('incorrect');
             }
             document.getElementById(`${question}-answer`).style.display = 'block';
         }
@@ -107,9 +126,9 @@
                 <p><strong>Answer:</strong> The critical Reynolds number should be about 2300. It was determined by gradually increasing the flow rate and observing the transition from laminar to turbulent flow using the dye injection method.</p>
             </div>
         </div>
-
+        
         <div class="question" id="question2">
-            <h2>2. How did the dye stream behave at different Reynolds numbers? How did you distinguish between laminar, transitional, and turbulent flows? Click yes or no if you managed to observe the following results:</h2>
+            <h2>2. How did the dye stream behave at different Reynolds numbers? How did you distinguish between laminar, transitional, and turbulent flows?</h2>
             <div class="checkbox-options">
                 <div>
                     <p>Laminar</p>
@@ -137,7 +156,9 @@
                 </div>
             </div>
         </div>
+        
         <button onclick="saveResults()">Save</button>
     </div>
 </body>
 </html>
+
