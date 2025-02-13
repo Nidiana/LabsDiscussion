@@ -28,19 +28,24 @@
         }
         .options {
             margin-top: 10px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
         }
-        .options button {
-            display: block;
-            margin: 5px 0;
-            padding: 10px;
-            background: #3498db;
-            color: white;
-            border: none;
-            cursor: pointer;
+        .checkbox-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .checkbox-options div {
+            text-align: center;
+            margin: 10px;
+        }
+        .checkbox-options img, .checkbox-options video {
+            width: 250px;
+            height: auto;
             border-radius: 5px;
-        }
-        .options button:hover {
-            background: #2980b9;
         }
         .answer {
             display: none;
@@ -49,67 +54,37 @@
             background: #d1f2eb;
             border-left: 5px solid #1abc9c;
         }
-        .correct {
-            background: #2ecc71 !important;
-        }
-        .incorrect {
-            background: #e74c3c !important;
-        }
-        .save-btn {
-            display: block;
-            margin-top: 20px;
-            padding: 10px;
-            background: #e67e22;
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-        .save-btn:hover {
-            background: #d35400;
-        }
     </style>
     <script>
-        let answers = {
-            question1: "",
-            question2: ""
-        };
-
         function checkAnswer(question, selected, correct) {
             let buttons = document.querySelectorAll(`#${question} .options button`);
             buttons.forEach(button => {
                 button.classList.remove('correct', 'incorrect');
             });
-
+            
             if (selected === correct) {
                 document.getElementById(selected).classList.add('correct');
-                answers[question] = document.getElementById(selected).innerText;
             } else {
                 document.getElementById(selected).classList.add('incorrect');
-                answers[question] = document.getElementById(selected).innerText;
             }
             document.getElementById(`${question}-answer`).style.display = 'block';
         }
+        
+        function saveResults() {
+            let question1Answer = document.querySelector('.options button.correct')?.innerText || "No answer selected";
+            let laminarAnswer = document.querySelector('input[name="laminar"]:checked')?.value || "No answer";
+            let transitionalAnswer = document.querySelector('input[name="transitional"]:checked')?.value || "No answer";
+            let turbulentAnswer = document.querySelector('input[name="turbulent"]:checked')?.value || "No answer";
 
-        function saveToFile() {
-            let benchNumber = document.getElementById('benchNumber').value || "Unknown";
-            let timestamp = new Date().toLocaleString(); // Get current date and time
-            
-            let content = `Bench Number: ${benchNumber}\n`;
-            content += `Timestamp: ${timestamp}\n\n`;
-            content += `Question 1: ${answers.question1 || "No answer selected"}\n`;
-            content += `Question 2: ${answers.question2 || "No answer selected"}\n`;
+            let content = `Question 1: ${question1Answer}\n`;
+            content += `Laminar: ${laminarAnswer}\n`;
+            content += `Transitional: ${transitionalAnswer}\n`;
+            content += `Turbulent: ${turbulentAnswer}\n`;
 
-            let filename = `responses_${benchNumber}.txt`;
-
-            // Create a Blob with the content
             let blob = new Blob([content], { type: "text/plain" });
-
-            // Create a temporary <a> element to trigger download
             let a = document.createElement("a");
             a.href = URL.createObjectURL(blob);
-            a.download = filename;
+            a.download = "Osborne_Results.txt";
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -120,18 +95,13 @@
     <div class="container">
         <h1>Discussion of the Osborne Reynolds Number Experiment</h1>
         
-        <div>
-            <label for="benchNumber"><strong>Enter Bench Number:</strong></label>
-            <input type="text" id="benchNumber" placeholder="Bench No. X">
-        </div>
-
         <div class="question" id="question1">
-            <h2>1. What is the theoretical critical Reynolds number of internal flow in pipes? What this quantity means?</h2>
+            <h2>1. What is the theoretical critical Reynolds number of internal flow in pipes? What does this quantity mean?</h2>
             <div class="options">
-                <button id="optionA" onclick="checkAnswer('question1', 'optionA', 'optionA')">Option A: After Re 2300</button>
-                <button id="optionB" onclick="checkAnswer('question1', 'optionB', 'optionA')">Option B: After Re 5000</button>
-                <button id="optionC" onclick="checkAnswer('question1', 'optionC', 'optionA')">Option C: After Re 100,000</button>
-                <button id="optionD" onclick="checkAnswer('question1', 'optionD', 'optionA')">Option D: After Re 500,000</button>
+                <button id="optionA" onclick="checkAnswer('question1', 'optionA', 'optionA')">Re 2300</button>
+                <button id="optionB" onclick="checkAnswer('question1', 'optionB', 'optionA')">Re 5000</button>
+                <button id="optionC" onclick="checkAnswer('question1', 'optionC', 'optionA')">Re 100,000</button>
+                <button id="optionD" onclick="checkAnswer('question1', 'optionD', 'optionA')">Re 500,000</button>
             </div>
             <div id="question1-answer" class="answer">
                 <p><strong>Answer:</strong> The critical Reynolds number should be about 2300. It was determined by gradually increasing the flow rate and observing the transition from laminar to turbulent flow using the dye injection method.</p>
@@ -139,20 +109,35 @@
         </div>
 
         <div class="question" id="question2">
-            <h2>2. What factors influence the Reynolds number?</h2>
-            <p>Select the correct option:</p>
-            <div class="options">
-                <button id="optionE" onclick="checkAnswer('question2', 'optionE', 'optionF')">Option A: Pipe Length</button>
-                <button id="optionF" onclick="checkAnswer('question2', 'optionF', 'optionF')">Option B: Fluid Velocity</button>
-                <button id="optionG" onclick="checkAnswer('question2', 'optionG', 'optionF')">Option C: Temperature Only</button>
-                <button id="optionH" onclick="checkAnswer('question2', 'optionH', 'optionF')">Option D: Pipe Color</button>
-            </div>
-            <div id="question2-answer" class="answer">
-                <p><strong>Answer:</strong> The Reynolds number is influenced by **fluid velocity**, pipe diameter, and fluid viscosity.</p>
+            <h2>2. How did the dye stream behave at different Reynolds numbers? How did you distinguish between laminar, transitional, and turbulent flows? Click yes or no if you managed to observe the following results:</h2>
+            <div class="checkbox-options">
+                <div>
+                    <p>Laminar</p>
+                    <img src="https://github.com/Nidiana/LabsDiscussion/raw/main/Osborne_Reynolds/laminar.jpg" alt="Laminar Flow">
+                    <br>
+                    <label><input type="radio" name="laminar" value="yes"> Yes</label>
+                    <label><input type="radio" name="laminar" value="no"> No</label>
+                </div>
+                <div>
+                    <p>Transitional</p>
+                    <video controls>
+                        <source src="https://github.com/Nidiana/LabsDiscussion/raw/main/Osborne_Reynolds/transitional.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                    <br>
+                    <label><input type="radio" name="transitional" value="yes"> Yes</label>
+                    <label><input type="radio" name="transitional" value="no"> No</label>
+                </div>
+                <div>
+                    <p>Turbulent</p>
+                    <img src="https://github.com/Nidiana/LabsDiscussion/raw/main/Osborne_Reynolds/turbulent.jpg" alt="Turbulent Flow">
+                    <br>
+                    <label><input type="radio" name="turbulent" value="yes"> Yes</label>
+                    <label><input type="radio" name="turbulent" value="no"> No</label>
+                </div>
             </div>
         </div>
-
-        <button class="save-btn" onclick="saveToFile()">Save Responses</button>
+        <button onclick="saveResults()">Save</button>
     </div>
 </body>
 </html>
