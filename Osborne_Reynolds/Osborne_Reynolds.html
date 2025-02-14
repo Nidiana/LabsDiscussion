@@ -74,7 +74,7 @@
     </style>
     <script>
         function checkAnswer(question, selected, correct) {
-            let buttons = document.querySelectorAll(`#${question} .options button`);
+             let buttons = document.querySelectorAll(`#${question} .options button`);
             buttons.forEach(button => {
                 button.classList.remove('correct', 'incorrect');
                 button.style.background = "#f39c12";
@@ -90,29 +90,51 @@
         }
         
         function saveResults() {
+            let benchNumber = document.getElementById("benchNumber").value.trim();
+            if (!benchNumber) {
+                alert("Please enter the Bench Number.");
+                return;
+            }
+            
+            let now = new Date();
+            let minutes = now.getMinutes();
+            let hours = now.getHours();
+            let date = now.getDate();
+            let month = now.toLocaleString('default', { month: 'short' });
+            let filename = `Osborne_Results${benchNumber}_${date}${month}${hours}`;
+            
             let question1Answer = document.querySelector('.options button.correct')?.innerText || "No answer selected";
             let laminarAnswer = document.querySelector('input[name="laminar"]:checked')?.value || "No answer";
             let transitionalAnswer = document.querySelector('input[name="transitional"]:checked')?.value || "No answer";
             let turbulentAnswer = document.querySelector('input[name="turbulent"]:checked')?.value || "No answer";
 
-            let content = `Question 1: ${question1Answer}\n`;
+            let content = `Bench Number: ${benchNumber}\n`;
+            content += `Time: ${hours}:${minutes}\n`;
+            content += `Question 1: ${question1Answer}\n`;
             content += `Laminar: ${laminarAnswer}\n`;
             content += `Transitional: ${transitionalAnswer}\n`;
             content += `Turbulent: ${turbulentAnswer}\n`;
-
+            
             let blob = new Blob([content], { type: "text/plain" });
             let a = document.createElement("a");
             a.href = URL.createObjectURL(blob);
-            a.download = "Osborne_Results.txt";
+            a.download = filename + ".txt";
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
+        }
+
+        function showAnswer(question) {
+            document.getElementById(`${question}-answer`).style.display = 'block';
         }
     </script>
 </head>
 <body>
     <div class="container">
         <h1>Discussion of the Osborne Reynolds Number Experiment</h1>
+		
+		<label for="benchNumber">Enter Bench Number: </label>
+        <input type="text" id="benchNumber" placeholder="e.g. 19">
         
         <div class="question" id="question1">
             <h2>1. What is the theoretical critical Reynolds number of internal flow in pipes? What does this quantity mean?</h2>
@@ -123,7 +145,7 @@
                 <button id="optionD" onclick="checkAnswer('question1', 'optionD', 'optionA')">Re 500,000</button>
             </div>
             <div id="question1-answer" class="answer">
-                <p><strong>Answer:</strong> The critical Reynolds number is about 2300. This is means, at lower Re of 2300 we have more changes to observed something laminat and above Re 4000 we are likely to observe turbulent flow. </p>
+                <p><strong>Answer:</strong> The critical Reynolds number for internal pipes is about 2300. This is means, at lower Re of 2300 we are more likely to observe laminar flow and above Re 4000 we are likely to observe turbulent flow. </p>
             </div>
         </div>
         
@@ -156,9 +178,39 @@
                 </div>
             </div>
         </div>
+
+        <!-- Question 3 -->
+        <div class="question" id="question3">
+            <h2>3. Did your observations agree with Reynolds calculated? In other words, below Re 2300 did you observe laminar, and above Re 4000 did you observe turbulent?</h2>
+            <div class="options">
+                <label><input type="radio" name="question3" value="yes" onclick="showAnswer('question3')"> Yes</label>
+                <label><input type="radio" name="question3" value="no" onclick="showAnswer('question3')"> No</label>
+            </div>
+            <div id="question3-answer" class="answer">
+                <p><strong>Explanation:</strong> If you observed transitional flow or turbulent flow earlier, this might be because the flow rate was large, and when you reduced the speed, there was turbulence in the equipment, meaning that a longer time is needed to remove those perturbations. Another reason might be the amount of ink being too much.</p>
+            </div>
+        </div>
+
+        <!-- New Question 4 -->
+        <div class="question" id="question4">
+            <h2>4. What is the physical mechanism that causes the flow to change from laminar to turbulent flow? How is it that flow can be laminar at very high Reynolds numbers?</h2>
+            <button onclick="showAnswer('question4')">Display Explanation</button>
+            <div id="question4-answer" class="answer">
+                <p><strong>Answer:</strong> Viscous forces in a laminar flow tend to be large relative to the inertial force. An increase in the Reynolds number causes the flow to transition from laminar to turbulent, and it is characterized by its unsteady, random, and chaotic attributes with a variety of eddy structures.</p>
+            </div>
+        </div>
+        
+        
+        <!-- New Question 5 -->
+        <div class="question" id="question5">
+            <h2>5. What sources of error might have affected your determination of the Reynolds number in this experiment? How could these errors be minimized in future experiments? </h2>
+            <button onclick="showAnswer('question5')">Display Explanation</button>
+            <div id="question5-answer" class="answer">
+                <p><strong>Answer:</strong> incorrect amount of ink, time error, volume error, vibrations due to the pump. error can be reduced by taking longer time in the reading, carefully adding the ink, isolating the vibration of the pump and using a less noise room..</p>
+            </div>
+        </div>
         
         <button onclick="saveResults()">Save</button>
     </div>
 </body>
 </html>
-
