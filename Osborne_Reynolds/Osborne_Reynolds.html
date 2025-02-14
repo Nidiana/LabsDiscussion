@@ -8,23 +8,26 @@
         body {
             font-family: Arial, sans-serif;
             margin: 40px;
-            background-color: #f4f4f4;
+            background-color: #faf8e1; /* Soft yellow background */
+            color: #000; /* Black font color */
         }
         .container {
             max-width: 800px;
-            background: white;
+            background: #fff9c4; /* Soft yellow container */
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            color: #000; /* Black font color */
         }
         h1, h2 {
-            color: #2c3e50;
+            color: #000; /* Black font color for headings */
         }
         .question {
             margin-top: 20px;
             padding: 10px;
-            border-left: 5px solid #3498db;
-            background: #ecf0f1;
+            border-left: 5px solid #ffd54f; /* Yellow accent */
+            background: #fffde7; /* Lighter yellow for questions */
+            color: #000; /* Black font color */
         }
         .options {
             margin-top: 10px;
@@ -38,15 +41,15 @@
             cursor: pointer;
             border-radius: 5px;
             transition: background 0.3s;
-            background: #f39c12; /* Soft orange color */
-            color: white;
+            background: #ffd54f; /* Soft yellow for buttons */
+            color: #000; /* Black font color */
         }
         .correct {
-            background: #2ecc71 !important;
+            background: #2ecc71 !important; /* Green for correct answers */
             color: white;
         }
         .incorrect {
-            background: #e74c3c !important;
+            background: #e74c3c !important; /* Red for incorrect answers */
             color: white;
         }
         .checkbox-options {
@@ -58,6 +61,7 @@
         .checkbox-options div {
             text-align: center;
             margin: 10px;
+            color: #000; /* Black font color */
         }
         .checkbox-options img, .checkbox-options video {
             width: 250px;
@@ -68,16 +72,23 @@
             display: none;
             margin-top: 10px;
             padding: 10px;
-            background: #d1f2eb;
-            border-left: 5px solid #1abc9c;
+            background: #fff3e0; /* Light yellow for answers */
+            border-left: 5px solid #ffb74d; /* Darker yellow accent */
+            color: #000; /* Black font color */
+        }
+        .copyright {
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #000; /* Black font color */
+            text-align: center;
         }
     </style>
     <script>
         function checkAnswer(question, selected, correct) {
-             let buttons = document.querySelectorAll(`#${question} .options button`);
+            let buttons = document.querySelectorAll(`#${question} .options button`);
             buttons.forEach(button => {
                 button.classList.remove('correct', 'incorrect');
-                button.style.background = "#f39c12";
+                button.style.background = "#ffd54f"; /* Reset to yellow */
             });
             
             let selectedButton = document.getElementById(selected);
@@ -97,23 +108,26 @@
             }
             
             let now = new Date();
-            let minutes = now.getMinutes();
-            let hours = now.getHours();
-            let date = now.getDate();
-            let month = now.toLocaleString('default', { month: 'short' });
-            let filename = `Osborne_Results${benchNumber}_${date}${month}${hours}`;
+            let minutes = now.getMinutes().toString().padStart(2, '0');
+            let hours = now.getHours().toString().padStart(2, '0');
+            let date = now.getDate().toString().padStart(2, '0');
+            let month = now.toLocaleString('default', { month: 'short' }).substring(0, 3);
+            let filename = `Osborne_Results${date}${month}${hours}_${benchNumber}`;
             
-            let question1Answer = document.querySelector('.options button.correct')?.innerText || "No answer selected";
+            // Save the selected answer for Question 1, even if incorrect
+            let question1Answer = document.querySelector('#question1 .options button.correct')?.innerText || 
+                                  document.querySelector('#question1 .options button.incorrect')?.innerText || 
+                                  "No answer selected";
             let laminarAnswer = document.querySelector('input[name="laminar"]:checked')?.value || "No answer";
             let transitionalAnswer = document.querySelector('input[name="transitional"]:checked')?.value || "No answer";
             let turbulentAnswer = document.querySelector('input[name="turbulent"]:checked')?.value || "No answer";
+            let question3Answer = document.querySelector('input[name="question3"]:checked')?.value || "No answer";
 
-            let content = `Bench Number: ${benchNumber}\n`;
-            content += `Time: ${hours}:${minutes}\n`;
-            content += `Question 1: ${question1Answer}\n`;
-            content += `Laminar: ${laminarAnswer}\n`;
-            content += `Transitional: ${transitionalAnswer}\n`;
-            content += `Turbulent: ${turbulentAnswer}\n`;
+            let content = `Bench number ${benchNumber}\n`;
+            content += `Time ${hours}:${minutes}\n`;
+            content += `Question 1 ${question1Answer}\n`;
+            content += `Question 2 ${laminarAnswer} ${transitionalAnswer} ${turbulentAnswer}\n`;
+            content += `Question 3 ${question3Answer}\n`;
             
             let blob = new Blob([content], { type: "text/plain" });
             let a = document.createElement("a");
@@ -132,8 +146,8 @@
 <body>
     <div class="container">
         <h1>Discussion of the Osborne Reynolds Number Experiment</h1>
-		
-		<label for="benchNumber">Enter Bench Number: </label>
+        
+        <label for="benchNumber">Enter Bench Number: </label>
         <input type="text" id="benchNumber" placeholder="e.g. 19">
         
         <div class="question" id="question1">
@@ -141,11 +155,11 @@
             <div class="options">
                 <button id="optionA" onclick="checkAnswer('question1', 'optionA', 'optionA')">Re 2300</button>
                 <button id="optionB" onclick="checkAnswer('question1', 'optionB', 'optionA')">Re 5000</button>
-                <button id="optionC" onclick="checkAnswer('question1', 'optionC', 'optionA')">Re 100,000</button>
-                <button id="optionD" onclick="checkAnswer('question1', 'optionD', 'optionA')">Re 500,000</button>
+                <button id="optionC" onclick="checkAnswer('question1', 'optionC', 'optionA')">Re 100000</button>
+                <button id="optionD" onclick="checkAnswer('question1', 'optionD', 'optionA')">Re 500000</button>
             </div>
             <div id="question1-answer" class="answer">
-                <p><strong>Answer:</strong> The critical Reynolds number for internal pipes is about 2300. This is means, at lower Re of 2300 we are more likely to observe laminar flow and above Re 4000 we are likely to observe turbulent flow. </p>
+                <p><strong>Answer:</strong> The critical Reynolds number for internal pipes is about 2300. This means, at lower Re of 2300 we are more likely to observe laminar flow and above Re 4000 we are likely to observe turbulent flow. </p>
             </div>
         </div>
         
@@ -156,8 +170,8 @@
                     <p>Laminar</p>
                     <img src="https://github.com/Nidiana/LabsDiscussion/raw/main/Osborne_Reynolds/laminar.jpg" alt="Laminar Flow">
                     <br>
-                    <label><input type="radio" name="laminar" value="yes"> Yes</label>
-                    <label><input type="radio" name="laminar" value="no"> No</label>
+                    <label><input type="radio" name="laminar" value="Yes"> Yes</label>
+                    <label><input type="radio" name="laminar" value="No"> No</label>
                 </div>
                 <div>
                     <p>Transitional</p>
@@ -166,15 +180,15 @@
                         Your browser does not support the video tag.
                     </video>
                     <br>
-                    <label><input type="radio" name="transitional" value="yes"> Yes</label>
-                    <label><input type="radio" name="transitional" value="no"> No</label>
+                    <label><input type="radio" name="transitional" value="Yes"> Yes</label>
+                    <label><input type="radio" name="transitional" value="No"> No</label>
                 </div>
                 <div>
                     <p>Turbulent</p>
                     <img src="https://github.com/Nidiana/LabsDiscussion/raw/main/Osborne_Reynolds/turbulent.jpg" alt="Turbulent Flow">
                     <br>
-                    <label><input type="radio" name="turbulent" value="yes"> Yes</label>
-                    <label><input type="radio" name="turbulent" value="no"> No</label>
+                    <label><input type="radio" name="turbulent" value="Yes"> Yes</label>
+                    <label><input type="radio" name="turbulent" value="No"> No</label>
                 </div>
             </div>
         </div>
@@ -183,8 +197,8 @@
         <div class="question" id="question3">
             <h2>3. Did your observations agree with Reynolds calculated? In other words, below Re 2300 did you observe laminar, and above Re 4000 did you observe turbulent?</h2>
             <div class="options">
-                <label><input type="radio" name="question3" value="yes" onclick="showAnswer('question3')"> Yes</label>
-                <label><input type="radio" name="question3" value="no" onclick="showAnswer('question3')"> No</label>
+                <label><input type="radio" name="question3" value="Yes" onclick="showAnswer('question3')"> Yes</label>
+                <label><input type="radio" name="question3" value="No" onclick="showAnswer('question3')"> No</label>
             </div>
             <div id="question3-answer" class="answer">
                 <p><strong>Explanation:</strong> If you observed transitional flow or turbulent flow earlier, this might be because the flow rate was large, and when you reduced the speed, there was turbulence in the equipment, meaning that a longer time is needed to remove those perturbations. Another reason might be the amount of ink being too much.</p>
@@ -200,17 +214,20 @@
             </div>
         </div>
         
-        
         <!-- New Question 5 -->
         <div class="question" id="question5">
             <h2>5. What sources of error might have affected your determination of the Reynolds number in this experiment? How could these errors be minimized in future experiments? </h2>
             <button onclick="showAnswer('question5')">Display Explanation</button>
             <div id="question5-answer" class="answer">
-                <p><strong>Answer:</strong> incorrect amount of ink, time error, volume error, vibrations due to the pump. error can be reduced by taking longer time in the reading, carefully adding the ink, isolating the vibration of the pump and using a less noise room..</p>
+                <p><strong>Answer:</strong> Incorrect amount of ink, time error, volume error, vibrations due to the pump. Errors can be reduced by taking longer time in the reading, carefully adding the ink, isolating the vibration of the pump, and using a less noisy room.</p>
             </div>
         </div>
         
         <button onclick="saveResults()">Save</button>
+        
+        <div class="copyright">
+            &copy; 2025 Nidiana Rosado Hau, University of Sheffield
+        </div>
     </div>
 </body>
 </html>
