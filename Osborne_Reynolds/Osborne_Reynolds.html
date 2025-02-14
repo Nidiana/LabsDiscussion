@@ -19,8 +19,37 @@
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
             color: #000; /* Black font color */
         }
-        h1, h2 {
-            color: #000; /* Black font color for headings */
+        .answer-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        margin-top: 10px;
+        }
+
+        .answer-text {
+        width: 50%;
+        text-align: justify;
+        }
+
+        .answer-image {
+        width: 50%;
+        display: flex;
+        justify-content: center;
+        }
+
+        .answer-image img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 5px;
+        }
+
+        
+        h1 {
+        color: #000; /* Black font color for headings */
+        }
+        .question h2 {
+        font-size: 1.2em; /* Reduce question font size */
         }
         .question {
             margin-top: 20px;
@@ -64,7 +93,8 @@
             color: #000; /* Black font color */
         }
         .checkbox-options img, .checkbox-options video {
-            width: 250px;
+            width: 350px; /* Makes the elements 45% of the page width */
+            max-width: 100%; /* Ensures it doesn't exceed its container */
             height: auto;
             border-radius: 5px;
         }
@@ -164,7 +194,7 @@
         </div>
         
         <div class="question" id="question2">
-            <h2>2. How did the dye stream behave at different Reynolds numbers? How did you distinguish between laminar, transitional, and turbulent flows?</h2>
+            <h2>2. How did the dye stream behave at different Reynolds numbers? Did you observe laminar, transitional, and turbulent flows as indicate in the following pictures?</h2>
             <div class="checkbox-options">
                 <div>
                     <p>Laminar</p>
@@ -174,7 +204,7 @@
                     <label><input type="radio" name="laminar" value="No"> No</label>
                 </div>
                 <div>
-                    <p>Transitional</p>
+                    <p>Transitional (use full screen for better visualization)</p>
                     <video controls>
                         <source src="https://github.com/Nidiana/LabsDiscussion/raw/main/Osborne_Reynolds/transitional.mp4" type="video/mp4">
                         Your browser does not support the video tag.
@@ -201,16 +231,26 @@
                 <label><input type="radio" name="question3" value="No" onclick="showAnswer('question3')"> No</label>
             </div>
             <div id="question3-answer" class="answer">
-                <p><strong>Explanation:</strong> If you observed transitional flow or turbulent flow earlier, this might be because the flow rate was large, and when you reduced the speed, there was turbulence in the equipment, meaning that a longer time is needed to remove those perturbations. Another reason might be the amount of ink being too much.</p>
+                <p><strong>Explanation:</strong> If you observed transitional or turbulent flow earlier than expected, it could be due to a high initial flow rate. When the speed is reduced with the valve, residual turbulence in the equipment may take time to dissipate, delaying the return to laminar flow. Another possible cause is using too much ink, which can artificially enhance turbulence and affect the observation.</p>
             </div>
         </div>
 
         <!-- New Question 4 -->
         <div class="question" id="question4">
-            <h2>4. What is the physical mechanism that causes the flow to change from laminar to turbulent flow? How is it that flow can be laminar at very high Reynolds numbers?</h2>
+            <h2>4. What is the physical mechanism that causes the flow to change from laminar to turbulent flow?</h2>
             <button onclick="showAnswer('question4')">Display Explanation</button>
             <div id="question4-answer" class="answer">
-                <p><strong>Answer:</strong> Viscous forces in a laminar flow tend to be large relative to the inertial force. An increase in the Reynolds number causes the flow to transition from laminar to turbulent, and it is characterized by its unsteady, random, and chaotic attributes with a variety of eddy structures.</p>
+                <div class="answer-container">
+                    <div class="answer-text">
+                        <p><strong>Answer:</strong> The transition from laminar to turbulent flow depends on the balance between viscous and inertial forces. 
+                        Viscous forces smooth out disturbances, keeping the flow orderly, while inertial forces amplify disruptions, leading to turbulence. 
+                        At low Reynolds numbers, viscous forces dominate, maintaining laminar flow. As Re increases, inertial forces grow stronger, making the flow unstable.</p>
+                        <p>Boundary layer control can help to delay transition, maintaining a more favorable laminar flow and reducing drag.</p>
+                    </div>
+                    <div class="answer-image">
+                        <img src="https://github.com/Nidiana/LabsDiscussion/raw/main/Osborne_Reynolds/shark_control.jpg" alt="Boundary Layer Control">
+                    </div>
+                </div>
             </div>
         </div>
         
@@ -226,7 +266,7 @@
         <button onclick="saveResults()">Save</button>
         
         <div class="copyright">
-            &copy; 2025 Nidiana Rosado Hau, University of Sheffield
+            &copy; 2023 Nidiana Rosado Hau, University of Sheffield
         </div>
     </div>
 </body>
