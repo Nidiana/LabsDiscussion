@@ -112,6 +112,36 @@
             color: #000; /* Black font color */
             text-align: center;
         }
+        .video-container {
+         width: 350px; /* Match video width */
+         text-align: center; /* Center align content */
+        }
+
+        .video-caption {
+        width: 100%; /* Match parent container width */
+        font-size: 0.9em; /* Slightly smaller font */
+        line-height: 1.3; /* Improve readability */
+        margin-bottom: 5px; /* Add spacing */
+        }
+
+        video {
+        width: 100%; /* Make the video fill its container */
+        border-radius: 5px;
+        }
+        .save-container {
+        display: flex;
+        align-items: center;
+        gap: 15px; /* Space between button and text */
+        margin-top: 15px;
+        }
+
+        .save-legend {
+         font-size: 0.9em; /* Slightly smaller text */
+        color: #000; /* Match text color */
+        max-width: 400px; /* Prevent it from being too wide */
+        font-weight: bold; /* Make the text bold */
+        }
+
     </style>
     <script>
         function checkAnswer(question, selected, correct) {
@@ -203,15 +233,19 @@
                     <label><input type="radio" name="laminar" value="Yes"> Yes</label>
                     <label><input type="radio" name="laminar" value="No"> No</label>
                 </div>
-                <div>
-                    <p>Transitional, this video shows the instant the flow move to transitional</p>
+                <div class="video-container">
+                     <div class="video-caption">
+                        Transitional, this video shows the instant the flow moves to transitional
+                    </div>
                     <video controls>
-                        <source src="https://github.com/Nidiana/LabsDiscussion/raw/main/Osborne_Reynolds/transitional.mp4" type="video/mp4">
+                         <source src="https://github.com/Nidiana/LabsDiscussion/raw/main/Osborne_Reynolds/transitional.mp4" type="video/mp4">
                         Your browser does not support the video tag.
                     </video>
-                    <br>
-                    <label><input type="radio" name="transitional" value="Yes"> Yes (I observed all of them)</label>
-                    <label><input type="radio" name="transitional" value="No"> No ( I missed one or two) </label>
+                    <!-- Yes/No Buttons for Transitional Case -->
+                    <div class="transitional-options">
+                    <label><input type="radio" name="transitional" value="Yes"> Yes </label>
+                    <label><input type="radio" name="transitional" value="No"> No </label>
+                    </div>
                 </div>
                 <div>
                     <p>Turbulent</p>
@@ -277,7 +311,12 @@
             </div>
         </div>
         
-        <button onclick="saveResults()">Save</button>
+        <div class="save-container">
+            <button onclick="saveResults()">Save</button>
+            <p class="save-legend">
+            Let a member of the staff know that you have completed and you have click the SAVE button on this section, and they will proceed to scan your UCard for check-out.
+            </p>
+        </div>
         
         <div class="copyright">
             &copy; 2025 Nidiana Rosado Hau, University of Sheffield
