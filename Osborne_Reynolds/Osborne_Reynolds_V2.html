@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Osborne Reynolds Number Experiment Discussion</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #faf8e1;
+            color: #000;
+        }
+        .container {
+            max-width: 800px;
+            background: #fff9c4;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            color: #000;
+        }
+        .answer-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            margin-top: 10px;
+        }
+        .answer-text {
+            width: 50%;
+            text-align: justify;
+        }
+        .answer-image {
+            width: 50%;
+            display: flex;
+            justify-content: center;
+        }
+        .answer-image img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }
+        h1 {
+            color: #000;
+        }
+        .question h2 {
+            font-size: 1.2em;
+        }
+        .question {
+            margin-top: 20px;
+            padding: 10px;
+            border-left: 5px solid #ffd54f;
+            background: #fffde7;
+            color: #000;
+        }
+        .options {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .options button {
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background 0.3s;
+            background: #ffd54f;
+            color: #000;
+        }
+        .correct {
+            background: #2ecc71 !important;
+            color: white;
+        }
+        .incorrect {
+            background: #e74c3c !important;
+            color: white;
+        }
+        .checkbox-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .checkbox-options div {
+            text-align: center;
+            margin: 10px;
+            color: #000;
+        }
+        .checkbox-options img, .checkbox-options video {
+            width: 350px;
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }
+        .answer {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            background: #fff3e0;
+            border-left: 5px solid #ffb74d;
+            color: #000;
+        }
+        .copyright {
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #000;
+            text-align: center;
+        }
+        .video-container {
+            width: 350px;
+            text-align: center;
+        }
+        .video-caption {
+            width: 100%;
+            font-size: 0.9em;
+            line-height: 1.3;
+            margin-bottom: 5px;
+        }
+        video {
+            width: 100%;
+            border-radius: 5px;
+        }
+        .completion-message {
+            display: none;
+            margin-top: 30px;
+            padding: 20px;
+            background: #d4edda;
+            border: 2px solid #28a745;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #155724;
+        }
+    </style>
+    <script>
+        let answeredQuestions = {
+            question1: false, question2: false, question3: false, question4: false, 
+            question5: false, q6laminar: false, q6transitional: false, q6turbulent: false, 
+            question7: false, question8: false, question9: false
+        };
+
+        function checkCompletion() {
+            console.log('Full state:', JSON.stringify(answeredQuestions, null, 2));
+            let allAnswered = Object.values(answeredQuestions).every(val => val === true);
+            console.log('Checking completion. All answered:', allAnswered);
+            if (allAnswered) {
+                document.getElementById('completionMessage').style.display = 'block';
+                window.scrollTo(0, document.body.scrollHeight);
+            }
+        }
+
+        function checkAnswer(question, selected, correct) {
+            let buttons = document.querySelectorAll(`#${question} .options button`);
+            buttons.forEach(button => {
+                button.classList.remove('correct', 'incorrect');
+                button.style.background = "#ffd54f";
+            });
+            
+            let selectedButton = document.getElementById(selected);
+            if (selected === correct) {
+                selectedButton.classList.add('correct');
+            } else {
+                selectedButton.classList.add('incorrect');
+            }
+            document.getElementById(`${question}-answer`).style.display = 'block';
+            
+            answeredQuestions[question] = true;
+            console.log('Question ' + question + ' marked as answered');
+            checkCompletion();
+        }
+        
+        function markRadioAnswered(questionId) {
+            answeredQuestions[questionId] = true;
+            console.log('Question ' + questionId + ' marked as answered');
+            checkCompletion();
+        }
+
+        function showAnswer(question) {
+            document.getElementById(`${question}-answer`).style.display = 'block';
+            answeredQuestions[question] = true;
+            console.log('Question ' + question + ' marked as answered via showAnswer');
+            checkCompletion();
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Discussion of the Osborne Reynolds Number Experiment</h1>
+        
+        <!-- New Question 1 -->
+        <div class="question" id="question1">
+            <h2>1. When you observed the dye stream at very low flow rates, what characteristic feature indicated laminar flow?</h2>
+            <div class="options">
+                <button id="q1optionA" onclick="checkAnswer('question1', 'q1optionA', 'q1optionC')">The dye mixed rapidly with the surrounding water</button>
+                <button id="q1optionB" onclick="checkAnswer('question1', 'q1optionB', 'q1optionC')">The dye formed vortices and eddies</button>
+                <button id="q1optionC" onclick="checkAnswer('question1', 'q1optionC', 'q1optionC')">The dye maintained a distinct, coherent streamline</button>
+                <button id="q1optionD" onclick="checkAnswer('question1', 'q1optionD', 'q1optionC')">The dye oscillated periodically</button>
+            </div>
+            <div id="question1-answer" class="answer">
+                <p><strong>Answer:</strong> In laminar flow, fluid particles move in parallel layers with no mixing between them, so the dye maintains a clear, straight path.</p>
+            </div>
+        </div>
+        
+        <!-- New Question 2 -->
+        <div class="question" id="question2">
+            <h2>2. During the transition from laminar to turbulent flow, what was the first sign of instability you observed?</h2>
+            <div class="options">
+                <button id="q2optionA" onclick="checkAnswer('question2', 'q2optionA', 'q2optionD')">The dye stream became perfectly straight</button>
+                <button id="q2optionB" onclick="checkAnswer('question2', 'q2optionB', 'q2optionD')">The flow stopped completely</button>
+                <button id="q2optionC" onclick="checkAnswer('question2', 'q2optionC', 'q2optionD')">The water changed temperature</button>
+                <button id="q2optionD" onclick="checkAnswer('question2', 'q2optionD', 'q2optionD')">Small waves or undulations appeared in the dye stream</button>
+            </div>
+            <div id="question2-answer" class="answer">
+                <p><strong>Answer:</strong> Transition begins with small instabilities (waves) in the dye stream before fully breaking down into chaotic turbulent motion.</p>
+            </div>
+        </div>
+
+        <!-- New Question 3 -->
+        <div class="question" id="question3">
+            <h2>3. The Reynolds number is a dimensionless parameter. Why do engineers prefer using dimensionless numbers rather than just flow velocity?</h2>
+            <div class="options">
+                <button id="q3optionA" onclick="checkAnswer('question3', 'q3optionA', 'q3optionA')">They allow comparison across different scales, fluids, and geometries</button>
+                <button id="q3optionB" onclick="checkAnswer('question3', 'q3optionB', 'q3optionA')">They're easier to calculate</button>
+                <button id="q3optionC" onclick="checkAnswer('question3', 'q3optionC', 'q3optionA')">They eliminate the need for units</button>
+                <button id="q3optionD" onclick="checkAnswer('question3', 'q3optionD', 'q3optionA')">They make the math simpler</button>
+            </div>
+            <div id="question3-answer" class="answer">
+                <p><strong>Answer:</strong> Dimensionless parameters like Re allow results from small-scale experiments to predict behavior in full-scale systems, regardless of fluid type or system size.</p>
+            </div>
+        </div>
+
+        <!-- New Question 4 -->
+        <div class="question" id="question4">
+            <h2>4. The critical Reynolds number for pipe flow is approximately 2300. What does this value represent?</h2>
+            <div class="options">
+                <button id="q4optionA" onclick="checkAnswer('question4', 'q4optionA', 'q4optionC')">The maximum velocity water can achieve in a pipe</button>
+                <button id="q4optionB" onclick="checkAnswer('question4', 'q4optionB', 'q4optionC')">The minimum pressure required for flow</button>
+                <button id="q4optionC" onclick="checkAnswer('question4', 'q4optionC', 'q4optionC')">The threshold below which laminar flow is typically stable</button>
+                <button id="q4optionD" onclick="checkAnswer('question4', 'q4optionD', 'q4optionC')">The pipe diameter in millimeters</button>
+            </div>
+            <div id="question4-answer" class="answer">
+                <p><strong>Answer:</strong> Below Re ≈ 2300, flow tends to remain laminar; above Re ≈ 4000, flow is typically turbulent. Between these values is the transition region.</p>
+            </div>
+        </div>
+
+        <!-- New Question 5 -->
+        <div class="question" id="question5">
+            <h2>5. In the Reynolds number Re = ρVD/μ, what happens to the ratio of inertial to viscous forces as velocity increases?</h2>
+            <div class="options">
+                <button id="q5optionA" onclick="checkAnswer('question5', 'q5optionA', 'q5optionD')">Inertial forces decrease relative to viscous forces</button>
+                <button id="q5optionB" onclick="checkAnswer('question5', 'q5optionB', 'q5optionD')">The ratio remains constant</button>
+                <button id="q5optionC" onclick="checkAnswer('question5', 'q5optionC', 'q5optionD')">Viscous forces dominate at all velocities</button>
+                <button id="q5optionD" onclick="checkAnswer('question5', 'q5optionD', 'q5optionD')">Inertial forces increase relative to viscous forces</button>
+            </div>
+            <div id="question5-answer" class="answer">
+                <p><strong>Answer:</strong> As velocity increases, Re increases, meaning inertial forces (which promote turbulence) become more significant compared to viscous forces (which damp disturbances).</p>
+            </div>
+        </div>
+        
+        <!-- Question 6 (formerly Question 2) -->
+        <div class="question" id="question6">
+            <h2>6. How did the dye stream behave at different Reynolds numbers? Did you observe laminar, transitional, and turbulent flows as indicated in the following pictures?</h2>
+            <div class="checkbox-options">
+                <div>
+                    <p>Laminar</p>
+                    <img src="https://github.com/Nidiana/LabsDiscussion/raw/main/Osborne_Reynolds/laminar.jpg" alt="Laminar Flow">
+                    <br>
+                    <label><input type="radio" name="laminar" value="Yes" onchange="answeredQuestions['q6laminar'] = true; checkCompletion();"> Yes</label>
+                    <label><input type="radio" name="laminar" value="No" onchange="answeredQuestions['q6laminar'] = true; checkCompletion();"> No</label>
+                </div>
+                <div class="video-container">
+                     <div class="video-caption">
+                        Transitional, this video shows the instant the flow moves to transitional
+                    </div>
+                    <video controls>
+                         <source src="https://github.com/Nidiana/LabsDiscussion/raw/main/Osborne_Reynolds/transitional.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                    <div class="transitional-options">
+                    <label><input type="radio" name="transitional" value="Yes" onchange="answeredQuestions['q6transitional'] = true; checkCompletion();"> Yes </label>
+                    <label><input type="radio" name="transitional" value="No" onchange="answeredQuestions['q6transitional'] = true; checkCompletion();"> No </label>
+                    </div>
+                </div>
+                <div>
+                    <p>Turbulent</p>
+                    <img src="https://github.com/Nidiana/LabsDiscussion/raw/main/Osborne_Reynolds/turbulent.jpg" alt="Turbulent Flow">
+                    <br>
+                    <label><input type="radio" name="turbulent" value="Yes" onchange="answeredQuestions['q6turbulent'] = true; checkCompletion();"> Yes</label>
+                    <label><input type="radio" name="turbulent" value="No" onchange="answeredQuestions['q6turbulent'] = true; checkCompletion();"> No</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 7 (formerly Question 3) -->
+        <div class="question" id="question7">
+            <h2>7. Did your observations agree with Reynolds calculated? In other words, below Re 2300 did you observe laminar, and above Re 4000 did you observe turbulent?</h2>
+            <div class="options">
+                <label><input type="radio" name="question7" value="Yes" onclick="answeredQuestions['question7'] = true; showAnswer('question7'); checkCompletion();"> Yes (for most of my cases)</label>
+                <label><input type="radio" name="question7" value="No" onclick="answeredQuestions['question7'] = true; showAnswer('question7'); checkCompletion();"> No</label>
+            </div>
+            <div id="question7-answer" class="answer">
+                <p><strong>Explanation:</strong> If you observed transitional or turbulent flow earlier than expected, it could be due to a high initial flow rate. When the speed is reduced with the valve, residual turbulence in the equipment may take time to dissipate, delaying the return to laminar flow. Another possible cause is using too much ink, which can artificially enhance turbulence and affect the observation.</p>
+            </div>
+        </div>
+
+        <!-- Question 8 (formerly Question 4) -->
+        <div class="question" id="question8">
+            <h2>8. What is the physical mechanism that causes the flow to change from laminar to turbulent flow?</h2>
+            <button onclick="showAnswer('question8')">Display Explanation</button>
+            <div id="question8-answer" class="answer">
+                <div class="answer-container">
+                    <div class="answer-text">
+                        <p><strong>Answer:</strong> The transition from laminar to turbulent flow depends on the balance between viscous and inertial forces. 
+                        Viscous forces smooth out disturbances, keeping the flow orderly, while inertial forces amplify disruptions, leading to turbulence. 
+                        At low Reynolds numbers, viscous forces dominate, maintaining laminar flow. As Re increases, inertial forces grow stronger, making the flow unstable.</p>
+                        <p>Boundary layer control can help to delay transition, maintaining a more favorable laminar flow and reducing drag.</p>
+                    </div>
+                    <div class="answer-image">
+                        <img src="https://github.com/Nidiana/LabsDiscussion/raw/main/Osborne_Reynolds/shark_control.jpg" alt="Boundary Layer Control">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Question 9 (formerly Question 5) -->
+        <div class="question" id="question9">
+            <h2>9. What sources of error might have affected your determination of the Reynolds number in this experiment? How could these errors be minimized in future experiments?</h2>
+            <button onclick="showAnswer('question9')">Display Explanation</button>
+            <div id="question9-answer" class="answer">
+                <p><strong>Common errors include:</strong></p>
+                <ul>
+                    <li>Incorrect amount of ink</li>
+                    <li>Time error</li>
+                    <li>Volume error</li>
+                    <li>Vibrations due to the pump</li>
+                </ul>
+
+                <p><strong>These errors can be reduced by:</strong></p>
+                <ul>
+                    <li>Taking a longer time for the reading</li>
+                    <li>Carefully adding the ink</li>
+                    <li>Isolating the vibration of the pump</li>
+                    <li>Using a less noisy room</li>
+                </ul>
+            </div>
+        </div>
+
+        <div id="completionMessage" class="completion-message">
+            ✅ You have successfully completed this Lab activity!<br>
+            Let a member of staff know to check out.
+        </div>
+        
+        <div class="copyright">
+            &copy; 2025 Nidiana Rosado Hau, University of Sheffield
+        </div>
+    </div>
+</body>
+</html>
