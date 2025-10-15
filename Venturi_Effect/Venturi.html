@@ -285,20 +285,20 @@
             <div class="question-section">
                 <!-- Question 1 -->
                 <div class="question">
-                    <h4>Question 1: Pressure-Velocity Relationship</h4>
-                    <p>According to Bernoulli's principle and your experimental data, what happens to static pressure as fluid velocity increases through the venturi throat?</p>
+                    <h4>Question 1: Total Pressure Behavior</h4>
+                    <p>Based on your experimental results, how did the total pressure behave along the Venturi tube (from the inlet to the outlet)?</p>
                     <div style="margin: 15px 0;">
                         <label style="display: block; padding: 10px; margin: 5px 0; background: #f8f9fa; border-radius: 5px; cursor: pointer;">
-                            <input type="radio" name="q1" value="A" onchange="checkAnswer(1, 'A')"> A) Static pressure increases proportionally to velocity
+                            <input type="radio" name="q1" value="A" onchange="checkAnswer(1, 'A')"> A) 🔻 The total pressure decreased along the Venturi for most flow rates
                         </label>
                         <label style="display: block; padding: 10px; margin: 5px 0; background: #f8f9fa; border-radius: 5px; cursor: pointer;">
-                            <input type="radio" name="q1" value="B" onchange="checkAnswer(1, 'B')"> B) Static pressure decreases as velocity increases
+                            <input type="radio" name="q1" value="B" onchange="checkAnswer(1, 'B')"> B) 🔺 The total pressure increased along the Venturi for most flow rates
                         </label>
                         <label style="display: block; padding: 10px; margin: 5px 0; background: #f8f9fa; border-radius: 5px; cursor: pointer;">
-                            <input type="radio" name="q1" value="C" onchange="checkAnswer(1, 'C')"> C) Static pressure remains constant regardless of velocity
+                            <input type="radio" name="q1" value="C" onchange="checkAnswer(1, 'C')"> C) ⚖️ The total pressure changed irregularly, with no consistent trend related to flow rate
                         </label>
                         <label style="display: block; padding: 10px; margin: 5px 0; background: #f8f9fa; border-radius: 5px; cursor: pointer;">
-                            <input type="radio" name="q1" value="D" onchange="checkAnswer(1, 'D')"> D) Static pressure fluctuates randomly
+                            <input type="radio" name="q1" value="D" onchange="checkAnswer(1, 'D')"> D) ❓ I cannot draw a clear conclusion, possibly due to measurement errors or inconsistent readings
                         </label>
                     </div>
                     <div id="feedback1" style="display: none; margin-top: 15px;"></div>
@@ -306,20 +306,20 @@
 
                 <!-- Question 2 -->
                 <div class="question">
-                    <h4>Question 2: Total Pressure Behavior</h4>
-                    <p>In an ideal venturi meter (no losses), the total pressure (static + dynamic) should:</p>
+                    <h4>Question 2: Dynamic Pressure Calculation</h4>
+                    <p>In this experiment the static pressure is measured by reading the water column in the piezometer and using Δp = ρgh. How is the dynamic pressure calculated?</p>
                     <div style="margin: 15px 0;">
                         <label style="display: block; padding: 10px; margin: 5px 0; background: #f8f9fa; border-radius: 5px; cursor: pointer;">
-                            <input type="radio" name="q2" value="A" onchange="checkAnswer(2, 'A')"> A) Increase from inlet to throat, then decrease to outlet
+                            <input type="radio" name="q2" value="A" onchange="checkAnswer(2, 'A')"> A) It is not possible to calculate; we need a pitot tube to measure it directly
                         </label>
                         <label style="display: block; padding: 10px; margin: 5px 0; background: #f8f9fa; border-radius: 5px; cursor: pointer;">
-                            <input type="radio" name="q2" value="B" onchange="checkAnswer(2, 'B')"> B) Decrease continuously from inlet to outlet
+                            <input type="radio" name="q2" value="B" onchange="checkAnswer(2, 'B')"> B) We measure the flow rate, the cross-sectional area, and estimate the velocity using Q = Av, then calculate ½ρv²
                         </label>
                         <label style="display: block; padding: 10px; margin: 5px 0; background: #f8f9fa; border-radius: 5px; cursor: pointer;">
-                            <input type="radio" name="q2" value="C" onchange="checkAnswer(2, 'C')"> C) Remain constant at all three positions (inlet, throat, outlet)
+                            <input type="radio" name="q2" value="C" onchange="checkAnswer(2, 'C')"> C) By subtracting the static pressure from the total pressure measured in the piezometer
                         </label>
                         <label style="display: block; padding: 10px; margin: 5px 0; background: #f8f9fa; border-radius: 5px; cursor: pointer;">
-                            <input type="radio" name="q2" value="D" onchange="checkAnswer(2, 'D')"> D) Be highest at the throat where velocity is maximum
+                            <input type="radio" name="q2" value="D" onchange="checkAnswer(2, 'D')"> D) Using the Bernoulli equation to solve for dynamic pressure from known static pressure values
                         </label>
                     </div>
                     <div id="feedback2" style="display: none; margin-top: 15px;"></div>
@@ -327,20 +327,20 @@
 
                 <!-- Question 3 -->
                 <div class="question">
-                    <h4>Question 3: Coefficient of Discharge</h4>
-                    <p>The coefficient of discharge (Cd) in a venturi meter is typically less than 1.0 because:</p>
+                    <h4>Question 3: Pressure-Velocity Relationship</h4>
+                    <p>According to Bernoulli's principle and your experimental data, what happens to static pressure as fluid velocity increases through the venturi throat?</p>
                     <div style="margin: 15px 0;">
                         <label style="display: block; padding: 10px; margin: 5px 0; background: #f8f9fa; border-radius: 5px; cursor: pointer;">
-                            <input type="radio" name="q3" value="A" onchange="checkAnswer(3, 'A')"> A) The rotameter overestimates the actual flow rate
+                            <input type="radio" name="q3" value="A" onchange="checkAnswer(3, 'A')"> A) Static pressure increases proportionally to velocity
                         </label>
                         <label style="display: block; padding: 10px; margin: 5px 0; background: #f8f9fa; border-radius: 5px; cursor: pointer;">
-                            <input type="radio" name="q3" value="B" onchange="checkAnswer(3, 'B')"> B) Real flow experiences friction, boundary layers, and viscous effects
+                            <input type="radio" name="q3" value="B" onchange="checkAnswer(3, 'B')"> B) Static pressure decreases as velocity increases
                         </label>
                         <label style="display: block; padding: 10px; margin: 5px 0; background: #f8f9fa; border-radius: 5px; cursor: pointer;">
-                            <input type="radio" name="q3" value="C" onchange="checkAnswer(3, 'C')"> C) Bernoulli's equation overestimates pressure differences
+                            <input type="radio" name="q3" value="C" onchange="checkAnswer(3, 'C')"> C) Static pressure remains constant regardless of velocity
                         </label>
                         <label style="display: block; padding: 10px; margin: 5px 0; background: #f8f9fa; border-radius: 5px; cursor: pointer;">
-                            <input type="radio" name="q3" value="D" onchange="checkAnswer(3, 'D')"> D) The piezometer readings are systematically too high
+                            <input type="radio" name="q3" value="D" onchange="checkAnswer(3, 'D')"> D) Static pressure fluctuates randomly
                         </label>
                     </div>
                     <div id="feedback3" style="display: none; margin-top: 15px;"></div>
@@ -348,20 +348,20 @@
 
                 <!-- Question 4 -->
                 <div class="question">
-                    <h4>Question 4: Static Pressure Distribution</h4>
-                    <p>If the piezometer height at the throat (h₂) is lower than at the inlet (h₁), this indicates that:</p>
+                    <h4>Question 4: Total Pressure Behavior</h4>
+                    <p>In an ideal venturi meter (no losses), the total pressure (static + dynamic) should:</p>
                     <div style="margin: 15px 0;">
                         <label style="display: block; padding: 10px; margin: 5px 0; background: #f8f9fa; border-radius: 5px; cursor: pointer;">
-                            <input type="radio" name="q4" value="A" onchange="checkAnswer(4, 'A')"> A) The flow rate has decreased at the throat
+                            <input type="radio" name="q4" value="A" onchange="checkAnswer(4, 'A')"> A) Increase from inlet to throat, then decrease to outlet
                         </label>
                         <label style="display: block; padding: 10px; margin: 5px 0; background: #f8f9fa; border-radius: 5px; cursor: pointer;">
-                            <input type="radio" name="q4" value="B" onchange="checkAnswer(4, 'B')"> B) Static pressure has decreased due to increased velocity at the throat
+                            <input type="radio" name="q4" value="B" onchange="checkAnswer(4, 'B')"> B) Decrease continuously from inlet to outlet
                         </label>
                         <label style="display: block; padding: 10px; margin: 5px 0; background: #f8f9fa; border-radius: 5px; cursor: pointer;">
-                            <input type="radio" name="q4" value="C" onchange="checkAnswer(4, 'C')"> C) There is a measurement error in the piezometer readings
+                            <input type="radio" name="q4" value="C" onchange="checkAnswer(4, 'C')"> C) Remain constant at all three positions (inlet, throat, outlet)
                         </label>
                         <label style="display: block; padding: 10px; margin: 5px 0; background: #f8f9fa; border-radius: 5px; cursor: pointer;">
-                            <input type="radio" name="q4" value="D" onchange="checkAnswer(4, 'D')"> D) The venturi meter is not functioning properly
+                            <input type="radio" name="q4" value="D" onchange="checkAnswer(4, 'D')"> D) Be highest at the throat where velocity is maximum
                         </label>
                     </div>
                     <div id="feedback4" style="display: none; margin-top: 15px;"></div>
@@ -369,23 +369,65 @@
 
                 <!-- Question 5 -->
                 <div class="question">
-                    <h4>Question 5: Pressure Recovery</h4>
-                    <p>Why doesn't the outlet pressure fully recover to the inlet pressure value in a real venturi meter?</p>
+                    <h4>Question 5: Coefficient of Discharge</h4>
+                    <p>The coefficient of discharge (Cd) in a venturi meter is typically less than 1.0 because:</p>
                     <div style="margin: 15px 0;">
                         <label style="display: block; padding: 10px; margin: 5px 0; background: #f8f9fa; border-radius: 5px; cursor: pointer;">
-                            <input type="radio" name="q5" value="A" onchange="checkAnswer(5, 'A')"> A) The continuity equation fails at the outlet
+                            <input type="radio" name="q5" value="A" onchange="checkAnswer(5, 'A')"> A) The rotameter overestimates the actual flow rate
                         </label>
                         <label style="display: block; padding: 10px; margin: 5px 0; background: #f8f9fa; border-radius: 5px; cursor: pointer;">
-                            <input type="radio" name="q5" value="B" onchange="checkAnswer(5, 'B')"> B) Dynamic pressure is lost due to turbulence at the outlet
+                            <input type="radio" name="q5" value="B" onchange="checkAnswer(5, 'B')"> B) Real flow experiences friction, boundary layers, and viscous effects
                         </label>
                         <label style="display: block; padding: 10px; margin: 5px 0; background: #f8f9fa; border-radius: 5px; cursor: pointer;">
-                            <input type="radio" name="q5" value="C" onchange="checkAnswer(5, 'C')"> C) Energy is lost due to friction and viscous effects throughout the venturi
+                            <input type="radio" name="q5" value="C" onchange="checkAnswer(5, 'C')"> C) Bernoulli's equation overestimates pressure differences
                         </label>
                         <label style="display: block; padding: 10px; margin: 5px 0; background: #f8f9fa; border-radius: 5px; cursor: pointer;">
-                            <input type="radio" name="q5" value="D" onchange="checkAnswer(5, 'D')"> D) The outlet diameter is too large compared to the throat
+                            <input type="radio" name="q5" value="D" onchange="checkAnswer(5, 'D')"> D) The piezometer readings are systematically too high
                         </label>
                     </div>
                     <div id="feedback5" style="display: none; margin-top: 15px;"></div>
+                </div>
+
+                <!-- Question 6 -->
+                <div class="question">
+                    <h4>Question 6: Static Pressure Distribution</h4>
+                    <p>If the piezometer height at the throat (h₂) is lower than at the inlet (h₁), this indicates that:</p>
+                    <div style="margin: 15px 0;">
+                        <label style="display: block; padding: 10px; margin: 5px 0; background: #f8f9fa; border-radius: 5px; cursor: pointer;">
+                            <input type="radio" name="q6" value="A" onchange="checkAnswer(6, 'A')"> A) The flow rate has decreased at the throat
+                        </label>
+                        <label style="display: block; padding: 10px; margin: 5px 0; background: #f8f9fa; border-radius: 5px; cursor: pointer;">
+                            <input type="radio" name="q6" value="B" onchange="checkAnswer(6, 'B')"> B) Static pressure has decreased due to increased velocity at the throat
+                        </label>
+                        <label style="display: block; padding: 10px; margin: 5px 0; background: #f8f9fa; border-radius: 5px; cursor: pointer;">
+                            <input type="radio" name="q6" value="C" onchange="checkAnswer(6, 'C')"> C) There is a measurement error in the piezometer readings
+                        </label>
+                        <label style="display: block; padding: 10px; margin: 5px 0; background: #f8f9fa; border-radius: 5px; cursor: pointer;">
+                            <input type="radio" name="q6" value="D" onchange="checkAnswer(6, 'D')"> D) The venturi meter is not functioning properly
+                        </label>
+                    </div>
+                    <div id="feedback6" style="display: none; margin-top: 15px;"></div>
+                </div>
+
+                <!-- Question 7 -->
+                <div class="question">
+                    <h4>Question 7: Pressure Recovery</h4>
+                    <p>Why doesn't the outlet pressure fully recover to the inlet pressure value in a real venturi meter?</p>
+                    <div style="margin: 15px 0;">
+                        <label style="display: block; padding: 10px; margin: 5px 0; background: #f8f9fa; border-radius: 5px; cursor: pointer;">
+                            <input type="radio" name="q7" value="A" onchange="checkAnswer(7, 'A')"> A) The continuity equation fails at the outlet
+                        </label>
+                        <label style="display: block; padding: 10px; margin: 5px 0; background: #f8f9fa; border-radius: 5px; cursor: pointer;">
+                            <input type="radio" name="q7" value="B" onchange="checkAnswer(7, 'B')"> B) Dynamic pressure is lost due to turbulence at the outlet
+                        </label>
+                        <label style="display: block; padding: 10px; margin: 5px 0; background: #f8f9fa; border-radius: 5px; cursor: pointer;">
+                            <input type="radio" name="q7" value="C" onchange="checkAnswer(7, 'C')"> C) Energy is lost due to friction and viscous effects throughout the venturi
+                        </label>
+                        <label style="display: block; padding: 10px; margin: 5px 0; background: #f8f9fa; border-radius: 5px; cursor: pointer;">
+                            <input type="radio" name="q7" value="D" onchange="checkAnswer(7, 'D')"> D) The outlet diameter is too large compared to the throat
+                        </label>
+                    </div>
+                    <div id="feedback7" style="display: none; margin-top: 15px;"></div>
                 </div>
             </div>
         </div>
@@ -393,22 +435,134 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script>
-        // Constants
-        const D1 = 0.020; // m (inlet diameter)
-        const D2 = 0.010; // m (throat diameter)
-        const D3 = 0.020; // m (outlet diameter)
-        const A1 = Math.PI * Math.pow(D1/2, 2); // Area in m²
-        const A2 = Math.PI * Math.pow(D2/2, 2); // Area in m²
-        const A3 = Math.PI * Math.pow(D3/2, 2); // Area in m²
-        const g = 9.81; // m/s²
-        const rho = 1000; // kg/m³ for water
-        const mu = 0.001; // Pa·s (water viscosity)
+        const D1 = 0.020;
+        const D2 = 0.010;
+        const D3 = 0.020;
+        const A1 = Math.PI * Math.pow(D1/2, 2);
+        const A2 = Math.PI * Math.pow(D2/2, 2);
+        const A3 = Math.PI * Math.pow(D3/2, 2);
+        const g = 9.81;
+        const rho = 1000;
+        const mu = 0.001;
 
         let trials = [];
         let trialCount = 0;
         let charts = {};
+        let quizAnswers = {};
+        let answeredQuestions = new Set();
 
-        // Initialize with one trial
+        window.onload = function() {
+            addTrial();
+            loadSavedAnswers();
+        };
+
+        function loadSavedAnswers() {
+            const saved = localStorage.getItem('venturi_quiz_answers');
+            if (saved) {
+                quizAnswers = JSON.parse(saved);
+                // Restore radio button selections and disable answered questions
+                for (let qNum in quizAnswers) {
+                    const radio = document.querySelector(`input[name="q${qNum}"][value="${quizAnswers[qNum].answer}"]`);
+                    if (radio) {
+                        radio.checked = true;
+                        disableQuestion(qNum);
+                    }
+                    answeredQuestions.add(parseInt(qNum));
+                }
+            }
+        }
+
+        function disableQuestion(questionNum) {
+            // Disable all radio buttons for this question
+            const radios = document.querySelectorAll(`input[name="q${questionNum}"]`);
+            radios.forEach(radio => {
+                radio.disabled = true;
+                radio.parentElement.style.opacity = '0.6';
+                radio.parentElement.style.cursor = 'not-allowed';
+            });
+        }
+
+        function saveAnswer(questionNum, answer) {
+            const timestamp = new Date().toISOString();
+            quizAnswers[questionNum] = {
+                answer: answer,
+                timestamp: timestamp
+            };
+            localStorage.setItem('venturi_quiz_answers', JSON.stringify(quizAnswers));
+        }
+
+        function exportAnswers() {
+            if (Object.keys(quizAnswers).length === 0) {
+                alert('No answers to export yet! Please answer at least one question.');
+                return;
+            }
+
+            // Get the last answer timestamp for filename
+            let lastTimestamp = '';
+            if (quizAnswers[7]) {
+                lastTimestamp = quizAnswers[7].timestamp;
+            } else {
+                // Use most recent answer if Q7 not answered yet
+                let latestTime = null;
+                for (let qNum in quizAnswers) {
+                    const time = new Date(quizAnswers[qNum].timestamp);
+                    if (!latestTime || time > latestTime) {
+                        latestTime = time;
+                        lastTimestamp = quizAnswers[qNum].timestamp;
+                    }
+                }
+            }
+
+            // Extract time in HHMM format
+            const date = new Date(lastTimestamp);
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            const timeStr = hours + minutes;
+
+            // Create .dat file content in CSV format
+            let content = 'Timestamp,Question,Answer\n';
+            
+            for (let qNum = 1; qNum <= 7; qNum++) {
+                if (quizAnswers[qNum]) {
+                    content += `${quizAnswers[qNum].timestamp},Q${qNum},${quizAnswers[qNum].answer}\n`;
+                } else {
+                    content += `Not answered,Q${qNum},N/A\n`;
+                }
+            }
+
+            // Create blob and download
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Venturi${timeStr}.dat`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+
+        function clearAnswers() {
+            if (confirm('Are you sure you want to clear all saved answers? This cannot be undone.')) {
+                quizAnswers = {};
+                answeredQuestions.clear();
+                localStorage.removeItem('venturi_quiz_answers');
+                // Re-enable and uncheck all radio buttons
+                document.querySelectorAll('input[type="radio"]').forEach(radio => {
+                    radio.checked = false;
+                    radio.disabled = false;
+                    radio.parentElement.style.opacity = '1';
+                    radio.parentElement.style.cursor = 'pointer';
+                });
+                // Hide all feedback
+                for (let i = 1; i <= 7; i++) {
+                    const feedbackDiv = document.getElementById(`feedback${i}`);
+                    if (feedbackDiv) feedbackDiv.style.display = 'none';
+                }
+                alert('All answers cleared!');
+            }
+        }
+
         window.onload = function() {
             addTrial();
         };
@@ -459,7 +613,6 @@
         function analyzeData() {
             trials = [];
             
-            // Collect all trial data
             for (let i = 1; i <= trialCount; i++) {
                 const trialDiv = document.getElementById(`trial-${i}`);
                 if (!trialDiv) continue;
@@ -471,37 +624,30 @@
                 
                 if (isNaN(h1) || isNaN(h2) || isNaN(h3) || isNaN(flow)) continue;
                 
-                // Convert to SI units
                 const h1_m = h1 / 100;
                 const h2_m = h2 / 100;
                 const h3_m = h3 / 100;
-                const Q = flow / 60000; // m³/s
+                const Q = flow / 60000;
                 
-                // Calculate velocities
                 const v1 = Q / A1;
                 const v2 = Q / A2;
                 const v3 = Q / A3;
                 
-                // Calculate static pressures (from piezometer heights)
                 const P1_static = rho * g * h1_m;
                 const P2_static = rho * g * h2_m;
                 const P3_static = rho * g * h3_m;
                 
-                // Calculate dynamic pressures
                 const P1_dynamic = 0.5 * rho * Math.pow(v1, 2);
                 const P2_dynamic = 0.5 * rho * Math.pow(v2, 2);
                 const P3_dynamic = 0.5 * rho * Math.pow(v3, 2);
                 
-                // Calculate total pressures
                 const P1_total = P1_static + P1_dynamic;
                 const P2_total = P2_static + P2_dynamic;
                 const P3_total = P3_static + P3_dynamic;
                 
-                // Theoretical flow rate (Bernoulli)
                 const Q_theoretical = A2 * Math.sqrt(2 * g * (h1_m - h2_m) * Math.pow(A1/A2, 2) / (Math.pow(A1/A2, 2) - 1));
                 const Cd = Q / Q_theoretical;
                 
-                // Reynolds number at throat
                 const Re = (rho * v2 * D2) / mu;
                 
                 trials.push({
@@ -553,13 +699,11 @@
         }
 
         function createCharts() {
-            // Destroy existing charts
             Object.values(charts).forEach(chart => chart.destroy());
             charts = {};
             
             const colors = ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#43e97b', '#fa709a'];
             
-            // Populate trial selector
             const selector = document.getElementById('trialSelector');
             selector.innerHTML = '';
             trials.forEach((trial, idx) => {
@@ -569,10 +713,8 @@
                 selector.appendChild(option);
             });
             
-            // Chart 1: Pressure Distribution (stacked bar) - will be updated by selector
             updatePressureDistribution();
             
-            // Chart 2: Total Pressure for all trials (line chart)
             const ctx2 = document.getElementById('totalPressureChart').getContext('2d');
             charts.totalPressure = new Chart(ctx2, {
                 type: 'line',
@@ -616,7 +758,6 @@
             const selectedIdx = parseInt(document.getElementById('trialSelector').value);
             const trial = trials[selectedIdx];
             
-            // Destroy existing chart if it exists
             if (charts.pressure) {
                 charts.pressure.destroy();
             }
@@ -689,20 +830,12 @@
             const avgCd = trials.reduce((sum, t) => sum + t.Cd, 0) / trials.length;
             const velocityRatio = trials[0].v2 / trials[0].v1;
             
-            // Calculate percentage drops
             const avgP2_drop = trials.reduce((sum, t) => sum + ((t.P1_total - t.P2_total) / t.P1_total * 100), 0) / trials.length;
             const avgP3_recovery = trials.reduce((sum, t) => sum + ((t.P3_total - t.P2_total) / (t.P1_total - t.P2_total) * 100), 0) / trials.length;
             
             let html = '<h3>Key Insights from Your Data</h3>';
             
-            html += `<div class="insight">
-                <h4>🎯 Pressure-Velocity Trade-off (Bernoulli Effect)</h4>
-                <p>At the throat, velocity increased by <strong>${velocityRatio.toFixed(2)}×</strong> compared to the inlet. 
-                This matches the theoretical prediction from continuity equation (A₁/A₂ = ${(A1/A2).toFixed(2)}).</p>
-                <p>Static pressure at throat dropped by an average of <strong>${avgP2_drop.toFixed(1)}%</strong> from inlet.</p>
-                <p>At the outlet, pressure recovered <strong>${avgP3_recovery.toFixed(1)}%</strong> of the throat pressure drop.</p>
-                <p><em>This is the essence of Bernoulli's principle: pressure energy converts to kinetic energy and back!</em></p>
-            </div>`;
+
             
             html += `<div class="insight">
                 <h4>🔬 Coefficient of Discharge Analysis</h4>
@@ -713,76 +846,95 @@
                 This is because the throat represents the critical flow condition with highest velocity and lowest pressure.</p>
                 <p><strong>Typical Cd values for well-designed venturi meters: 0.95 - 0.99</strong></p>
                 <p>The theoretical flow rate assumes ideal Bernoulli conditions (no friction, no boundary layers, inviscid flow). 
-                The actual flow is always less because:</p>
-                <ul>
-                    <li>Friction between fluid and pipe walls</li>
-                    <li>Boundary layer development reduces effective flow area</li>
-                    <li>Minor turbulence and flow separation</li>
-                    <li>Viscosity effects</li>
-                </ul>
-                <p>${avgCd < 0.95 ? 'Your Cd < 0.95 indicates significant viscous effects - typical for lower Reynolds numbers.' :
-                      avgCd < 0.98 ? 'Your Cd is close to ideal, indicating good venturi design and relatively high Reynolds numbers.' :
-                      'Excellent Cd very close to 1.0! Your venturi operates efficiently with minimal losses.'}</p>
             </div>`;
             
             document.getElementById('insights-container').innerHTML = html;
-            
-            document.getElementById('insights-container').innerHTML = html;
         }
 
-        function saveAnswers() {
-            const answers = {
-                q1: document.getElementById('answer1').value,
-                q2: document.getElementById('answer2').value,
-                q3: document.getElementById('answer3').value,
-                q4: document.getElementById('answer4').value,
-                q5: document.getElementById('answer5').value
-            };
+        function checkAnswer(questionNum, answer) {
+            // Check if question already answered
+            if (answeredQuestions.has(questionNum)) {
+                return; // Don't process if already answered
+            }
             
-            localStorage.setItem('venturi_answers', JSON.stringify(answers));
-            alert('Answers saved locally! You can export them or copy to your lab report.');
-        }
-
-        function checkAnswer(questionNum, selected) {
+            // Mark as answered and disable the question
+            answeredQuestions.add(questionNum);
+            disableQuestion(questionNum);
+            
+            // Save the answer with timestamp
+            saveAnswer(questionNum, answer);
+            
+            // Question 1 is observational only - no correct/wrong answer
+            if (questionNum === 1) {
+                const feedbackDiv = document.getElementById('feedback1');
+                let feedback = '';
+                
+                if (answer === 'A') {
+                    feedback = '<div style="background: #e3f2fd; border-left: 4px solid #2196f3; padding: 15px; border-radius: 5px;"><strong>📊 Your Observation: Total pressure decreased</strong><br>Good observation! In real venturi meters, total pressure typically decreases from inlet to outlet due to friction losses and viscous effects. This represents energy dissipation as heat. Check your "Total Pressure Along Venturi" graph - if your lines show a downward trend, this confirms real-world energy losses. In an ideal venturi (no losses), total pressure would remain constant according to Bernoulli\'s principle, but reality always includes some friction.</div>';
+                } else if (answer === 'B') {
+                    feedback = '<div style="background: #e3f2fd; border-left: 4px solid #2196f3; padding: 15px; border-radius: 5px;"><strong>📊 Your Observation: Total pressure increased</strong><br>Interesting observation! This is unusual for a venturi meter. Check your "Total Pressure Along Venturi" graph carefully. If you see an increase, this might indicate: (1) measurement errors in piezometer readings, (2) air bubbles in the system, or (3) miscalculation. In both ideal and real venturi meters, total pressure should either stay constant (ideal) or decrease slightly (real, due to friction). Review your data and measurements to ensure accuracy.</div>';
+                } else if (answer === 'C') {
+                    feedback = '<div style="background: #e3f2fd; border-left: 4px solid #2196f3; padding: 15px; border-radius: 5px;"><strong>📊 Your Observation: Total pressure changed irregularly</strong><br>You observed irregular changes in total pressure. This suggests there may be inconsistencies in your measurements or experimental setup. Check your "Total Pressure Along Venturi" graph - you should see either relatively flat lines (approaching ideal behavior) or consistently decreasing lines (typical real behavior). Irregular patterns might indicate: measurement errors, air bubbles, flow instabilities, or calculation mistakes. Review your piezometer readings and ensure consistent flow rates.</div>';
+                } else if (answer === 'D') {
+                    feedback = '<div style="background: #e3f2fd; border-left: 4px solid #2196f3; padding: 15px; border-radius: 5px;"><strong>📊 Your Observation: Cannot draw clear conclusion</strong><br>That\'s honest scientific reporting! If your data is unclear, look at your "Total Pressure Along Venturi" graph. For good data, you should see: (1) lines that are relatively flat (ideal case) or (2) lines that consistently decrease from inlet to outlet (real case with friction). If patterns are unclear, consider: checking piezometer readings for errors, ensuring flow was steady during measurements, reviewing calculations, or repeating trials for more consistent data. Sometimes experimental difficulties teach us as much as clear results!</div>';
+                }
+                
+                feedbackDiv.innerHTML = feedback;
+                feedbackDiv.style.display = 'block';
+                feedbackDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                return;
+            }
+            
             const correctAnswers = {
-                1: 'B',
-                2: 'C',
+                2: 'B',
                 3: 'B',
-                4: 'B',
-                5: 'C'
+                4: 'C',
+                5: 'B',
+                6: 'B',
+                7: 'C'
             };
             
             const explanations = {
-                1: {
+                2: {
+                    correct: '<div style="background: #d4edda; border-left: 4px solid #28a745; padding: 15px; border-radius: 5px;"><strong>✓ Correct!</strong><br>Exactly right! In this experiment, we measure the flow rate using the rotameter (in L/min), and we know the cross-sectional areas at each position (A₁ = 314 mm², A₂ = 79 mm², A₃ = 314 mm²). Using the continuity equation Q = Av, we calculate the velocity at each position: v = Q/A. Once we have the velocity, we can calculate dynamic pressure using the formula: P_dynamic = ½ρv². This is why dynamic pressure is highest at the throat - the smallest area means highest velocity! Check your pressure distribution graph to see how dynamic pressure varies along the venturi.</div>',
+                    wrong: '<div style="background: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; border-radius: 5px;"><strong>✗ Incorrect.</strong><br>The correct answer is <strong>B</strong>. While a pitot tube can measure total pressure directly, we don\'t need one for this experiment. We measure the flow rate Q (using the rotameter) and we know the cross-sectional area A at each position. Using the continuity equation Q = Av, we calculate velocity: v = Q/A. Then dynamic pressure is calculated using P_dynamic = ½ρv². This is the method your analysis tool uses to calculate the dynamic pressure values shown in your pressure distribution graph. The piezometers only measure static pressure (P = ρgh), not dynamic pressure.</div>'
+                },
+                3: {
                     correct: '<div style="background: #d4edda; border-left: 4px solid #28a745; padding: 15px; border-radius: 5px;"><strong>✓ Correct!</strong><br>According to Bernoulli\'s principle, as velocity increases, static pressure decreases. This is the fundamental pressure-velocity trade-off. Look at your experimental data: at the throat (where velocity is highest due to the smallest area), the piezometer height h₂ is lowest, indicating the lowest static pressure. The total energy (pressure energy + kinetic energy) remains approximately constant.</div>',
                     wrong: '<div style="background: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; border-radius: 5px;"><strong>✗ Incorrect.</strong><br>The correct answer is <strong>B</strong>. According to Bernoulli\'s principle, as velocity increases, static pressure must decrease to conserve energy. Look at your pressure distribution graph: at the throat where the area is smallest (10 mm diameter), velocity is highest and static pressure (piezometer height h₂) is lowest. This inverse relationship between velocity and pressure is the essence of the venturi effect.</div>'
                 },
-                2: {
+                4: {
                     correct: '<div style="background: #d4edda; border-left: 4px solid #28a745; padding: 15px; border-radius: 5px;"><strong>✓ Correct!</strong><br>In an ideal venturi (no friction losses), total pressure should remain constant because energy is conserved. Total pressure = static pressure + dynamic pressure = P + ½ρv². As the fluid accelerates through the throat, static pressure decreases but dynamic pressure increases by the same amount, keeping the sum constant. However, in your experimental data, you likely observed that total pressure at the outlet is slightly less than at the inlet due to real-world friction losses.</div>',
                     wrong: '<div style="background: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; border-radius: 5px;"><strong>✗ Incorrect.</strong><br>The correct answer is <strong>C</strong>. According to Bernoulli\'s equation for ideal flow, total pressure (static + dynamic) should remain constant along the venturi. This represents conservation of energy: P/ρ + v²/2 + gz = constant. Check your "Total Pressure Along Venturi" graph - ideally the lines should be horizontal, though in reality there\'s some loss due to friction.</div>'
                 },
-                3: {
+                5: {
                     correct: '<div style="background: #d4edda; border-left: 4px solid #28a745; padding: 15px; border-radius: 5px;"><strong>✓ Correct!</strong><br>Cd = Q<sub>actual</sub> / Q<sub>theoretical</sub> is less than 1.0 because real fluids experience viscous effects that ideal Bernoulli theory doesn\'t account for. Friction at the walls creates boundary layers, reducing the effective flow area. Viscosity causes energy dissipation. These non-ideal effects mean the actual flow rate is always slightly less than what ideal theory predicts. Typical Cd values for well-designed venturi meters range from 0.95 to 0.99.</div>',
                     wrong: '<div style="background: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; border-radius: 5px;"><strong>✗ Incorrect.</strong><br>The correct answer is <strong>B</strong>. The coefficient of discharge accounts for the difference between ideal theory (Bernoulli equation) and reality. Real fluids have viscosity, experience friction at the walls, develop boundary layers, and may have minor turbulence - none of which are considered in ideal Bernoulli theory. These effects reduce the actual flow rate below the theoretical prediction, making Cd < 1.0. Check your Cd value in the insights section.</div>'
                 },
-                4: {
+                6: {
                     correct: '<div style="background: #d4edda; border-left: 4px solid #28a745; padding: 15px; border-radius: 5px;"><strong>✓ Correct!</strong><br>Lower piezometer height means lower static pressure (P = ρgh). At the throat, the cross-sectional area decreases from 314 mm² to 79 mm², so by continuity (Q = Av), velocity must increase by a factor of 4. According to Bernoulli\'s principle, this increase in kinetic energy (½ρv²) comes from a decrease in pressure energy (P). Your experimental data should show h₂ < h₁, demonstrating this pressure-velocity trade-off.</div>',
                     wrong: '<div style="background: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; border-radius: 5px;"><strong>✗ Incorrect.</strong><br>The correct answer is <strong>B</strong>. Piezometer height directly measures static pressure (P = ρgh). At the throat, the area is smallest (79 mm² vs 314 mm² at inlet), so by continuity equation (Q = Av), velocity must be highest. Bernoulli\'s principle tells us that increased velocity means decreased static pressure. Therefore h₂ < h₁ is exactly what we expect - it\'s proof that Bernoulli\'s principle is working! Look at your pressure distribution graph to see this relationship.</div>'
                 },
-                5: {
+                7: {
                     correct: '<div style="background: #d4edda; border-left: 4px solid #28a745; padding: 15px; border-radius: 5px;"><strong>✓ Correct!</strong><br>In real flow through the venturi, friction between the fluid and pipe walls dissipates energy as heat. Viscous effects in the boundary layer also cause losses. Additionally, in the diverging section, some turbulence may occur. All these effects mean that some mechanical energy is converted to thermal energy and lost. This is why h₃ < h₁ in your data, and why total pressure at the outlet is less than at the inlet. The difference represents the permanent pressure loss, while (h₁ - h₃) tells you how much energy was lost to friction.</div>',
                     wrong: '<div style="background: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; border-radius: 5px;"><strong>✗ Incorrect.</strong><br>The correct answer is <strong>C</strong>. In your experimental data, compare h₁ and h₃. You should find that h₃ < h₁, meaning the outlet pressure doesn\'t fully recover to inlet pressure. This is because Bernoulli\'s equation assumes no energy losses, but real fluids experience friction with the pipe walls and viscous dissipation. These effects convert mechanical energy to heat, resulting in a permanent pressure loss. The difference (h₁ - h₃) represents the total energy lost to friction in your venturi meter.</div>'
                 }
             };
             
             const feedbackDiv = document.getElementById(`feedback${questionNum}`);
-            const isCorrect = selected === correctAnswers[questionNum];
+            const isCorrect = answer === correctAnswers[questionNum];
             
             feedbackDiv.innerHTML = isCorrect ? explanations[questionNum].correct : explanations[questionNum].wrong;
             feedbackDiv.style.display = 'block';
             
-            // Scroll to feedback
             feedbackDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            
+            // Auto-download when Question 7 is answered
+            if (questionNum === 7) {
+                setTimeout(() => {
+                    exportAnswers();
+                }, 1000);
+            }
         }
     </script>
 </body>
