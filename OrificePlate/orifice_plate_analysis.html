@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>Orifice Plate Analysis Tool</title>
+
+    <!-- Google Fonts: Inter for UI, Source Serif 4 for body text -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- MathJax for proper LaTeX rendering -->
+    <script>
+        MathJax = {
+            tex: { inlineMath: [['\\(','\\)'], ['$','$']], displayMath: [['\\[','\\]'], ['$$','$$']] },
+            options: { skipHtmlTags: ['script','noscript','style','textarea'] }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+
+    <style>
+        :root {
+            --bg:        #f2f4f0;
+            --surface:   #ffffff;
+            --surface2:  #f7f8f6;
+            --border:    #d4d9cf;
+            --green:     #2e7d32;
+            --green-mid: #388e3c;
+            --green-lt:  #e8f5e9;
+            --header-bg: #263238;
+            --text:      #1a211a;
+            --text-dim:  #4a5c4e;
+            --text-mute: #7a9080;
+            --red:       #b71c1c;
+            --blue:      #1a4e8c;
+            --orange:    #bf360c;
+
+            --fs-base:   18px;
+            --fs-sm:     15px;
+            --fs-xs:     13px;
+            --fs-lg:     20px;
+            --fs-xl:     24px;
+            --fs-h1:     28px;
+            --lh:        1.7;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { font-size: var(--fs-base); }
+
+        body {
+            font-family: 'Source Serif 4', Georgia, serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: var(--lh);
+            min-height: 100vh;
+        }
+
+        /* ── UI elements use Inter ─────────────────────── */
+        button, input, select, label, .tab, .q-label, .quiz-section-label,
+        .specs-band, th, .trial-header h3, .section-title, .chart-card h3,
+        .insight h4, .btn-row, .page-header h1 {
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+
+        /* ── HEADER ───────────────────────────────────── */
+        .page-header {
+            background: var(--header-bg);
+            color: #eceff1;
+            padding: 22px 20px 18px;
+            border-bottom: 4px solid var(--green);
+        }
+        .page-header h1 {
+            font-size: clamp(1.3rem, 4vw, 1.8rem);
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.2;
+            margin-bottom: 4px;
+        }
+        .page-header .subtitle {
+            font-family: 'Source Serif 4', serif;
+            font-style: italic;
+            font-size: clamp(0.85rem, 3vw, 1rem);
+            color: #90a4ae;
+        }
+
+        .specs-band {
+            background: #37474f;
+            padding: 10px 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px 24px;
+            font-size: var(--fs-xs);
+            color: #b0bec5;
+            border-bottom: 1px solid #455a64;
+            line-height: 1.4;
+        }
+        .specs-band strong { color: #a5d6a7; }
+
+        /* ── CONTAINER ────────────────────────────────── */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 24px 16px 48px;
+        }
+
+        /* ── TABS ─────────────────────────────────────── */
+        .tabs {
+            display: flex;
+            gap: 3px;
+            margin-bottom: 24px;
+            border-bottom: 2px solid var(--border);
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .tab {
+            padding: 12px 18px;
+            background: transparent;
+            border: 1px solid transparent;
+            border-bottom: none;
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+            font-size: var(--fs-sm);
+            font-weight: 600;
+            color: var(--text-dim);
+            white-space: nowrap;
+            transition: all 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .tab:hover  { color: var(--green); }
+        .tab.active {
+            background: var(--surface);
+            border-color: var(--border);
+            color: var(--green);
+            border-bottom-color: var(--surface);
+            margin-bottom: -2px;
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* ── SECTION HEADINGS ─────────────────────────── */
+        .section-title {
+            font-size: var(--fs-lg);
+            font-weight: 700;
+            color: var(--header-bg);
+            margin-bottom: 8px;
+        }
+        .section-desc {
+            font-family: 'Source Serif 4', serif;
+            font-size: var(--fs-base);
+            color: var(--text-dim);
+            line-height: var(--lh);
+            margin-bottom: 22px;
+        }
+
+        /* ── THEORY PANEL ─────────────────────────────── */
+        .theory-panel {
+            background: var(--green-lt);
+            border-left: 5px solid var(--green);
+            border-radius: 0 8px 8px 0;
+            padding: 18px 20px;
+            margin-bottom: 24px;
+        }
+        .theory-panel h3 {
+            font-family: 'Inter', sans-serif;
+            font-size: var(--fs-base);
+            font-weight: 700;
+            color: var(--green);
+            margin-bottom: 10px;
+        }
+        .theory-panel p {
+            font-size: var(--fs-base);
+            color: #1b4020;
+            line-height: var(--lh);
+            margin-bottom: 10px;
+        }
+        .theory-panel p:last-child { margin-bottom: 0; }
+
+        /* ── MATH DISPLAY BLOCK ───────────────────────── */
+        .math-block {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 14px 16px;
+            margin: 12px 0;
+            overflow-x: auto;
+            text-align: center;
+            font-size: 1.05rem;
+        }
+        .math-block.tight { padding: 10px 16px; }
+
+        .math-label {
+            font-family: 'Inter', sans-serif;
+            font-size: var(--fs-xs);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-mute);
+            margin-bottom: 4px;
+        }
+
+        /* ── DATA ENTRY ───────────────────────────────── */
+        .data-entry {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-left: 5px solid var(--green);
+            border-radius: 8px;
+            padding: 18px 16px;
+            margin-bottom: 14px;
+        }
+        .trial-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+        .trial-header h3 {
+            font-size: var(--fs-sm);
+            font-weight: 700;
+            color: var(--green);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+        .delete-btn {
+            background: transparent;
+            color: var(--red);
+            border: 1px solid var(--red);
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: var(--fs-sm);
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            min-height: 44px;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .delete-btn:active { background: #fdecea; }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+        @media (max-width: 400px) { .input-grid { grid-template-columns: 1fr; } }
+
+        .input-group { display: flex; flex-direction: column; }
+        .input-group label {
+            font-family: 'Inter', sans-serif;
+            font-size: var(--fs-xs);
+            font-weight: 700;
+            color: var(--text-dim);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        input[type="number"] {
+            padding: 12px 13px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: var(--fs-lg);
+            background: var(--surface2);
+            color: var(--text);
+            font-family: 'JetBrains Mono', monospace;
+            min-height: 48px;
+            width: 100%;
+            -webkit-appearance: none;
+        }
+        input[type="number"]:focus { outline: none; border-color: var(--green); box-shadow: 0 0 0 3px rgba(46,125,50,0.15); }
+
+        /* ── BUTTONS ──────────────────────────────────── */
+        .btn-row {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 24px;
+        }
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 6px;
+            font-size: var(--fs-base);
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            min-height: 50px;
+            transition: all 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .btn-secondary {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+        }
+        .btn-secondary:active { border-color: var(--green); color: var(--green); }
+        .btn-primary  { background: var(--green);   color: #fff; }
+        .btn-primary:active  { background: #1b5e20; }
+        .btn-export   { background: #37474f; color: #fff; }
+        .btn-export:active { background: #263238; }
+
+        /* ── CHART CARDS ──────────────────────────────── */
+        .chart-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px 16px;
+            margin-bottom: 22px;
+            overflow: hidden;
+        }
+        .chart-card h3 {
+            font-size: var(--fs-base);
+            font-weight: 700;
+            color: var(--header-bg);
+            margin-bottom: 6px;
+            line-height: 1.3;
+        }
+        .chart-note {
+            font-family: 'Source Serif 4', serif;
+            font-size: var(--fs-sm);
+            color: var(--text-dim);
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+        canvas { max-width: 100%; touch-action: none; }
+
+        /* ── TABLE ────────────────────────────────────── */
+        .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: var(--fs-sm);
+            min-width: 560px;
+        }
+        th {
+            background: var(--header-bg);
+            color: #eceff1;
+            padding: 11px 12px;
+            text-align: center;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: var(--fs-xs);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        td {
+            padding: 10px 12px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: var(--fs-sm);
+        }
+        tr:nth-child(even) td { background: var(--surface2); }
+
+        /* ── INSIGHT BOXES ────────────────────────────── */
+        .insight {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-left: 5px solid var(--green);
+            border-radius: 8px;
+            padding: 18px 18px;
+            margin-bottom: 18px;
+        }
+        .insight h4 {
+            font-family: 'Inter', sans-serif;
+            color: var(--green);
+            font-size: var(--fs-base);
+            margin-bottom: 8px;
+        }
+        .insight p {
+            font-size: var(--fs-base);
+            color: var(--text-dim);
+            line-height: var(--lh);
+            margin-top: 6px;
+        }
+
+        /* ── QUIZ ─────────────────────────────────────── */
+        .quiz-section-label {
+            font-family: 'Inter', sans-serif;
+            font-size: var(--fs-xs);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-mute);
+            margin: 28px 0 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+        .question-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px 18px 20px 22px;
+            margin-bottom: 18px;
+            position: relative;
+        }
+        .question-card::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0;
+            width: 5px; height: 100%;
+            background: var(--green);
+            border-radius: 8px 0 0 8px;
+        }
+        .q-label {
+            font-size: var(--fs-xs);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--green);
+            margin-bottom: 6px;
+        }
+        .question-card h4 {
+            font-family: 'Inter', sans-serif;
+            font-size: var(--fs-base);
+            font-weight: 700;
+            color: var(--header-bg);
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+        .question-card p, .question-card .q-text {
+            font-family: 'Source Serif 4', serif;
+            font-size: var(--fs-base);
+            color: var(--text-dim);
+            line-height: var(--lh);
+            margin-bottom: 12px;
+        }
+
+        /* ── OPTIONS ──────────────────────────────────── */
+        .options { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 13px 15px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Source Serif 4', serif;
+            font-size: var(--fs-base);
+            color: var(--text);
+            line-height: 1.5;
+            min-height: 48px;
+            -webkit-tap-highlight-color: transparent;
+            transition: border-color 0.15s, background 0.15s;
+        }
+        .option-label:active { border-color: var(--green); background: var(--green-lt); }
+        .option-label input[type="radio"] {
+            margin-top: 4px;
+            width: 20px; height: 20px;
+            accent-color: var(--green);
+            flex-shrink: 0;
+        }
+
+        /* ── FEEDBACK ─────────────────────────────────── */
+        .feedback {
+            display: none;
+            margin-top: 14px;
+            padding: 14px 16px;
+            border-radius: 6px;
+            font-family: 'Source Serif 4', serif;
+            font-size: var(--fs-base);
+            line-height: var(--lh);
+        }
+        .feedback.correct { background: #e8f5e9; border-left: 5px solid #2e7d32; color: #1b4020; }
+        .feedback.wrong   { background: #fdecea; border-left: 5px solid #b71c1c; color: #5c0a0a; }
+
+        /* ── OPEN QUESTIONS ───────────────────────────── */
+        .open-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px 18px 20px 22px;
+            margin-bottom: 18px;
+            position: relative;
+        }
+        .open-card::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0;
+            width: 5px; height: 100%;
+            background: var(--text-mute);
+            border-radius: 8px 0 0 8px;
+        }
+        .open-card h4 {
+            font-family: 'Inter', sans-serif;
+            font-size: var(--fs-base);
+            font-weight: 700;
+            color: var(--header-bg);
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        .open-card p {
+            font-family: 'Source Serif 4', serif;
+            font-size: var(--fs-base);
+            color: var(--text-dim);
+            line-height: var(--lh);
+            margin-bottom: 12px;
+        }
+        textarea.open-ans {
+            width: 100%;
+            padding: 13px 14px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--surface2);
+            font-family: 'Source Serif 4', serif;
+            font-size: var(--fs-base);
+            color: var(--text);
+            min-height: 110px;
+            resize: vertical;
+            line-height: var(--lh);
+        }
+        textarea.open-ans:focus { outline: none; border-color: var(--green); box-shadow: 0 0 0 3px rgba(46,125,50,0.15); }
+
+        .reveal-btn {
+            margin-top: 12px;
+            padding: 11px 20px;
+            background: transparent;
+            border: 1px solid var(--green);
+            border-radius: 5px;
+            color: var(--green);
+            font-family: 'Inter', sans-serif;
+            font-size: var(--fs-sm);
+            font-weight: 600;
+            cursor: pointer;
+            min-height: 44px;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .reveal-btn:active { background: var(--green-lt); }
+
+        .hint-box {
+            display: none;
+            margin-top: 14px;
+            background: var(--green-lt);
+            border-left: 5px solid var(--green);
+            border-radius: 6px;
+            padding: 14px 16px;
+            font-family: 'Source Serif 4', serif;
+            font-size: var(--fs-base);
+            color: #1b4020;
+            line-height: var(--lh);
+        }
+        .hint-box strong { font-family: 'Inter', sans-serif; }
+
+        /* ── HOVER for desktop ────────────────────────── */
+        @media (hover: hover) {
+            .btn-secondary:hover { border-color: var(--green); color: var(--green); }
+            .btn-primary:hover   { background: #1b5e20; }
+            .btn-export:hover    { background: #263238; }
+            .option-label:hover  { border-color: var(--green); background: var(--green-lt); }
+            .reveal-btn:hover    { background: var(--green-lt); }
+            .delete-btn:hover    { background: #fdecea; }
+        }
+
+        /* ── RESPONSIVE ───────────────────────────────── */
+        @media (max-width: 480px) {
+            :root { --fs-base: 16px; --fs-sm: 14px; --fs-lg: 18px; }
+            .container { padding: 16px 12px 48px; }
+            .chart-card { padding: 16px 12px; }
+            .question-card, .open-card { padding: 16px 14px 16px 18px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── PAGE HEADER ─────────────────────────────── -->
+<div class="page-header">
+    <h1>⬤ Orifice Plate Flow Analysis</h1>
+    <p class="subtitle">Bernoulli's Principle &amp; Coefficient of Discharge</p>
+</div>
+<div class="specs-band">
+    <span><strong>D₁</strong> 20 mm &nbsp;|&nbsp; A₁ = 314.2 mm²</span>
+    <span><strong>D₂</strong> 12 mm &nbsp;|&nbsp; A₂ = 113.1 mm²</span>
+    <span><strong>β = D₂/D₁</strong> = 0.60</span>
+    <span><strong>ΔP</strong> mmH₂O (digital manometer)</span>
+    <span><strong>Q</strong> L/min &nbsp;|&nbsp; Water 20 °C &nbsp;|&nbsp; ρ = 1000 kg/m³</span>
+</div>
+
+<!-- ── MAIN ───────────────────────────────────── -->
+<div class="container">
+
+    <div class="tabs">
+        <button class="tab active" onclick="showTab('data',event)">📋 Data Entry</button>
+        <button class="tab" onclick="showTab('analysis',event)">📈 Analysis</button>
+        <button class="tab" onclick="showTab('quiz',event)">✅ Quiz</button>
+    </div>
+
+    <!-- ═══════ DATA TAB ═══════ -->
+    <div id="data" class="tab-content active">
+
+        <p class="section-title">Experimental Data Collection</p>
+        <p class="section-desc">
+            For each trial, set a different flow rate using the bench valve, wait for steady conditions,
+            then record \(\Delta P\) in mmH₂O from the digital manometer and \(Q\) in L/min from the
+            rotameter. Aim for 4–6 evenly spread flow rates across the available range.
+        </p>
+
+        <!-- Theory at point of need: before students enter a single number -->
+        <div class="theory-panel">
+            <h3>What are you measuring — and why?</h3>
+            <p>
+                The manometer measures one thing only: the <strong>pressure difference</strong>
+                \(\Delta P = P_1 - P_2\) between the upstream pipe and the orifice throat.
+                There are no individual pressure taps, so absolute static pressures are not available.
+            </p>
+            <p>
+                Bernoulli's equation for an ideal (inviscid, incompressible, steady) fluid says
+                that pressure drop is entirely converted into kinetic energy gain:
+            </p>
+            <div class="math-block">
+                \[\Delta P = \tfrac{1}{2}\rho\!\left(V_2^2 - V_1^2\right)\]
+            </div>
+            <p>
+                Because flow rate is constant at every cross-section (\(Q = A_1 V_1 = A_2 V_2\)),
+                combining Bernoulli with continuity gives the ideal predicted flow rate:
+            </p>
+            <div class="math-block">
+                \[Q_\text{ideal} = A_2\,\sqrt{\dfrac{2\,\Delta P}{\rho\,(1-\beta^4)}} \qquad \beta = \frac{D_2}{D_1} = 0.60\]
+            </div>
+            <p>
+                Your rotameter gives \(Q_\text{actual}\). Recording both across several flow rates
+                lets you determine the <strong>coefficient of discharge</strong>
+                \(C_d = Q_\text{actual}/Q_\text{ideal}\) — a measure of how much energy is lost
+                to the sharp edge and turbulent re-expansion. The quiz will ask you to explain why
+                \(C_d < 1\) and why this matters.
+            </p>
+        </div>
+
+        <div id="trials-container"></div>
+        <div class="btn-row">
+            <button class="btn btn-secondary" onclick="addTrial()">+ Add Trial</button>
+            <button class="btn btn-primary"   onclick="analyzeData()">Analyse &amp; Graphs ›</button>
+        </div>
+    </div>
+
+    <!-- ═══════ ANALYSIS TAB ═══════ -->
+    <div id="analysis" class="tab-content">
+        <p class="section-title">Data Analysis &amp; Visualisation</p>
+
+        <div id="summary-table-wrap" class="chart-card"></div>
+
+        <!-- Chart 1a — Bernoulli energy budget, per trial -->
+        <div class="chart-card">
+            <h3>Bernoulli Energy Budget — Selected Trial</h3>
+            <p class="chart-note">
+                For an <em>ideal</em> fluid, Bernoulli requires the measured pressure drop to be exactly
+                consumed by the gain in kinetic energy:
+                \(\Delta P = \tfrac{1}{2}\rho(V_2^2 - V_1^2)\).
+                This chart compares the two for a selected trial.
+                The shortfall — \(\Delta P\) exceeding the kinetic energy gain — is the energy
+                lost to the vena contracta and turbulent mixing at the orifice edge.
+                The permanent (irrecoverable) pressure loss is estimated as
+                \(h_L = \Delta P\,(1 - C_d^2)\).
+            </p>
+            <div style="margin-bottom:14px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                <label for="trialSelector" style="font-family:'Inter',sans-serif; font-size:0.8rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-dim);">Select trial</label>
+                <select id="trialSelector" onchange="updateEnergyBudget()" style="font-size:0.95rem; padding:8px 12px; border:1px solid var(--border); border-radius:6px; background:var(--surface2); font-family:'Inter',sans-serif; min-height:44px;"></select>
+            </div>
+            <canvas id="energyBudgetChart"></canvas>
+        </div>
+
+        <!-- Chart 1b — Permanent pressure loss vs Q -->
+        <div class="chart-card">
+            <h3>Permanent Pressure Loss \(h_L\) vs Flow Rate — All Trials</h3>
+            <p class="chart-note">
+                \(h_L = \Delta P\,(1 - C_d^2)\) is the energy permanently lost to turbulence at the
+                orifice — the portion of \(\Delta P\) that is <em>not</em> recovered downstream.
+                Unlike a venturi, there is no gradual diffuser to reclaim it.
+                Each bar is one trial. As \(Q\) rises, \(h_L\) grows rapidly — making the running
+                cost of an orifice plate significant at high flow rates.
+            </p>
+            <canvas id="permLossChart"></canvas>
+        </div>
+
+        <!-- Chart 2 — Q_actual vs Q_ideal -->
+        <div class="chart-card">
+            <h3>\(Q_\text{actual}\) vs \(Q_\text{ideal}\) — Bernoulli Prediction</h3>
+            <p class="chart-note">
+                Points below the dashed ideal line (\(C_d = 1\)) show real losses.
+                The slope of the best-fit line through the origin equals the average \(C_d\).
+            </p>
+            <canvas id="cdChart"></canvas>
+        </div>
+
+        <!-- Chart 3 — ΔP vs Q -->
+        <div class="chart-card">
+            <h3>Pressure Drop \(\Delta P\) vs Flow Rate \(Q\)</h3>
+            <p class="chart-note">
+                Bernoulli theory predicts \(\Delta P \propto Q^2\) — a quadratic power law.
+                Does your data confirm this relationship?
+            </p>
+            <canvas id="dpChart"></canvas>
+        </div>
+
+        <!-- Chart 4 — Cd vs Q -->
+        <div class="chart-card">
+            <h3>Coefficient of Discharge \(C_d\) vs Flow Rate \(Q\)</h3>
+            <p class="chart-note">
+                In the turbulent regime \(C_d\) should be approximately constant, independent of flow rate.
+                Any upward or downward trend with \(Q\) reveals Reynolds-number dependence.
+            </p>
+            <canvas id="cdFlowChart"></canvas>
+        </div>
+
+        <div id="insights-container"></div>
+    </div>
+
+    <!-- ═══════ QUIZ TAB ═══════ -->
+    <div id="quiz" class="tab-content">
+        <p class="section-title">Understanding the Orifice Plate</p>
+        <p class="section-desc">
+            Use your experimental results to answer each question.
+            The key formulae from the Data Entry tab apply throughout — focus on what
+            \(C_d\) means physically, why it is less than 1, and what that tells you
+            about real vs ideal flow.
+        </p>
+
+        <div class="quiz-section-label">Multiple Choice — select the best answer</div>
+
+        <!-- Q1 -->
+        <div class="question-card">
+            <div class="q-label">Question 1 — Q<sub>ideal</sub> and Bernoulli's assumptions</div>
+            <h4>What does \(Q_\text{ideal}\) represent, and what does its derivation assume?</h4>
+            <p class="q-text">
+                Your digital manometer gives a pressure drop \(\Delta P\) (mmH₂O). Converting to Pascals
+                via \(\Delta P_\text{Pa} = \rho g \Delta h\) and applying Bernoulli + continuity yields:
+            </p>
+            <div class="math-block tight">
+                \[Q_\text{ideal} = A_2 \sqrt{\dfrac{2\,\Delta P_\text{Pa}}{\rho\,(1-\beta^4)}}\]
+            </div>
+            <p class="q-text">Which statement best describes the key assumptions behind this formula?</p>
+            <div class="options">
+                <label class="option-label"><input type="radio" name="q1" value="A" onchange="checkMC(1,'A')"> A) The fluid is compressible and \(Q_\text{ideal}\) accounts for heat losses at the orifice edge.</label>
+                <label class="option-label"><input type="radio" name="q1" value="B" onchange="checkMC(1,'B')"> B) The fluid is ideal (inviscid, incompressible, steady). All the measured \(\Delta P\) accelerates the fluid — no energy is lost to friction or turbulence.</label>
+                <label class="option-label"><input type="radio" name="q1" value="C" onchange="checkMC(1,'C')"> C) The formula only applies to slow laminar flow where viscosity dominates.</label>
+                <label class="option-label"><input type="radio" name="q1" value="D" onchange="checkMC(1,'D')"> D) \(Q_\text{ideal}\) equals the actual flow rate when \(C_d = 0\).</label>
+            </div>
+            <div id="feedback1" class="feedback"></div>
+        </div>
+
+        <!-- Q2 -->
+        <div class="question-card">
+            <div class="q-label">Question 2 — Velocities V₁ and V₂</div>
+            <h4>What do \(V_1\) and \(V_2\) tell us, and how does the continuity equation connect them?</h4>
+            <p class="q-text">
+                Using the measured \(Q_\text{actual}\) and the known cross-sectional areas,
+                we calculate the mean velocity at each position:
+            </p>
+            <div class="math-block tight">
+                \[V_1 = \frac{Q_\text{actual}}{A_1} \qquad V_2 = \frac{Q_\text{actual}}{A_2} \qquad \Rightarrow \quad \frac{V_2}{V_1} = \frac{A_1}{A_2} = \frac{314.2}{113.1} \approx 2.78\]
+            </div>
+            <p class="q-text">Without calculating, which statement correctly follows?</p>
+            <div class="options">
+                <label class="option-label"><input type="radio" name="q2" value="A" onchange="checkMC(2,'A')"> A) The fluid slows down at the orifice because \(\Delta P\) consumes kinetic energy.</label>
+                <label class="option-label"><input type="radio" name="q2" value="B" onchange="checkMC(2,'B')"> B) \(V_2 \approx 2.78\,V_1\): the fluid must speed up at the orifice to keep \(Q\) constant (continuity equation).</label>
+                <label class="option-label"><input type="radio" name="q2" value="C" onchange="checkMC(2,'C')"> C) \(V_1 = V_2\) because \(Q\) is the same at both cross-sections.</label>
+                <label class="option-label"><input type="radio" name="q2" value="D" onchange="checkMC(2,'D')"> D) \(V_2\) depends only on \(\Delta P\), not on area.</label>
+            </div>
+            <div id="feedback2" class="feedback"></div>
+        </div>
+
+        <!-- Q3 -->
+        <div class="question-card">
+            <div class="q-label">Question 3 — Defining C<sub>d</sub></div>
+            <h4>What does \(C_d = Q_\text{actual} / Q_\text{ideal}\) mean physically, and why is it always less than 1?</h4>
+            <div class="math-block tight">
+                \[C_d = \frac{Q_\text{actual}}{Q_\text{ideal}} \qquad \text{where } Q_\text{actual} \text{ is measured by the rotameter}\]
+            </div>
+            <p class="q-text">Which of the following best explains why \(C_d < 1\) for a real orifice plate?</p>
+            <div class="options">
+                <label class="option-label"><input type="radio" name="q3" value="A" onchange="checkMC(3,'A')"> A) The manometer over-reads \(\Delta P\), making \(Q_\text{ideal}\) artificially large.</label>
+                <label class="option-label"><input type="radio" name="q3" value="B" onchange="checkMC(3,'B')"> B) Real flow separates at the sharp orifice edge, forming a <em>vena contracta</em>. Turbulent mixing in the re-expansion zone dissipates energy that Bernoulli's ideal equation ignores.</label>
+                <label class="option-label"><input type="radio" name="q3" value="C" onchange="checkMC(3,'C')"> C) The rotameter consistently under-reads the true flow rate.</label>
+                <label class="option-label"><input type="radio" name="q3" value="D" onchange="checkMC(3,'D')"> D) \(C_d < 1\) because \(D_2 > D_1\).</label>
+            </div>
+            <div id="feedback3" class="feedback"></div>
+        </div>
+
+        <!-- Q4 -->
+        <div class="question-card">
+            <div class="q-label">Question 4 — Orifice plate vs venturi: why is C<sub>d</sub> lower?</div>
+            <h4>How does \(C_d\) for the orifice plate compare with the venturi meter, and why?</h4>
+            <p class="q-text">
+                Typical values: &nbsp;<strong>Venturi</strong> \(C_d \approx 0.95\text{–}0.99\) &nbsp;|&nbsp;
+                <strong>Orifice plate</strong> \(C_d \approx 0.60\text{–}0.80\)
+            </p>
+            <p class="q-text">Which explanation best accounts for this difference?</p>
+            <div class="options">
+                <label class="option-label"><input type="radio" name="q4" value="A" onchange="checkMC(4,'A')"> A) The orifice plate has a smaller throat so it is physically impossible to pass the same flow rate.</label>
+                <label class="option-label"><input type="radio" name="q4" value="B" onchange="checkMC(4,'B')"> B) The orifice plate's sharp edge causes flow separation and a vena contracta (effective flow area \({<}\,A_2\)) plus turbulent re-expansion losses. The venturi's smooth, gradual profile minimises separation and allows much better pressure recovery after the throat.</label>
+                <label class="option-label"><input type="radio" name="q4" value="C" onchange="checkMC(4,'C')"> C) The venturi measures \(\Delta P\) at the wrong position, making its \(C_d\) artificially high.</label>
+                <label class="option-label"><input type="radio" name="q4" value="D" onchange="checkMC(4,'D')"> D) The orifice plate always requires a higher Reynolds number, so low flows give an artificially low \(C_d\).</label>
+            </div>
+            <div id="feedback4" class="feedback"></div>
+        </div>
+
+        <!-- Q5 -->
+        <div class="question-card">
+            <div class="q-label">Question 5 — Practical advantages of the orifice plate</div>
+            <h4>Despite its lower \(C_d\) and higher permanent pressure loss, why is the orifice plate widely used in industry?</h4>
+            <div class="options">
+                <label class="option-label"><input type="radio" name="q5" value="A" onchange="checkMC(5,'A')"> A) It is preferred because it has a higher \(C_d\) and therefore wastes less energy than the venturi.</label>
+                <label class="option-label"><input type="radio" name="q5" value="B" onchange="checkMC(5,'B')"> B) It is extremely simple to manufacture, cheap to install between existing pipe flanges, and easy to replace or inspect — making it cost-effective even though it produces more permanent pressure loss than a venturi.</label>
+                <label class="option-label"><input type="radio" name="q5" value="C" onchange="checkMC(5,'C')"> C) It is more accurate than any other flow device at all flow rates.</label>
+                <label class="option-label"><input type="radio" name="q5" value="D" onchange="checkMC(5,'D')"> D) Orifice plates never need calibration and \(C_d = 1.0\) under standard conditions.</label>
+            </div>
+            <div id="feedback5" class="feedback"></div>
+        </div>
+
+        <!-- Open Q6 -->
+        <div class="quiz-section-label" style="margin-top:32px;">Open Questions — write 3–4 sentences, then reveal key points</div>
+
+        <div class="open-card">
+            <div class="q-label" style="color:var(--text-mute);">Question 6 — Reflection</div>
+            <h4>Comparing \(C_d\) for the orifice plate and venturi</h4>
+            <p>
+                Based on your experimental results and what you now know about both devices:
+                <br><br>
+                <strong>How does \(C_d\) for the orifice plate compare with the venturi?
+                Why is it typically lower? What does this tell you about energy losses in the two devices?</strong>
+            </p>
+            <textarea class="open-ans" id="q6-text" placeholder="Write your answer here…"></textarea>
+            <br>
+            <button class="reveal-btn" onclick="toggleHint('hint6')">Show key points ›</button>
+            <div id="hint6" class="hint-box">
+                <strong>Key points to include:</strong><br><br>
+                • Orifice plate \(C_d \approx 0.60\text{–}0.80\) vs venturi \(C_d \approx 0.95\text{–}0.99\). For the same measured \(\Delta P\), the orifice plate delivers less actual flow than Bernoulli predicts.<br><br>
+                • The lower \(C_d\) reflects larger energy losses: the sharp edge causes flow separation, a <em>vena contracta</em> (jet narrower than \(A_2\)), and turbulent mixing downstream.<br><br>
+                • The venturi's smooth converging–diverging profile prevents separation and allows pressure to largely recover after the throat — far less energy is permanently lost to turbulence.<br><br>
+                • A lower \(C_d\) means more permanent pressure loss for the same flow rate, which means higher pumping costs in a real system.
+            </div>
+        </div>
+
+        <div class="open-card">
+            <div class="q-label" style="color:var(--text-mute);">Question 7 — Reflection</div>
+            <h4>Practical advantages of the orifice plate in flow measurement and control</h4>
+            <p>
+                <strong>Despite its lower \(C_d\) and higher permanent pressure loss, why is the orifice plate
+                one of the most commonly used flow-measurement devices in industry?</strong>
+                <br><br>
+                Think about cost, installation, maintenance, and flexibility.
+            </p>
+            <textarea class="open-ans" id="q7-text" placeholder="Write your answer here…"></textarea>
+            <br>
+            <button class="reveal-btn" onclick="toggleHint('hint7')">Show key points ›</button>
+            <div id="hint7" class="hint-box">
+                <strong>Key points to include:</strong><br><br>
+                • <strong>Cost &amp; simplicity:</strong> An orifice plate is a machined disc — a fraction of the cost of a venturi's precision-cast body.<br><br>
+                • <strong>Installation:</strong> It fits between standard pipe flanges with no special pipework, installed or swapped without cutting the pipe.<br><br>
+                • <strong>Maintenance:</strong> The plate can be removed, inspected, or replaced with a different orifice size in minutes — very useful when process conditions change.<br><br>
+                • <strong>Proven standard:</strong> ISO 5167 provides well-established \(C_d\) data so accurate measurement is achievable without individual calibration.<br><br>
+                • <strong>Accepted trade-off:</strong> In many processes the higher permanent pressure loss is outweighed by capital and installation savings vs a venturi.
+            </div>
+        </div>
+
+        <div class="btn-row" style="margin-top:28px;">
+            <button class="btn btn-export" onclick="exportAnswers()">⬇ Export Answers (.dat)</button>
+        </div>
+    </div>
+
+</div><!-- container -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script>
+    // ── Constants ──────────────────────────────────────
+    const D1 = 0.020, D2 = 0.012;
+    const A1 = Math.PI * Math.pow(D1/2, 2);
+    const A2 = Math.PI * Math.pow(D2/2, 2);
+    const beta = D2 / D1;
+    const g = 9.81, rho = 1000, mu = 0.001;
+
+    let trials = [], trialCount = 0, charts = {};
+    let mcAnswers = {}, answeredMC = new Set();
+
+    window.onload = () => { addTrial(); addTrial(); addTrial(); };
+
+    // ── Tabs ───────────────────────────────────────────
+    function showTab(name, ev) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.getElementById(name).classList.add('active');
+        if (ev && ev.target) ev.target.classList.add('active');
+        // Re-render MathJax for the newly shown tab
+        if (window.MathJax) MathJax.typesetPromise();
+    }
+
+    // ── Trials ─────────────────────────────────────────
+    function addTrial() {
+        trialCount++;
+        const d = document.createElement('div');
+        d.className = 'data-entry'; d.id = `trial-${trialCount}`;
+        d.innerHTML = `
+            <div class="trial-header">
+                <h3>Trial ${trialCount}</h3>
+                ${trialCount > 1 ? `<button class="delete-btn" onclick="deleteTrial(${trialCount})">Remove</button>` : ''}
+            </div>
+            <div class="input-grid">
+                <div class="input-group">
+                    <label>ΔP (mmH₂O)</label>
+                    <input type="number" id="dp-${trialCount}" inputmode="decimal" step="0.1" min="0" placeholder="e.g. 45.0">
+                </div>
+                <div class="input-group">
+                    <label>Flow Rate (L/min)</label>
+                    <input type="number" id="flow-${trialCount}" inputmode="decimal" step="0.01" min="0" placeholder="e.g. 4.50">
+                </div>
+            </div>`;
+        document.getElementById('trials-container').appendChild(d);
+    }
+    function deleteTrial(id) { document.getElementById(`trial-${id}`).remove(); }
+
+    // ── Analyse ────────────────────────────────────────
+    function analyzeData() {
+        trials = [];
+        for (let i = 1; i <= trialCount; i++) {
+            const el = document.getElementById(`trial-${i}`);
+            if (!el) continue;
+            const dp_mm    = parseFloat(document.getElementById(`dp-${i}`).value);
+            const flow_lpm = parseFloat(document.getElementById(`flow-${i}`).value);
+            if (isNaN(dp_mm) || isNaN(flow_lpm) || dp_mm <= 0 || flow_lpm <= 0) continue;
+
+            const dp_Pa   = rho * g * (dp_mm / 1000);
+            const Q_act   = flow_lpm / 60000;
+            const Q_ideal = A2 * Math.sqrt((2 * dp_Pa) / (rho * (1 - Math.pow(beta, 4))));
+            const Cd      = Q_act / Q_ideal;
+            const V1      = Q_act / A1;
+            const V2      = Q_act / A2;
+            const Re      = (rho * V2 * D2) / mu;
+
+            // Dynamic pressures — directly calculable from Q and areas
+            const dyn1 = 0.5 * rho * V1 * V1;   // ½ρV₁²
+            const dyn2 = 0.5 * rho * V2 * V2;   // ½ρV₂²
+            const dynDiff = dyn2 - dyn1;          // ½ρ(V₂²−V₁²) — Bernoulli predicts this = ΔP
+
+            // Energy loss: measured ΔP that was NOT converted to kinetic energy
+            // In ideal flow ΔP = dynDiff. Real loss = ΔP − dynDiff (via Bernoulli deficit)
+            // Alternatively: permanent pressure loss h_L = ΔP·(1 − Cd²) [standard orifice result]
+            const permLoss   = dp_Pa * (1 - Cd * Cd);   // permanent/irrecoverable pressure loss (Pa)
+            const bernIdeal  = dynDiff;                   // ideal KE gain predicted by Bernoulli
+
+            trials.push({ trial: i, dp_mm, flow_lpm, Q_act, Q_ideal, Cd, V1, V2, Re,
+                          dp_Pa, dyn1, dyn2, dynDiff, permLoss, bernIdeal });
+        }
+        if (!trials.length) { alert('Please enter valid data for at least one trial.'); return; }
+
+        buildTable();
+        buildCharts();
+        buildInsights();
+
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.getElementById('analysis').classList.add('active');
+        document.querySelectorAll('.tab')[1].classList.add('active');
+        if (window.MathJax) MathJax.typesetPromise();
+    }
+
+    // ── Summary table ──────────────────────────────────
+    function buildTable() {
+        let html = `<h3 style="margin-bottom:14px; font-family:'Inter',sans-serif; font-size:1rem; color:#263238;">Summary of Calculations</h3>
+        <div class="table-scroll"><table><thead><tr>
+            <th>Trial</th><th>ΔP (mmH₂O)</th>
+            <th>Q actual (L/min)</th><th>Q ideal (L/min)</th>
+            <th>V₁ (m/s)</th><th>V₂ (m/s)</th>
+            <th>Cd</th><th>Re (orifice)</th>
+        </tr></thead><tbody>`;
+        trials.forEach(t => {
+            html += `<tr>
+                <td>${t.trial}</td><td>${t.dp_mm.toFixed(1)}</td>
+                <td>${t.flow_lpm.toFixed(2)}</td><td>${(t.Q_ideal*60000).toFixed(2)}</td>
+                <td>${t.V1.toFixed(3)}</td><td>${t.V2.toFixed(3)}</td>
+                <td>${t.Cd.toFixed(3)}</td><td>${Math.round(t.Re)}</td>
+            </tr>`;
+        });
+        html += `</tbody></table></div>`;
+        document.getElementById('summary-table-wrap').innerHTML = html;
+    }
+
+    // ── Chart 1a: Bernoulli energy budget, per trial ──────
+    function buildPressureSelector() {
+        const sel = document.getElementById('trialSelector');
+        sel.innerHTML = '';
+        trials.forEach((t, i) => {
+            const o = document.createElement('option');
+            o.value = i;
+            o.textContent = `Trial ${t.trial}  —  Q = ${t.flow_lpm.toFixed(2)} L/min  |  ΔP = ${t.dp_mm.toFixed(1)} mmH₂O  |  Cd = ${t.Cd.toFixed(3)}`;
+            sel.appendChild(o);
+        });
+    }
+
+    function updateEnergyBudget() {
+        if (charts.energyBudget) charts.energyBudget.destroy();
+        const t = trials[parseInt(document.getElementById('trialSelector').value)];
+        const lo = { position: 'top', labels: { font: { family: 'Inter', size: 13 } } };
+
+        // Three bars: measured ΔP, kinetic energy gain ½ρ(V₂²−V₁²), permanent loss h_L
+        const labels = ['Measured ΔP', 'KE gain ½ρ(V₂²−V₁²)', 'Permanent loss hL'];
+        const values = [t.dp_Pa, t.dynDiff, t.permLoss];
+        const colors = ['#1a4e8c', '#2e7d32', '#bf360c'];
+
+        charts.energyBudget = new Chart(
+            document.getElementById('energyBudgetChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels,
+                datasets: [{
+                    label: 'Pressure (Pa)',
+                    data: values,
+                    backgroundColor: colors,
+                    borderRadius: 4,
+                    barPercentage: 0.5
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false },
+                    title: {
+                        display: true,
+                        text: `Trial ${t.trial}  —  Q = ${t.flow_lpm.toFixed(2)} L/min  |  ΔP = ${t.dp_mm.toFixed(1)} mmH₂O  |  Cd = ${t.Cd.toFixed(3)}`,
+                        font: { family: 'Inter', size: 13, weight: '600' },
+                        color: '#263238'
+                    },
+                    tooltip: { callbacks: {
+                        label: ctx => `${ctx.parsed.y.toFixed(1)} Pa`,
+                        afterLabel: ctx => {
+                            const pct = (ctx.parsed.y / t.dp_Pa * 100).toFixed(1);
+                            const notes = [
+                                `${pct}% of measured ΔP`,
+                                `Ideal prediction: ΔP should equal KE gain`,
+                                `ΔP × (1 − Cd²) = ${t.permLoss.toFixed(1)} Pa`
+                            ];
+                            return notes[ctx.dataIndex];
+                        }
+                    }}
+                },
+                scales: {
+                    y: {
+                        title: { display: true, text: 'Pressure (Pa)', font: { family: 'Inter', size: 13 } },
+                        grid: { color: '#e0e6e0' },
+                        beginAtZero: true
+                    },
+                    x: { grid: { display: false }, ticks: { font: { family: 'Inter', size: 12 } } }
+                }
+            }
+        });
+    }
+
+    // ── Chart 1b: permanent loss bar chart — all trials ──
+    function buildPermLossChart() {
+        if (charts.permLoss) charts.permLoss.destroy();
+        const sorted = [...trials].sort((a,b) => a.flow_lpm - b.flow_lpm);
+        const lo = { position: 'top', labels: { font: { family: 'Inter', size: 13 } } };
+
+        // Colour bars by fraction of ΔP that is lost: darker = worse
+        const barColors = sorted.map(t => {
+            const frac = t.permLoss / t.dp_Pa;   // 0 → 1
+            const r = Math.round(60  + frac * 160);
+            const g = Math.round(120 - frac * 80);
+            const b = Math.round(40);
+            return `rgb(${r},${g},${b})`;
+        });
+
+        charts.permLoss = new Chart(
+            document.getElementById('permLossChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: sorted.map(t => `T${t.trial}\n${t.flow_lpm.toFixed(1)} L/min`),
+                datasets: [
+                    {
+                        label: 'Permanent loss hL (Pa)',
+                        data: sorted.map(t => t.permLoss),
+                        backgroundColor: barColors,
+                        borderRadius: 4,
+                        order: 1
+                    },
+                    {
+                        label: 'Measured ΔP (Pa)',
+                        data: sorted.map(t => t.dp_Pa),
+                        type: 'line',
+                        borderColor: '#1a4e8c',
+                        backgroundColor: 'transparent',
+                        borderWidth: 2,
+                        borderDash: [6, 3],
+                        pointRadius: 5,
+                        pointBackgroundColor: '#1a4e8c',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        fill: false,
+                        tension: 0.2,
+                        order: 0
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: lo,
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)} Pa`,
+                            afterBody: items => {
+                                const t = sorted[items[0].dataIndex];
+                                const pct = (t.permLoss / t.dp_Pa * 100).toFixed(1);
+                                return [`${pct}% of ΔP permanently lost`, `Cd = ${t.Cd.toFixed(3)}`];
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        title: { display: true, text: 'Pressure (Pa)', font: { family: 'Inter', size: 13 } },
+                        grid: { color: '#e0e6e0' },
+                        beginAtZero: true
+                    },
+                    x: {
+                        title: { display: true, text: 'Trial  (flow rate)', font: { family: 'Inter', size: 13 } },
+                        grid: { display: false },
+                        ticks: { font: { family: 'Inter', size: 12 } }
+                    }
+                }
+            }
+        });
+    }
+
+    // ── Other charts ───────────────────────────────────
+    function buildCharts() {
+        ['cdChart','dpChart','cdFlowChart'].forEach(id => { if (charts[id]) charts[id].destroy(); });
+        buildPressureSelector();
+        updateEnergyBudget();
+        buildPermLossChart();
+
+        const sorted = [...trials].sort((a,b) => a.flow_lpm - b.flow_lpm);
+        const maxQ   = Math.max(...trials.map(t => t.Q_ideal*60000)) * 1.12;
+        const sc = (xl, yl) => ({
+            x: { title: { display: true, text: xl, font: { family: 'Inter', size: 13 } }, grid: { color: '#e0e6e0' } },
+            y: { title: { display: true, text: yl, font: { family: 'Inter', size: 13 } }, grid: { color: '#e0e6e0' } }
+        });
+        const lo = { position: 'top', labels: { font: { family: 'Inter', size: 13 } } };
+
+        charts.cdChart = new Chart(document.getElementById('cdChart').getContext('2d'), {
+            type: 'scatter',
+            data: { datasets: [
+                { label: 'Experimental points',
+                  data: trials.map(t => ({ x: t.Q_ideal*60000, y: t.flow_lpm })),
+                  backgroundColor: '#2e7d32', pointRadius: 8 },
+                { label: 'Ideal line (Cd = 1)',
+                  data: [{x:0,y:0},{x:maxQ,y:maxQ}],
+                  type: 'line', borderColor: '#9e9e9e', borderDash:[7,4], borderWidth:2, pointRadius:0 }
+            ]},
+            options: { responsive: true, plugins: { legend: lo }, scales: sc('Q ideal (L/min)', 'Q actual (L/min)') }
+        });
+
+        charts.dpChart = new Chart(document.getElementById('dpChart').getContext('2d'), {
+            type: 'scatter',
+            data: { datasets: [{
+                label: 'ΔP vs Q',
+                data: sorted.map(t => ({ x: t.flow_lpm, y: t.dp_mm })),
+                backgroundColor: '#1a4e8c', borderColor: '#1a4e8c',
+                pointRadius: 8, showLine: true, tension: 0.35, fill: false
+            }]},
+            options: { responsive: true, plugins: { legend: lo }, scales: sc('Q actual (L/min)', 'ΔP (mmH₂O)') }
+        });
+
+        charts.cdFlowChart = new Chart(document.getElementById('cdFlowChart').getContext('2d'), {
+            type: 'scatter',
+            data: { datasets: [{
+                label: 'Cd',
+                data: sorted.map(t => ({ x: t.flow_lpm, y: t.Cd })),
+                backgroundColor: '#bf360c', borderColor: '#bf360c',
+                pointRadius: 8, showLine: true, tension: 0.35, fill: false
+            }]},
+            options: { responsive: true, plugins: { legend: lo },
+                       scales: { ...sc('Q actual (L/min)', 'Cd'), y: { ...sc('','Cd').y, min: 0, max: 1.1 } } }
+        });
+    }
+
+    // ── Insights ───────────────────────────────────────
+    function buildInsights() {
+        const avgCd = trials.reduce((s,t) => s+t.Cd, 0) / trials.length;
+        const minCd = Math.min(...trials.map(t => t.Cd));
+        const maxCd = Math.max(...trials.map(t => t.Cd));
+        const avgV1 = trials.reduce((s,t) => s+t.V1, 0) / trials.length;
+        const avgV2 = trials.reduce((s,t) => s+t.V2, 0) / trials.length;
+
+        document.getElementById('insights-container').innerHTML = `
+        <div class="insight">
+            <h4>Your Results at a Glance</h4>
+            <p>
+                Average \\(C_d\\) = <strong>${avgCd.toFixed(3)}</strong>
+                &nbsp;(range ${minCd.toFixed(3)}–${maxCd.toFixed(3)})
+                &nbsp;|&nbsp;
+                Velocity ratio \\(V_2/V_1\\) = <strong>${(avgV2/avgV1).toFixed(2)}</strong>
+                &nbsp;(theoretical \\(A_1/A_2 = ${(A1/A2).toFixed(2)}\\))
+            </p>
+        </div>`;
+        if (window.MathJax) MathJax.typesetPromise();
+    }
+
+    // ── Quiz ───────────────────────────────────────────
+    function toggleHint(id) {
+        const el = document.getElementById(id);
+        el.style.display = el.style.display === 'block' ? 'none' : 'block';
+        if (window.MathJax) MathJax.typesetPromise();
+    }
+
+    function checkMC(qNum, answer) {
+        if (answeredMC.has(qNum)) return;
+        answeredMC.add(qNum); mcAnswers[qNum] = answer;
+
+        document.querySelectorAll(`input[name="q${qNum}"]`).forEach(r => {
+            r.disabled = true;
+            r.parentElement.style.opacity = '0.65';
+            r.parentElement.style.cursor  = 'default';
+        });
+
+        const correct = { 1:'B', 2:'B', 3:'B', 4:'B', 5:'B' };
+        const isRight = answer === correct[qNum];
+
+        const ct = {
+            1: `✓ Correct! \\(Q_\\text{ideal}\\) is derived from Bernoulli's equation (energy conservation) combined with the continuity equation \\(Q = AV\\). It assumes the fluid is ideal — incompressible, inviscid, and in steady flow — so all of the measured \\(\\Delta P\\) goes into accelerating the fluid with zero losses. Real flow always has viscous losses, which is why \\(Q_\\text{actual} < Q_\\text{ideal}\\) and \\(C_d < 1\\).`,
+            2: `✓ Correct! Continuity (\\(Q = AV\\)) means that when \\(A\\) decreases, \\(V\\) must increase to keep \\(Q\\) constant. So \\(V_2 = V_1 \\times (A_1/A_2) \\approx 2.78\\,V_1\\). This acceleration of the fluid at the orifice is precisely what Bernoulli converts into the pressure drop you measure.`,
+            3: `✓ Correct! At the sharp orifice edge the flow cannot follow the abrupt direction change — it separates and contracts to a minimum jet area (<em>vena contracta</em>) smaller than \\(A_2\\). Beyond it, the flow re-expands turbulently, permanently converting mechanical energy to heat. Bernoulli's ideal equation ignores all of this, so \\(Q_\\text{ideal}\\) overpredicts and \\(C_d < 1\\).`,
+            4: `✓ Correct! The geometry is the key difference. The venturi's smooth, gradual convergence and gentle divergence prevent flow separation and allow excellent pressure recovery after the throat (\\(C_d \\approx 0.95\\text{–}0.99\\)). The orifice plate's sharp edge causes immediate separation, a vena contracta, and turbulent re-expansion — large irreversible losses giving \\(C_d \\approx 0.60\\text{–}0.80\\).`,
+            5: `✓ Correct! The orifice plate is just a flat machined disc: it costs a fraction of a venturi, fits between standard pipe flanges without special pipework, and can be removed and swapped in minutes. ISO 5167 provides reliable \\(C_d\\) data without individual calibration. Where the higher permanent pressure loss is acceptable, the orifice plate is the obvious engineering choice.`
+        };
+        const wt = {
+            1: `✗ Not quite — the correct answer is <strong>B</strong>. \\(Q_\\text{ideal}\\) assumes an ideal, incompressible, inviscid, steady fluid. The entire \\(\\Delta P\\) accelerates the flow with zero losses. Real fluids have viscosity, hence the need for \\(C_d\\).`,
+            2: `✗ Not quite — the correct answer is <strong>B</strong>. Continuity (\\(Q = AV\\)) shows that when \\(A\\) decreases, \\(V\\) must increase: \\(V_2 \\approx 2.78\\,V_1\\). The fluid speeds up — it does not slow down — at the orifice.`,
+            3: `✗ Not quite — the correct answer is <strong>B</strong>. \\(C_d < 1\\) because the sharp edge causes flow separation, a vena contracta (jet area \\({<}\\,A_2\\)), then turbulent re-expansion. This permanently converts mechanical energy to heat — losses Bernoulli does not model.`,
+            4: `✗ Not quite — the correct answer is <strong>B</strong>. The venturi's smooth profile prevents separation and gives good pressure recovery (\\(C_d \\approx 0.95\\text{–}0.99\\)). The orifice plate's sharp edge creates a vena contracta and turbulent losses, giving a much lower \\(C_d\\).`,
+            5: `✗ Not quite — the correct answer is <strong>B</strong>. Despite higher energy losses, the orifice plate dominates because it is cheap, simple, and fits between standard flanges. The capital and maintenance savings typically outweigh the higher pumping cost.`
+        };
+
+        const el = document.getElementById(`feedback${qNum}`);
+        el.className = 'feedback ' + (isRight ? 'correct' : 'wrong');
+        el.innerHTML = isRight ? ct[qNum] : wt[qNum];
+        el.style.display = 'block';
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        if (window.MathJax) MathJax.typesetPromise();
+    }
+
+    // ── Export ─────────────────────────────────────────
+    function exportAnswers() {
+        const now  = new Date();
+        const hhmm = now.getHours().toString().padStart(2,'0') + now.getMinutes().toString().padStart(2,'0');
+        let csv = 'Timestamp,Question,Answer\n';
+        for (let q = 1; q <= 5; q++) csv += `${now.toISOString()},Q${q}_MC,${mcAnswers[q] || 'N/A'}\n`;
+        const q6 = (document.getElementById('q6-text').value.trim() || 'N/A').replace(/"/g,'""');
+        const q7 = (document.getElementById('q7-text').value.trim() || 'N/A').replace(/"/g,'""');
+        csv += `${now.toISOString()},Q6_open,"${q6}"\n`;
+        csv += `${now.toISOString()},Q7_open,"${q7}"\n`;
+        const a = Object.assign(document.createElement('a'), {
+            href: URL.createObjectURL(new Blob([csv], { type: 'text/plain' })),
+            download: `Orificeplate${hhmm}.dat`
+        });
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    }
+</script>
+</body>
+</html>
