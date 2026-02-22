@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Venturi Meter Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:        #f2f4f0;
+  --surface:   #ffffff;
+  --surface2:  #f7f8f6;
+  --border:    #d4d9cf;
+  --border-lt: #e2e6de;
+
+  --text:      #1a211a;
+  --text-md:   #4a5c4e;
+  --text-lt:   #7a9080;
+
+  --accent:    #2e7d32;
+  --accent-h:  #1b5e20;
+  --accent-bg: #e8f5e9;
+
+  /* Data colours */
+  --c-static:  #1a4e8c;   /* blue       */
+  --c-dynamic: #bf360c;   /* orange-red */
+  --c-total:   #263238;   /* dark slate */
+
+  /* Position colours — tap markers only */
+  --cp1:       #1a4e8c;
+  --cp2:       #b71c1c;
+  --cp3:       #2e7d32;
+
+  /* Feedback */
+  --ok:        #2e7d32;
+  --ok-bg:     #e8f5e9;
+  --err:       #b71c1c;
+  --err-bg:    #fdecea;
+  --info:      #1a4e8c;
+  --info-bg:   #e3f2fd;
+
+  --ff:        'Inter', system-ui, sans-serif;
+  --serif:     'Source Serif 4', Georgia, serif;
+  --mono:      'JetBrains Mono', 'Courier New', monospace;
+
+  --r:         8px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 18px; }
+
+body {
+  font-family: var(--serif);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  min-height: 100vh;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* ─── WIZARD SHELL ── */
+.wizard { display: flex; flex-direction: column; height: 100dvh; }
+
+/* ─── TOP BAR ─────────────────────────────────────────── */
+.topbar {
+  flex-shrink: 0;
+  background: #263238;
+  border-bottom: 4px solid var(--accent);
+  padding: 18px 20px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.topbar-title {
+  font-family: var(--ff);
+  font-size: clamp(1.1rem, 4vw, 1.5rem);
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.2;
+}
+.topbar-sub {
+  font-family: var(--serif);
+  font-size: clamp(0.8rem, 3vw, 0.95rem);
+  color: #90a4ae;
+  font-style: italic;
+  margin-top: 2px;
+}
+
+/* Step indicator */
+.steps-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.step-pip {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: 2px solid #455a64;
+  background: #37474f;
+  color: #78909c;
+  font-family: var(--ff);
+  font-size: 0.8rem;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.25s;
+  flex-shrink: 0;
+}
+.step-pip.active {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
+.step-pip.done {
+  border-color: var(--accent-h);
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+.step-connector {
+  width: 18px; height: 2px;
+  background: #455a64;
+  flex-shrink: 0;
+}
+
+/* ─── SLIDES VIEWPORT ─────────────────────────────────── */
+.slides-viewport {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+.slide {
+  position: absolute; inset: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 22px 20px 32px;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(48px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  will-change: opacity, transform;
+}
+.slide.active {
+  opacity: 1;
+  pointer-events: all;
+  transform: translateX(0);
+}
+.slide.exit {
+  opacity: 0;
+  transform: translateX(-48px);
+}
+
+/* ─── SLIDE WRAPPER ───────────────────────────────────── */
+.slide-body {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* ─── HEADINGS ────────────────────────────────────────── */
+.slide-h {
+  font-family: var(--ff);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #263238;
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+.slide-lead {
+  font-family: var(--serif);
+  font-size: 1rem;
+  color: var(--text-md);
+  font-style: italic;
+  margin-bottom: 22px;
+  line-height: 1.7;
+}
+
+/* ─── CARDS ───────────────────────────────────────────── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 18px 20px;
+  margin-bottom: 14px;
+}
+.card-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-md);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 12px;
+}
+
+/* ─── VENTURI DIAGRAM ─────────────────────────────────── */
+.diagram-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 16px 18px 12px;
+  margin-bottom: 14px;
+}
+.diagram-card svg { width: 100%; height: auto; display: block; }
+.diagram-note {
+  font-size: 0.8rem;
+  color: var(--text-lt);
+  font-style: italic;
+  font-weight: 300;
+  margin-top: 8px;
+  line-height: 1.5;
+}
+
+/* ─── TRIAL ENTRY ─────────────────────────────────────── */
+.trial-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 5px solid var(--border);
+  border-radius: var(--r);
+  padding: 18px 16px;
+  margin-bottom: 14px;
+  transition: border-left-color 0.2s;
+}
+.trial-card.complete { border-left-color: var(--ok); }
+
+.trial-row-head {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 14px;
+}
+.trial-label {
+  font-family: var(--ff);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.btn-rm {
+  background: transparent;
+  color: #b71c1c;
+  border: 1px solid #b71c1c;
+  padding: 7px 14px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: var(--ff);
+  font-size: 0.82rem;
+  font-weight: 600;
+  min-height: 40px;
+  transition: background 0.15s;
+}
+.btn-rm:hover { background: #fdecea; }
+
+.fields-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+@media (max-width: 500px) { .fields-grid { grid-template-columns: 1fr 1fr; gap: 10px; } }
+
+.fld label {
+  display: block;
+  font-family: var(--ff);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  font-weight: 700;
+}
+.fld.f-p1 label { color: var(--cp1); }
+.fld.f-p2 label { color: var(--cp2); }
+.fld.f-p3 label { color: var(--cp3); }
+.fld.f-fl label { color: var(--text-md); }
+
+.fld input {
+  width: 100%;
+  padding: 12px 13px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface2);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 1.1rem;
+  min-height: 48px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.fld input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(46,125,50,0.15);
+  background: #fff;
+}
+
+/* ─── BUTTONS ─────────────────────────────────────────── */
+.btn-add {
+  font-family: var(--ff);
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 12px 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-md);
+  cursor: pointer;
+  min-height: 48px;
+  transition: border-color 0.15s, color 0.15s;
+}
+.btn-add:hover { border-color: var(--accent); color: var(--accent); }
+
+.btn-proceed {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--ff);
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 14px 28px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--r);
+  cursor: pointer;
+  min-height: 50px;
+  margin-top: 20px;
+  transition: background 0.15s, opacity 0.15s;
+}
+.btn-proceed:hover:not(:disabled) { background: var(--accent-h); }
+.btn-proceed:disabled { opacity: 0.35; cursor: not-allowed; }
+.btn-proceed .arr { font-size: 1.1rem; }
+
+/* ─── SLIDE 2: ANALYSIS ───────────────────────────────── */
+
+/* Bernoulli equation — green theory panel, matching Orifice Plate */
+.bernoulli-box {
+  background: var(--accent-bg);
+  border-left: 5px solid var(--accent);
+  border-radius: 0 var(--r) var(--r) 0;
+  padding: 18px 20px;
+  margin-bottom: 20px;
+}
+.bernoulli-eq {
+  font-family: var(--mono);
+  font-size: 1.05rem;
+  font-weight: 500;
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+.bernoulli-eq .cs { color: var(--c-static);  font-weight: 700; }
+.bernoulli-eq .cd { color: var(--c-dynamic); font-weight: 700; }
+.bernoulli-eq .ct { color: var(--c-total);   font-weight: 700; }
+.bernoulli-eq .cm { color: var(--text-md); }
+.bernoulli-note {
+  font-family: var(--serif);
+  font-size: 0.95rem;
+  color: #1b4020;
+  line-height: 1.7;
+}
+
+/* Stat strip */
+.stat-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+.stat-cell {
+  background: var(--surface);
+  padding: 13px 16px;
+}
+.stat-cell .s-lbl {
+  font-family: var(--ff);
+  font-size: 0.62rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--text-lt);
+  margin-bottom: 3px;
+}
+.stat-cell .s-val {
+  font-family: var(--mono);
+  font-size: 1.35rem;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1;
+}
+.stat-cell .s-unit {
+  font-family: var(--ff);
+  font-size: 0.65rem;
+  color: var(--text-lt);
+  margin-top: 2px;
+}
+
+/* Charts */
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+@media (max-width: 600px) { .charts-grid { grid-template-columns: 1fr; } }
+
+.chart-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 20px 16px;
+}
+.chart-card h3 {
+  font-family: var(--ff);
+  font-size: 1rem;
+  font-weight: 700;
+  color: #263238;
+  margin-bottom: 6px;
+}
+.chart-card .ch-note {
+  font-family: var(--serif);
+  font-size: 0.9rem;
+  color: var(--text-md);
+  line-height: 1.65;
+  margin-bottom: 14px;
+}
+.chart-sel-row {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+}
+.chart-sel-row label {
+  font-family: var(--ff);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-md);
+}
+.chart-sel-row select {
+  font-family: var(--ff);
+  font-size: 0.9rem;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--surface2);
+  color: var(--text);
+  min-height: 40px;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* Colour legend strip */
+.clr-legend {
+  display: flex; gap: 16px; flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.clr-item {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 0.75rem; color: var(--text-md);
+}
+.clr-swatch {
+  width: 20px; height: 4px; border-radius: 2px; flex-shrink: 0;
+}
+
+/* ─── SLIDE 3: CFD + QUESTIONS ────────────────────────── */
+
+.cfd-unit {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+.cfd-unit-header {
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--border-lt);
+}
+.cfd-unit-header h3 {
+  font-family: var(--ff);
+  font-size: 1rem;
+  font-weight: 700;
+  color: #263238;
+  margin-bottom: 4px;
+}
+.cfd-unit-header p {
+  font-family: var(--serif);
+  font-size: 0.9rem;
+  color: var(--text-md);
+  font-style: italic;
+  line-height: 1.65;
+}
+
+.cfd-img-area {
+  position: relative;
+  background: #0C1824;
+  overflow: hidden;
+}
+.cfd-img-area img {
+  width: 100%;
+  display: block;
+  position: relative;
+  z-index: 1;
+}
+
+/* Tap-point labels on images */
+.cfd-dots { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
+.cdot {
+  position: absolute;
+  width: 11px; height: 11px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.9);
+  transform: translate(-50%, -50%);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+}
+.cdot.c1 { background: var(--cp1); }
+.cdot.c2 { background: var(--cp2); }
+.cdot.c3 { background: var(--cp3); }
+.cdot-lbl {
+  position: absolute;
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  color: #fff;
+  text-shadow: 0 1px 3px #000;
+  transform: translate(-50%, -300%);
+  white-space: nowrap;
+  font-weight: 500;
+  z-index: 2;
+}
+
+/* observe note below image */
+.cfd-observe {
+  padding: 14px 20px;
+  background: var(--accent-bg);
+  border-top: 1px solid #c8e6c9;
+  font-family: var(--serif);
+  font-size: 0.95rem;
+  color: #1b4020;
+  line-height: 1.7;
+}
+.cfd-observe strong { font-family: var(--ff); }
+
+/* question section within unit */
+.cfd-question {
+  padding: 18px 20px;
+  border-top: 1px solid var(--border);
+}
+.q-badge {
+  display: inline-block;
+  font-family: var(--ff);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: 20px;
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+.q-obs { background: #e3f2fd; color: #0d47a1; }
+.q-exp { background: var(--accent-bg); color: #1b5e20; }
+.q-prd { background: #fff8e1; color: #e65100; }
+
+.q-stem {
+  font-family: var(--ff);
+  font-size: 1rem;
+  font-weight: 700;
+  color: #263238;
+  margin-bottom: 8px;
+  line-height: 1.45;
+}
+.q-context {
+  font-family: var(--serif);
+  font-size: 0.95rem;
+  color: var(--text-md);
+  font-style: italic;
+  line-height: 1.7;
+  margin-bottom: 16px;
+  padding-left: 14px;
+  border-left: 4px solid var(--border);
+}
+
+/* Options */
+.mc-opt {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 13px 15px;
+  margin: 8px 0;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: var(--serif);
+  font-size: 1rem;
+  line-height: 1.55;
+  transition: border-color 0.15s, background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 48px;
+}
+.mc-opt:hover { border-color: var(--accent); background: var(--accent-bg); }
+.mc-opt input {
+  margin-top: 4px;
+  flex-shrink: 0;
+  accent-color: var(--accent);
+  width: 18px; height: 18px;
+}
+.mc-opt.locked { opacity: 0.6; cursor: default; pointer-events: none; }
+
+/* Feedback */
+.q-feedback {
+  display: none;
+  margin-top: 14px;
+  padding: 14px 16px;
+  border-radius: 6px;
+  font-family: var(--serif);
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+.q-feedback.show { display: block; }
+.fb-ok  { background: var(--ok-bg);   border-left: 5px solid var(--ok);  color: #1b4020; }
+.fb-err { background: var(--err-bg);  border-left: 5px solid var(--err); color: #5c0a0a; }
+
+/* Quiz progress */
+.quiz-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 22px;
+  flex-wrap: wrap;
+}
+.q-prog-label {
+  font-family: var(--ff);
+  font-size: 0.78rem;
+  color: var(--text-lt);
+}
+.q-prog-track {
+  flex: 1; min-width: 100px;
+  height: 6px; background: var(--border);
+  border-radius: 3px; overflow: hidden;
+}
+.q-prog-fill {
+  height: 100%;
+  background: var(--ok);
+  border-radius: 3px;
+  transition: width 0.35s ease;
+}
+.btn-export {
+  font-family: var(--ff);
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 10px 20px;
+  background: #37474f;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  min-height: 44px;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+.btn-export:hover { background: #263238; }
+</style>
+</head>
+<body>
+<div class="wizard">
+
+  <!-- ══ TOP BAR ════════════════════════════════════════ -->
+  <header class="topbar">
+    <div>
+      <div class="topbar-title">Venturi Meter Lab</div>
+      <div class="topbar-sub">Bernoulli's Principle · Flow Measurement</div>
+    </div>
+    <div class="steps-row">
+      <div class="step-pip active" id="sp1">1</div>
+      <div class="step-connector"></div>
+      <div class="step-pip" id="sp2">2</div>
+      <div class="step-connector"></div>
+      <div class="step-pip" id="sp3">3</div>
+    </div>
+  </header>
+
+  <!-- ══ SLIDES ════════════════════════════════════════ -->
+  <div class="slides-viewport">
+
+    <!-- ════════════════════════════════════════════════
+         SLIDE 1 — DATA ENTRY
+    ════════════════════════════════════════════════ -->
+    <div class="slide active" id="s1">
+      <div class="slide-body">
+
+        <div class="slide-h">Record your measurements</div>
+        <div class="slide-lead">Enter piezometer heights and flow rate for each trial. The button activates automatically once a trial is complete.</div>
+
+        <!-- Venturi diagram -->
+        <div class="diagram-card">
+          <svg viewBox="0 0 660 155" xmlns="http://www.w3.org/2000/svg">
+            <rect width="660" height="155" fill="#FFFFFF"/>
+            <line x1="15" y1="77" x2="645" y2="77" stroke="#E5E0D8" stroke-width="1" stroke-dasharray="5 4"/>
+            <!-- walls -->
+            <path d="M15,30 L160,30 Q235,30 272,63 L355,63 Q404,63 476,30 L645,30"
+                  stroke="#1E2A35" stroke-width="2.2" fill="none" stroke-linejoin="round"/>
+            <path d="M15,124 L160,124 Q235,124 272,91 L355,91 Q404,124 476,124 L645,124"
+                  stroke="#1E2A35" stroke-width="2.2" fill="none" stroke-linejoin="round"/>
+            <!-- throat fill -->
+            <rect x="270" y="62" width="86" height="29" fill="rgba(201,91,59,0.08)" rx="1"/>
+            <!-- flow -->
+            <defs>
+              <marker id="fl" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
+                <polygon points="0,0 7,3.5 0,7" fill="#2D6A9F"/>
+              </marker>
+            </defs>
+            <line x1="22" y1="77" x2="58" y2="77" stroke="#2D6A9F" stroke-width="1.8" marker-end="url(#fl)"/>
+            <text x="20" y="70" fill="#2D6A9F" font-size="9" font-weight="700" font-family="monospace">Q</text>
+            <!-- tap 1 -->
+            <line x1="95" y1="30" x2="95" y2="8"  stroke="#1A5276" stroke-width="1.5" stroke-dasharray="3 2"/>
+            <circle cx="95" cy="30" r="4" fill="#1A5276"/>
+            <text x="83" y="6" fill="#1A5276" font-size="10" font-weight="700" font-family="monospace">P₁</text>
+            <line x1="95" y1="124" x2="95" y2="147" stroke="#1A5276" stroke-width="1.5" stroke-dasharray="3 2"/>
+            <circle cx="95" cy="124" r="4" fill="#1A5276"/>
+            <text x="70" y="154" fill="#1A5276" font-size="8" font-family="monospace">h₁ Inlet</text>
+            <!-- tap 2 -->
+            <line x1="313" y1="63" x2="313" y2="8"  stroke="#922B21" stroke-width="1.5" stroke-dasharray="3 2"/>
+            <circle cx="313" cy="63" r="4" fill="#922B21"/>
+            <text x="301" y="6" fill="#922B21" font-size="10" font-weight="700" font-family="monospace">P₂</text>
+            <line x1="313" y1="91" x2="313" y2="147" stroke="#922B21" stroke-width="1.5" stroke-dasharray="3 2"/>
+            <circle cx="313" cy="91" r="4" fill="#922B21"/>
+            <text x="281" y="154" fill="#922B21" font-size="8" font-family="monospace">h₂ Throat</text>
+            <!-- tap 3 -->
+            <line x1="540" y1="30" x2="540" y2="8"  stroke="#196F3D" stroke-width="1.5" stroke-dasharray="3 2"/>
+            <circle cx="540" cy="30" r="4" fill="#196F3D"/>
+            <text x="528" y="6" fill="#196F3D" font-size="10" font-weight="700" font-family="monospace">P₃</text>
+            <line x1="540" y1="124" x2="540" y2="147" stroke="#196F3D" stroke-width="1.5" stroke-dasharray="3 2"/>
+            <circle cx="540" cy="124" r="4" fill="#196F3D"/>
+            <text x="508" y="154" fill="#196F3D" font-size="8" font-family="monospace">h₃ Outlet</text>
+            <!-- Ø labels -->
+            <text x="17" y="80" fill="#9A9590" font-size="8" font-family="monospace">Ø 20 mm</text>
+            <text x="285" y="80" fill="#922B21" font-size="8" font-family="monospace">Ø 10</text>
+            <text x="578" y="80" fill="#9A9590" font-size="8" font-family="monospace">Ø 20 mm</text>
+            <!-- section notes -->
+            <text x="172" y="144" fill="#B8B0A6" font-size="8" font-family="monospace">converging</text>
+            <text x="372" y="144" fill="#B8B0A6" font-size="8" font-family="monospace">diverging (longer — see Step 3)</text>
+          </svg>
+          <div class="diagram-note">Tap positions are not arbitrary. The CFD simulation in Step 3 shows exactly why each one is placed here.</div>
+        </div>
+
+        <!-- Trial cards -->
+        <div id="trials-wrap"></div>
+
+        <div style="margin-bottom:6px;">
+          <button class="btn-add" onclick="addTrial()">+ Add trial</button>
+        </div>
+
+        <button class="btn-proceed" id="btn1" onclick="runAnalysis()" disabled>
+          Move to analysis <span class="arr">→</span>
+        </button>
+
+      </div>
+    </div><!-- /s1 -->
+
+    <!-- ════════════════════════════════════════════════
+         SLIDE 2 — ANALYSIS
+    ════════════════════════════════════════════════ -->
+    <div class="slide" id="s2">
+      <div class="slide-body">
+
+        <div class="slide-h">Your results</div>
+        <div class="slide-lead">Calculated pressures compared to the theoretical ideal. The gap between theoretical and actual flow is the energy lost to friction.</div>
+
+        <!-- Bernoulli banner -->
+        <div class="bernoulli-box">
+          <div class="bernoulli-eq">
+            <span class="cs">P</span>
+            <span class="cm"> + </span>
+            <span class="cd">½ρv²</span>
+            <span class="cm"> + ρgz </span>
+            <span class="ct">= constant</span>
+          </div>
+          <div class="bernoulli-note">
+            <span style="color:var(--c-static);font-weight:700;">Static pressure</span> +
+            <span style="color:var(--c-dynamic);font-weight:700;">Dynamic pressure</span> +
+            Hydrostatic = Total &nbsp;·&nbsp;
+            Valid along a streamline in <em>steady, inviscid, incompressible</em> flow.
+            The colour coding below follows this equation.
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stat-strip" id="stat-strip"></div>
+
+        <!-- Charts -->
+        <div class="charts-grid">
+          <div class="chart-card">
+            <h3>Pressure at each position</h3>
+            <div class="clr-legend">
+              <span class="clr-item"><span class="clr-swatch" style="background:var(--c-static)"></span>Static</span>
+              <span class="clr-item"><span class="clr-swatch" style="background:var(--c-dynamic)"></span>Dynamic</span>
+              <span class="clr-item"><span class="clr-swatch" style="background:var(--c-total);height:3px;border-top:2px dashed var(--c-total);background:transparent;"></span>Total</span>
+            </div>
+            <div class="ch-note">Bars use the same blue for static and same terracotta for dynamic at every position — only position labels distinguish location, not colour.</div>
+            <div class="chart-sel-row">
+              <label>Trial:</label>
+              <select id="trialSel" onchange="drawPressureChart()"></select>
+            </div>
+            <canvas id="pressureChart" height="210"></canvas>
+          </div>
+
+          <div class="chart-card">
+            <h3>Actual vs theoretical flow rate</h3>
+            <div class="ch-note">Light bar = Bernoulli ideal (no losses). Dark bar = your measurement. The gap is the Cd penalty — energy consumed by friction and the boundary layer.</div>
+            <canvas id="flowChart" height="210"></canvas>
+          </div>
+        </div>
+
+        <button class="btn-proceed" onclick="goTo(3)">
+          Move for more understanding <span class="arr">→</span>
+        </button>
+
+      </div>
+    </div><!-- /s2 -->
+
+    <!-- ════════════════════════════════════════════════
+         SLIDE 3 — CFD + QUESTIONS
+    ════════════════════════════════════════════════ -->
+    <div class="slide" id="s3">
+      <div class="slide-body">
+
+        <div class="slide-h">Understanding the flow field</div>
+        <div class="slide-lead">Three CFD simulations — each followed by a question. The simulation is at 28 L/min (not your exact conditions) and is here to show what is happening <em>everywhere</em>, not just at three points.</div>
+
+        <div class="quiz-meta">
+          <span class="q-prog-label" id="qprog-lbl">0 of 3 answered</span>
+          <div class="q-prog-track"><div class="q-prog-fill" id="qprog-fill" style="width:0%"></div></div>
+          <button class="btn-export" onclick="exportAnswers()">Export (.dat)</button>
+        </div>
+
+        <!-- ─── UNIT 1: STATIC PRESSURE ─────────────────── -->
+        <div class="cfd-unit">
+          <div class="cfd-unit-header">
+            <h3>Static pressure field</h3>
+            <p>Blue = lowest (most negative) static pressure; red = highest. The colour gradient shows the full continuous pressure field that your three tapping points sample at just three locations.</p>
+          </div>
+          <div class="cfd-img-area">
+            <img src="https://github.com/Nidiana/LabsDiscussion/raw/main/Venturi_Effect/StaticP_28LPM.png" alt="CFD static pressure contour 28 LPM" loading="lazy">
+          </div>
+          <div class="cfd-observe">
+            <strong>Observe:</strong> P₁ (inlet) sits in a deep red region — high static pressure in the wide, slow-moving section. P₂ (throat) is where the colour shifts to blue, the lowest static pressure in the whole field. P₃ (outlet) shows a partial return toward red — incomplete pressure recovery due to friction in the diverging section. The pressure varies <em>continuously</em> between the taps; your piezometers capture only three samples of this curve. Also note that near the converging and diverging transitions the contours are not perfectly parallel — this is why taps must be placed in the straight, fully developed sections.
+          </div>
+          <div class="cfd-question">
+            <span class="q-badge q-exp">Explain</span>
+            <div class="q-stem">Q1 — Why can we apply Bernoulli between these three positions, even though the total pressure CFD (shown in Unit 3) reveals that Bernoulli is violated near the walls?</div>
+            <div class="q-context">Consider where P₁, P₂ and P₃ are located and what the static pressure contours tell you about those specific regions.</div>
+            <label class="mc-opt"><input type="radio" name="q1" value="A" onchange="checkQ(1,'A')"> A &nbsp; Because Bernoulli is valid everywhere in liquid flows at these velocities</label>
+            <label class="mc-opt"><input type="radio" name="q1" value="B" onchange="checkQ(1,'B')"> B &nbsp; Because the taps are in straight sections where the pressure field is uniform across the cross-section — viscous effects are confined to a thin wall layer and the wall pressure equals the cross-sectional mean</label>
+            <label class="mc-opt"><input type="radio" name="q1" value="C" onchange="checkQ(1,'C')"> C &nbsp; Because pressure losses only occur at the throat, not at the tap positions</label>
+            <label class="mc-opt"><input type="radio" name="q1" value="D" onchange="checkQ(1,'D')"> D &nbsp; Because the piezometers measure total pressure, which is conserved even with viscosity</label>
+            <div id="fb1" class="q-feedback"></div>
+          </div>
+        </div>
+
+        <!-- ─── UNIT 2: VELOCITY ─────────────────────────── -->
+        <div class="cfd-unit">
+          <div class="cfd-unit-header">
+            <h3>Velocity magnitude field</h3>
+            <p>Blue = lowest velocity; red = highest. Velocity is <em>not uniform</em> across the cross-section — it is highest on the centreline and falls to zero at the wall. This non-uniformity is the physical origin of C<sub>d</sub> &lt; 1.</p>
+          </div>
+          <div class="cfd-img-area">
+            <img src="https://github.com/Nidiana/LabsDiscussion/raw/main/Venturi_Effect/Vel_28LPM.png" alt="CFD velocity magnitude contour 28 LPM" loading="lazy">
+          </div>
+          <div class="cfd-observe">
+            <strong>Observe:</strong> The blue region clinging to the wall is the <em>boundary layer</em> — fluid slowed almost to zero by the no-slip condition. At the throat, where the geometry is narrowest, this slow wall layer means the effective flow area is slightly smaller than the geometric 78.5 mm². Bernoulli-based theory assumes plug flow (uniform velocity across the section), so it predicts a higher Q than is actually achieved — which is exactly why C<sub>d</sub> &lt; 1. Also observe the diverging section: the boundary layer thickens as the flow decelerates against rising pressure. If the diverging angle were too steep, this layer would separate entirely from the wall, destroying pressure recovery.
+          </div>
+          <div class="cfd-question">
+            <span class="q-badge q-exp">Explain</span>
+            <div class="q-stem">Q2 — The actual flow rate in your experiment was less than the theoretical Bernoulli prediction. What does this velocity field tell you is the physical reason?</div>
+            <div class="q-context">Look at the colour distribution across the throat cross-section, not just along the centreline.</div>
+            <label class="mc-opt"><input type="radio" name="q2" value="A" onchange="checkQ(2,'A')"> A &nbsp; The fluid slows down inside the throat due to increased pressure</label>
+            <label class="mc-opt"><input type="radio" name="q2" value="B" onchange="checkQ(2,'B')"> B &nbsp; The no-slip condition at the wall creates a boundary layer of slow fluid, reducing the effective flow area below 79 mm² — so real Q is always less than Q = A₂ × v̄ assumes</label>
+            <label class="mc-opt"><input type="radio" name="q2" value="C" onchange="checkQ(2,'C')"> C &nbsp; The rotameter under-reads at high velocities</label>
+            <label class="mc-opt"><input type="radio" name="q2" value="D" onchange="checkQ(2,'D')"> D &nbsp; Bernoulli over-predicts the pressure difference between inlet and throat</label>
+            <div id="fb2" class="q-feedback"></div>
+          </div>
+        </div>
+
+        <!-- ─── UNIT 3: TOTAL PRESSURE ───────────────────── -->
+        <div class="cfd-unit">
+          <div class="cfd-unit-header">
+            <h3>Total pressure field</h3>
+            <p>Blue = lowest total pressure; red = highest. If Bernoulli held everywhere, this map would be a single uniform colour. It is not — understanding <em>where</em> it varies and why is the key engineering insight of this experiment.</p>
+          </div>
+          <div class="cfd-img-area">
+            <img src="https://github.com/Nidiana/LabsDiscussion/raw/main/Venturi_Effect/TotalP_28LPM.png" alt="CFD total pressure contour 28 LPM" loading="lazy">
+          </div>
+          <div class="cfd-observe">
+            <strong>Observe:</strong> The core of the flow is largely uniform in colour — total pressure is approximately conserved there, consistent with the Bernoulli approximation. Near the walls the colour shifts toward blue: viscosity is converting mechanical energy to heat in the boundary layer, in direct violation of Bernoulli's inviscid assumption. The total pressure also decreases slightly from inlet to outlet even in the core — this is the real friction loss your experiment measured as P₁<sub>total</sub> − P₃<sub>total</sub>. Crucially, the three tap positions sample the core where this loss is small between adjacent taps — which is why the Bernoulli approximation is usable for your measurements despite the field not being truly inviscid.
+          </div>
+          <div class="cfd-question">
+            <span class="q-badge q-prd">Predict</span>
+            <div class="q-stem">Q3 — A designer proposes reducing the diverging section length by half to make the venturi more compact. Based on what you see in the velocity and total pressure fields, what is the risk?</div>
+            <div class="q-context">Think about what happens to the boundary layer in a decelerating flow when the angle becomes steeper, and what that would do to the total pressure field and pressure recovery.</div>
+            <label class="mc-opt"><input type="radio" name="q3" value="A" onchange="checkQ(3,'A')"> A &nbsp; No risk — a shorter diffuser simply means the pressure recovers faster</label>
+            <label class="mc-opt"><input type="radio" name="q3" value="B" onchange="checkQ(3,'B')"> B &nbsp; The boundary layer in the diverging section would be more likely to separate from the wall, creating a recirculation zone — total pressure loss would increase sharply and pressure recovery would be severely reduced</label>
+            <label class="mc-opt"><input type="radio" name="q3" value="C" onchange="checkQ(3,'C')"> C &nbsp; The throat velocity would increase, improving measurement sensitivity</label>
+            <label class="mc-opt"><input type="radio" name="q3" value="D" onchange="checkQ(3,'D')"> D &nbsp; The Cd value would increase toward 1.0 because the venturi is shorter</label>
+            <div id="fb3" class="q-feedback"></div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;">
+          <button class="btn-export" onclick="exportAnswers()">Export answers (.dat)</button>
+          <button class="btn-export" onclick="clearAnswers()">Clear answers</button>
+        </div>
+
+      </div>
+    </div><!-- /s3 -->
+
+  </div><!-- /slides-viewport -->
+</div><!-- /wizard -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script>
+/* ═══ PHYSICS CONSTANTS ═════════════════════════════════ */
+const D1=0.020, D2=0.010, D3=0.020;
+const A1=Math.PI*(D1/2)**2, A2=Math.PI*(D2/2)**2, A3=Math.PI*(D3/2)**2;
+const G=9.81, RHO=1000, MU=0.001;
+
+/* Data colours — matching CSS tokens */
+const C_ST='#1a4e8c';   /* static  — blue       */
+const C_DY='#bf360c';   /* dynamic — orange-red */
+const C_TO='#263238';   /* total   — dark slate */
+
+let trials=[], trialCount=0, charts={};
+let quizAnswers={}, answeredQs=new Set();
+
+/* ═══ BOOT ══════════════════════════════════════════════ */
+window.addEventListener('DOMContentLoaded',()=>{
+  addTrial();
+  loadSaved();
+  updateProgress();
+});
+
+/* ═══ NAVIGATION ════════════════════════════════════════ */
+function goTo(n){
+  document.querySelectorAll('.slide').forEach((s,i)=>{
+    const idx=i+1;
+    if(s.classList.contains('active')){
+      s.classList.remove('active');
+      s.classList.add('exit');
+      setTimeout(()=>s.classList.remove('exit'),340);
+    }
+  });
+  const tgt=document.getElementById('s'+n);
+  tgt.classList.add('active');
+  tgt.scrollTop=0;
+  // pips
+  for(let i=1;i<=3;i++){
+    const p=document.getElementById('sp'+i);
+    p.classList.remove('active','done');
+    if(i<n) p.classList.add('done');
+    else if(i===n) p.classList.add('active');
+  }
+}
+
+/* ═══ TRIAL MANAGEMENT ══════════════════════════════════ */
+function addTrial(){
+  trialCount++;
+  const tc=document.createElement('div');
+  tc.className='trial-card'; tc.id='tc-'+trialCount;
+  tc.innerHTML=`
+  <div class="trial-row-head">
+    <span class="trial-label">Trial ${trialCount}</span>
+    ${trialCount>1?`<button class="btn-rm" onclick="removeTrial(${trialCount})">Remove</button>`:''}
+  </div>
+  <div class="fields-grid">
+    <div class="fld f-p1">
+      <label>h₁ Inlet (cm)</label>
+      <input type="number" id="h1-${trialCount}" step="0.1" placeholder="e.g. 30.5"
+             inputmode="decimal" oninput="watchTrial(${trialCount})">
+    </div>
+    <div class="fld f-p2">
+      <label>h₂ Throat (cm)</label>
+      <input type="number" id="h2-${trialCount}" step="0.1" placeholder="e.g. 15.2"
+             inputmode="decimal" oninput="watchTrial(${trialCount})">
+    </div>
+    <div class="fld f-p3">
+      <label>h₃ Outlet (cm)</label>
+      <input type="number" id="h3-${trialCount}" step="0.1" placeholder="e.g. 28.7"
+             inputmode="decimal" oninput="watchTrial(${trialCount})">
+    </div>
+    <div class="fld f-fl">
+      <label>Flow rate (L/min)</label>
+      <input type="number" id="fl-${trialCount}" step="0.1" placeholder="e.g. 9.0"
+             inputmode="decimal" oninput="watchTrial(${trialCount})">
+    </div>
+  </div>`;
+  document.getElementById('trials-wrap').appendChild(tc);
+  watchTrial(trialCount);
+}
+
+function removeTrial(id){
+  document.getElementById('tc-'+id)?.remove();
+  checkBtn();
+}
+
+function watchTrial(id){
+  const keys=['h1','h2','h3','fl'];
+  const vals=keys.map(k=>{
+    const el=document.getElementById(k+'-'+id);
+    return el?parseFloat(el.value):NaN;
+  });
+  const ok=vals.every(v=>!isNaN(v)&&v>=0);
+  document.getElementById('tc-'+id)?.classList.toggle('complete',ok);
+  checkBtn();
+}
+
+function checkBtn(){
+  let any=false;
+  for(let i=1;i<=trialCount;i++){
+    if(document.getElementById('tc-'+i)?.classList.contains('complete')){ any=true; break; }
+  }
+  document.getElementById('btn1').disabled=!any;
+}
+
+/* ═══ COMPUTE + BUILD SLIDE 2 ═══════════════════════════ */
+function runAnalysis(){
+  trials=[];
+  for(let i=1;i<=trialCount;i++){
+    if(!document.getElementById('tc-'+i)) continue;
+    const get=k=>parseFloat(document.getElementById(k+'-'+i)?.value);
+    const [h1,h2,h3,fl]=['h1','h2','h3','fl'].map(get);
+    if([h1,h2,h3,fl].some(v=>isNaN(v)||v<0)) continue;
+    const [h1m,h2m,h3m]=[h1,h2,h3].map(v=>v/100);
+    const Q=fl/60000;
+    const [v1,v2,v3]=[A1,A2,A3].map(a=>Q/a);
+    const Ps=[h1m,h2m,h3m].map(h=>RHO*G*h);
+    const Pd=[v1,v2,v3].map(v=>0.5*RHO*v*v);
+    const Pt=Ps.map((p,i)=>p+Pd[i]);
+    const dh=h1m-h2m;
+    const Qth=dh>0?A2*Math.sqrt(2*G*dh*(A1/A2)**2/((A1/A2)**2-1)):NaN;
+    const Cd=Qth&&Qth>0?Q/Qth:NaN;
+    trials.push({n:i,h1,h2,h3,fl,Q,v1,v2,v3,
+                 Ps1:Ps[0],Ps2:Ps[1],Ps3:Ps[2],
+                 Pd1:Pd[0],Pd2:Pd[1],Pd3:Pd[2],
+                 Pt1:Pt[0],Pt2:Pt[1],Pt3:Pt[2],
+                 Cd,Re:RHO*v2*D2/MU,Qth});
+  }
+  if(!trials.length){ alert('Complete at least one trial first.'); return; }
+  buildStats(); populateSel(); drawPressureChart(); buildFlowChart();
+  goTo(2);
+}
+
+function buildStats(){
+  const vCd=trials.filter(t=>!isNaN(t.Cd));
+  const avgCd=vCd.length?vCd.reduce((s,t)=>s+t.Cd,0)/vCd.length:NaN;
+  const maxRe=Math.max(...trials.map(t=>t.Re));
+  const avgL=trials.reduce((s,t)=>s+(t.Pt1-t.Pt3),0)/trials.length;
+  document.getElementById('stat-strip').innerHTML=`
+    <div class="stat-cell"><div class="s-lbl">Trials</div><div class="s-val">${trials.length}</div><div class="s-unit">datasets</div></div>
+    <div class="stat-cell"><div class="s-lbl">Avg Cd</div><div class="s-val">${isNaN(avgCd)?'—':avgCd.toFixed(3)}</div><div class="s-unit">discharge coeff.</div></div>
+    <div class="stat-cell"><div class="s-lbl">Max Re</div><div class="s-val">${maxRe.toFixed(0)}</div><div class="s-unit">at throat</div></div>
+    <div class="stat-cell"><div class="s-lbl">Head loss</div><div class="s-val">${(avgL/(RHO*G)).toFixed(3)}</div><div class="s-unit">m (avg P₁ᵗ−P₃ᵗ)</div></div>`;
+}
+
+function populateSel(){
+  const sel=document.getElementById('trialSel');
+  sel.innerHTML='';
+  trials.forEach((t,i)=>{
+    const o=document.createElement('option');
+    o.value=i; o.textContent=`Trial ${t.n}  (${t.fl.toFixed(1)} L/min)`;
+    sel.appendChild(o);
+  });
+}
+
+/* Chart 1 — stacked bar: static (blue) + dynamic (terracotta), total (forest line)
+   SAME colour for each pressure TYPE at all three positions.
+   Position is distinguished by the x-axis label only.             */
+function drawPressureChart(){
+  if(charts.p){try{charts.p.destroy();}catch(e){}}
+  const idx=parseInt(document.getElementById('trialSel').value)||0;
+  const t=trials[idx]; if(!t) return;
+  charts.p=new Chart(document.getElementById('pressureChart').getContext('2d'),{
+    type:'bar',
+    data:{
+      labels:['P₁  Inlet','P₂  Throat','P₃  Outlet'],
+      datasets:[
+        {label:'Static (ρgh)',
+         data:[t.Ps1,t.Ps2,t.Ps3],
+         backgroundColor:C_ST+'C0', stack:'s'},
+        {label:'Dynamic (½ρv²)',
+         data:[t.Pd1,t.Pd2,t.Pd3],
+         backgroundColor:C_DY+'C0', stack:'s'},
+        {label:'Total',
+         type:'line', data:[t.Pt1,t.Pt2,t.Pt3],
+         borderColor:C_TO, borderWidth:2.5,
+         pointRadius:7, pointBackgroundColor:'#fff',
+         pointBorderColor:C_TO, pointBorderWidth:2.5,
+         backgroundColor:'transparent', fill:false}
+      ]
+    },
+    options:{
+      responsive:true,
+      plugins:{
+        legend:{position:'bottom',labels:{boxWidth:12,font:{size:13,family:'Inter'}}},
+        title:{display:true,
+               text:`Trial ${t.n} · ${t.fl.toFixed(1)} L/min · Cd=${isNaN(t.Cd)?'—':t.Cd.toFixed(3)}`,
+               color:'#546e7a',font:{size:13,family:'Inter'}}
+      },
+      scales:{
+        y:{stacked:true,
+           title:{display:true,text:'Pressure (Pa)',font:{size:13,family:'Inter'}},
+           grid:{color:'#e0e6da'}},
+        x:{grid:{color:'#e0e6da'}}
+      }
+    }
+  });
+}
+
+/* Chart 2 — grouped bar: theoretical vs actual Q, all trials */
+function buildFlowChart(){
+  if(charts.f){try{charts.f.destroy();}catch(e){}}
+  charts.f=new Chart(document.getElementById('flowChart').getContext('2d'),{
+    type:'bar',
+    data:{
+      labels:trials.map(t=>`T${t.n}`),
+      datasets:[
+        {label:'Theoretical (Bernoulli)',
+         data:trials.map(t=>isNaN(t.Qth)?0:+(t.Qth*60000).toFixed(2)),
+         backgroundColor:'#A8C8E8',
+         borderColor:C_ST, borderWidth:1.5},
+        {label:'Actual (measured)',
+         data:trials.map(t=>+t.fl.toFixed(2)),
+         backgroundColor:C_ST+'BB',
+         borderColor:'#1A3F6F', borderWidth:1.5}
+      ]
+    },
+    options:{
+      responsive:true,
+      plugins:{
+        legend:{position:'bottom',labels:{boxWidth:12,font:{size:13,family:'Inter'}}},
+        tooltip:{callbacks:{
+          afterBody(items){
+            const t=trials[items[0].dataIndex];
+            return isNaN(t.Cd)?[]:
+              [`Cd = ${t.Cd.toFixed(3)}`,`Loss = ${((1-t.Cd)*100).toFixed(1)}%`];
+          }
+        }}
+      },
+      scales:{
+        y:{beginAtZero:true,
+           title:{display:true,text:'Flow rate (L/min)',font:{size:13,family:'Inter'}},
+           grid:{color:'#e0e6da'}},
+        x:{grid:{color:'#e0e6da'}}
+      }
+    }
+  });
+}
+
+/* ═══ QUIZ ══════════════════════════════════════════════ */
+const CORRECT={1:'B', 2:'B', 3:'B'};
+
+const FB={
+  1:{
+    B:`<strong>✓ Correct.</strong> The static pressure CFD shows that in straight, fully developed sections (where P₁, P₂ and P₃ are tapped), the pressure contours are uniform across the cross-section — wall pressure equals the cross-sectional mean. Viscous losses are concentrated in the boundary layer at the wall, but in these straight regions that layer is thin enough that the core flow — which is what we are approximating — satisfies Bernoulli. Tap locations were <em>designed</em> to exploit this.`,
+    def:`<strong>✗ Incorrect — correct answer: B.</strong> Bernoulli assumes inviscid flow, which is violated everywhere near the walls. However, the three tapping positions are in straight, fully developed sections where pressure is uniform across the cross-section. The viscous boundary layer is thin there, and the wall pressure equals the bulk mean — making Bernoulli a valid approximation between those specific points, even though it fails near the wall elsewhere.`
+  },
+  2:{
+    B:`<strong>✓ Correct.</strong> The velocity field shows the no-slip condition in action: zero velocity at the wall, rising to a maximum on the centreline. This boundary layer region of slow fluid reduces the effective flow area below the geometric 79 mm² of the throat. Because Bernoulli-based theory assumes plug flow (uniform velocity), it predicts a higher Q than is actually achieved. The ratio Q_actual / Q_theoretical = Cd, and the boundary layer is exactly why Cd &lt; 1. Higher Reynolds numbers thin the boundary layer, pushing Cd toward 1 — which is why ISO 5167 specifies Re ranges for Cd corrections.`,
+    def:`<strong>✗ Incorrect — correct answer: B.</strong> Look at the velocity contour across the throat: the centreline is fast, the wall region is slow (boundary layer). This slow fluid reduces the effective area below 79 mm², so the real Q is less than Q = A₂ × v̄ assumes. That is the physical meaning of Cd &lt; 1.`
+  },
+  3:{
+    B:`<strong>✓ Correct.</strong> In the diverging section, the flow decelerates — pressure is rising in the flow direction. This <em>adverse pressure gradient</em> is inherently unstable for the boundary layer. A steeper diffuser angle means a sharper pressure rise, giving the low-momentum boundary layer fluid less time to adjust. If the angle exceeds roughly 7–15°, the boundary layer separates — it reverses direction near the wall and forms a turbulent recirculation zone. Once that happens, total pressure drops sharply and pressure recovery is lost. The venturi's longer diverging section is not about cost or material — it is a precision fluid mechanics decision to prevent exactly this failure.`,
+    def:`<strong>✗ Incorrect — correct answer: B.</strong> In a diverging flow, pressure rises in the flow direction (adverse pressure gradient). The boundary layer is susceptible to separation under these conditions. A shorter, steeper diffuser increases the pressure rise rate — the boundary layer separates, total pressure loss increases dramatically, and the static pressure at P₃ no longer recovers. The design choice to make the diverging section long and gentle is a core fluid mechanics principle for diffuser design, not an arbitrary geometry.`
+  }
+};
+
+function checkQ(qNum,answer){
+  if(answeredQs.has(qNum)) return;
+  answeredQs.add(qNum);
+  saveAnswer(qNum,answer);
+  document.querySelectorAll(`input[name="q${qNum}"]`).forEach(r=>{
+    r.disabled=true; r.closest('.mc-opt').classList.add('locked');
+  });
+  const fb=document.getElementById('fb'+qNum);
+  const ok=answer===CORRECT[qNum];
+  const data=FB[qNum];
+  fb.innerHTML=ok?data.B:(data[answer]||data.def);
+  fb.className='q-feedback '+(ok?'fb-ok':'fb-err')+' show';
+  updateProgress();
+  fb.scrollIntoView({behavior:'smooth',block:'nearest'});
+  if(qNum===3) setTimeout(exportAnswers,1100);
+}
+
+function updateProgress(){
+  const n=answeredQs.size;
+  document.getElementById('qprog-lbl').textContent=`${n} of 3 answered`;
+  document.getElementById('qprog-fill').style.width=`${(n/3)*100}%`;
+}
+
+function saveAnswer(q,a){
+  quizAnswers[q]={a,ts:new Date().toISOString()};
+  try{localStorage.setItem('vm3_q',JSON.stringify(quizAnswers));}catch(e){}
+}
+
+function loadSaved(){
+  try{
+    const s=localStorage.getItem('vm3_q'); if(!s) return;
+    quizAnswers=JSON.parse(s);
+    for(const q in quizAnswers){
+      const n=parseInt(q), ans=quizAnswers[q].a;
+      const r=document.querySelector(`input[name="q${n}"][value="${ans}"]`);
+      if(r) r.checked=true;
+      document.querySelectorAll(`input[name="q${n}"]`).forEach(x=>{
+        x.disabled=true; x.closest('.mc-opt').classList.add('locked');
+      });
+      const fb=document.getElementById('fb'+n);
+      if(fb){
+        const ok=ans===CORRECT[n];
+        fb.innerHTML=ok?FB[n].B:(FB[n][ans]||FB[n].def);
+        fb.className='q-feedback '+(ok?'fb-ok':'fb-err')+' show';
+      }
+      answeredQs.add(n);
+    }
+  }catch(e){}
+}
+
+function exportAnswers(){
+  if(!Object.keys(quizAnswers).length){alert('No answers to export yet.');return;}
+  let latest=null;
+  for(const q in quizAnswers){
+    const t=new Date(quizAnswers[q].ts);
+    if(!latest||t>latest) latest=t;
+  }
+  const hh=latest.getHours().toString().padStart(2,'0');
+  const mm=latest.getMinutes().toString().padStart(2,'0');
+  let csv='Timestamp,Question,Answer\n';
+  for(let i=1;i<=3;i++){
+    csv+=quizAnswers[i]
+      ?`${quizAnswers[i].ts},Q${i},${quizAnswers[i].a}\n`
+      :`Not answered,Q${i},N/A\n`;
+  }
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/plain'}));
+  a.download=`Venturi${hh}${mm}.dat`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
+function clearAnswers(){
+  if(!confirm('Clear all saved answers?')) return;
+  quizAnswers={}; answeredQs.clear();
+  try{localStorage.removeItem('vm3_q');}catch(e){}
+  document.querySelectorAll('input[type=radio]').forEach(r=>{
+    r.checked=false; r.disabled=false; r.closest('.mc-opt').classList.remove('locked');
+  });
+  document.querySelectorAll('.q-feedback').forEach(f=>f.className='q-feedback');
+  updateProgress();
+}
+</script>
+</body>
+</html>
