@@ -5,11 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <title>Orifice Plate Analysis Tool</title>
 
-    <!-- Google Fonts: Inter for UI, Source Serif 4 for body text -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-    <!-- MathJax for proper LaTeX rendering -->
     <script>
         MathJax = {
             tex: { inlineMath: [['\\(','\\)'], ['$','$']], displayMath: [['\\[','\\]'], ['$$','$$']] },
@@ -45,7 +43,6 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
-
         html { font-size: var(--fs-base); }
 
         body {
@@ -56,14 +53,12 @@
             min-height: 100vh;
         }
 
-        /* ── UI elements use Inter ─────────────────────── */
         button, input, select, label, .tab, .q-label, .quiz-section-label,
         .specs-band, th, .trial-header h3, .section-title, .chart-card h3,
         .insight h4, .btn-row, .page-header h1 {
             font-family: 'Inter', system-ui, sans-serif;
         }
 
-        /* ── HEADER ───────────────────────────────────── */
         .page-header {
             background: var(--header-bg);
             color: #eceff1;
@@ -97,14 +92,12 @@
         }
         .specs-band strong { color: #a5d6a7; }
 
-        /* ── CONTAINER ────────────────────────────────── */
         .container {
             max-width: 900px;
             margin: 0 auto;
             padding: 24px 16px 48px;
         }
 
-        /* ── TABS ─────────────────────────────────────── */
         .tabs {
             display: flex;
             gap: 3px;
@@ -138,7 +131,6 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        /* ── SECTION HEADINGS ─────────────────────────── */
         .section-title {
             font-size: var(--fs-lg);
             font-weight: 700;
@@ -153,7 +145,6 @@
             margin-bottom: 22px;
         }
 
-        /* ── THEORY PANEL ─────────────────────────────── */
         .theory-panel {
             background: var(--green-lt);
             border-left: 5px solid var(--green);
@@ -176,7 +167,6 @@
         }
         .theory-panel p:last-child { margin-bottom: 0; }
 
-        /* ── MATH DISPLAY BLOCK ───────────────────────── */
         .math-block {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -199,7 +189,24 @@
             margin-bottom: 4px;
         }
 
-        /* ── DATA ENTRY ───────────────────────────────── */
+        /* Vena contracta diagram */
+        .vc-diagram {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 14px 0;
+            text-align: center;
+        }
+        .vc-diagram svg { max-width: 100%; height: auto; }
+        .vc-caption {
+            font-family: 'Source Serif 4', serif;
+            font-size: var(--fs-sm);
+            color: var(--text-dim);
+            margin-top: 8px;
+            font-style: italic;
+        }
+
         .data-entry {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -267,7 +274,6 @@
         }
         input[type="number"]:focus { outline: none; border-color: var(--green); box-shadow: 0 0 0 3px rgba(46,125,50,0.15); }
 
-        /* ── BUTTONS ──────────────────────────────────── */
         .btn-row {
             display: flex;
             gap: 12px;
@@ -295,10 +301,7 @@
         .btn-secondary:active { border-color: var(--green); color: var(--green); }
         .btn-primary  { background: var(--green);   color: #fff; }
         .btn-primary:active  { background: #1b5e20; }
-        .btn-export   { background: #37474f; color: #fff; }
-        .btn-export:active { background: #263238; }
 
-        /* ── CHART CARDS ──────────────────────────────── */
         .chart-card {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -323,7 +326,6 @@
         }
         canvas { max-width: 100%; touch-action: none; }
 
-        /* ── TABLE ────────────────────────────────────── */
         .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
         table {
             width: 100%;
@@ -351,7 +353,6 @@
         }
         tr:nth-child(even) td { background: var(--surface2); }
 
-        /* ── INSIGHT BOXES ────────────────────────────── */
         .insight {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -373,7 +374,6 @@
             margin-top: 6px;
         }
 
-        /* ── QUIZ ─────────────────────────────────────── */
         .quiz-section-label {
             font-family: 'Inter', sans-serif;
             font-size: var(--fs-xs);
@@ -425,7 +425,6 @@
             margin-bottom: 12px;
         }
 
-        /* ── OPTIONS ──────────────────────────────────── */
         .options { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
         .option-label {
             display: flex;
@@ -452,7 +451,6 @@
             flex-shrink: 0;
         }
 
-        /* ── FEEDBACK ─────────────────────────────────── */
         .feedback {
             display: none;
             margin-top: 14px;
@@ -465,7 +463,6 @@
         .feedback.correct { background: #e8f5e9; border-left: 5px solid #2e7d32; color: #1b4020; }
         .feedback.wrong   { background: #fdecea; border-left: 5px solid #b71c1c; color: #5c0a0a; }
 
-        /* ── OPEN QUESTIONS ───────────────────────────── */
         .open-card {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -497,62 +494,14 @@
             line-height: var(--lh);
             margin-bottom: 12px;
         }
-        textarea.open-ans {
-            width: 100%;
-            padding: 13px 14px;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            background: var(--surface2);
-            font-family: 'Source Serif 4', serif;
-            font-size: var(--fs-base);
-            color: var(--text);
-            min-height: 110px;
-            resize: vertical;
-            line-height: var(--lh);
-        }
-        textarea.open-ans:focus { outline: none; border-color: var(--green); box-shadow: 0 0 0 3px rgba(46,125,50,0.15); }
 
-        .reveal-btn {
-            margin-top: 12px;
-            padding: 11px 20px;
-            background: transparent;
-            border: 1px solid var(--green);
-            border-radius: 5px;
-            color: var(--green);
-            font-family: 'Inter', sans-serif;
-            font-size: var(--fs-sm);
-            font-weight: 600;
-            cursor: pointer;
-            min-height: 44px;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .reveal-btn:active { background: var(--green-lt); }
-
-        .hint-box {
-            display: none;
-            margin-top: 14px;
-            background: var(--green-lt);
-            border-left: 5px solid var(--green);
-            border-radius: 6px;
-            padding: 14px 16px;
-            font-family: 'Source Serif 4', serif;
-            font-size: var(--fs-base);
-            color: #1b4020;
-            line-height: var(--lh);
-        }
-        .hint-box strong { font-family: 'Inter', sans-serif; }
-
-        /* ── HOVER for desktop ────────────────────────── */
         @media (hover: hover) {
             .btn-secondary:hover { border-color: var(--green); color: var(--green); }
             .btn-primary:hover   { background: #1b5e20; }
-            .btn-export:hover    { background: #263238; }
             .option-label:hover  { border-color: var(--green); background: var(--green-lt); }
-            .reveal-btn:hover    { background: var(--green-lt); }
             .delete-btn:hover    { background: #fdecea; }
         }
 
-        /* ── RESPONSIVE ───────────────────────────────── */
         @media (max-width: 480px) {
             :root { --fs-base: 16px; --fs-sm: 14px; --fs-lg: 18px; }
             .container { padding: 16px 12px 48px; }
@@ -563,7 +512,6 @@
 </head>
 <body>
 
-<!-- ── PAGE HEADER ─────────────────────────────── -->
 <div class="page-header">
     <h1>⬤ Orifice Plate Flow Analysis</h1>
     <p class="subtitle">Bernoulli's Principle &amp; Coefficient of Discharge</p>
@@ -576,7 +524,6 @@
     <span><strong>Q</strong> L/min &nbsp;|&nbsp; Water 20 °C &nbsp;|&nbsp; ρ = 1000 kg/m³</span>
 </div>
 
-<!-- ── MAIN ───────────────────────────────────── -->
 <div class="container">
 
     <div class="tabs">
@@ -595,7 +542,6 @@
             rotameter. Aim for 4–6 evenly spread flow rates across the available range.
         </p>
 
-        <!-- Theory at point of need: before students enter a single number -->
         <div class="theory-panel">
             <h3>What are you measuring — and why?</h3>
             <p>
@@ -621,8 +567,9 @@
                 Your rotameter gives \(Q_\text{actual}\). Recording both across several flow rates
                 lets you determine the <strong>coefficient of discharge</strong>
                 \(C_d = Q_\text{actual}/Q_\text{ideal}\) — a measure of how much energy is lost
-                to the sharp edge and turbulent re-expansion. The quiz will ask you to explain why
-                \(C_d < 1\) and why this matters.
+                at the sharp orifice edge and in the turbulent flow downstream of it.
+                For a sharp-edged orifice plate, you can expect \(C_d \approx 0.60\text{–}0.67\).
+                The quiz will ask you to explain why \(C_d < 1\) and why this matters.
             </p>
         </div>
 
@@ -648,7 +595,7 @@
                 \(\Delta P = \tfrac{1}{2}\rho(V_2^2 - V_1^2)\).
                 This chart compares the two for a selected trial.
                 The shortfall — \(\Delta P\) exceeding the kinetic energy gain — is the energy
-                lost to the vena contracta and turbulent mixing at the orifice edge.
+                lost to turbulent mixing just downstream of the orifice edge.
                 The permanent (irrecoverable) pressure loss is estimated as
                 \(h_L = \Delta P\,(1 - C_d^2)\).
             </p>
@@ -730,10 +677,10 @@
             </div>
             <p class="q-text">Which statement best describes the key assumptions behind this formula?</p>
             <div class="options">
-                <label class="option-label"><input type="radio" name="q1" value="A" onchange="checkMC(1,'A')"> A) The fluid is compressible and \(Q_\text{ideal}\) accounts for heat losses at the orifice edge.</label>
-                <label class="option-label"><input type="radio" name="q1" value="B" onchange="checkMC(1,'B')"> B) The fluid is ideal (inviscid, incompressible, steady). All the measured \(\Delta P\) accelerates the fluid — no energy is lost to friction or turbulence.</label>
+                <label class="option-label"><input type="radio" name="q1" value="A" onchange="checkMC(1,'A')"> A) The fluid is ideal (inviscid, incompressible, steady). All the measured ΔP accelerates the fluid — no energy is lost to friction or turbulence.</label>
+                <label class="option-label"><input type="radio" name="q1" value="B" onchange="checkMC(1,'B')"> B) The fluid is compressible and Q_ideal accounts for heat losses at the orifice edge.</label>
                 <label class="option-label"><input type="radio" name="q1" value="C" onchange="checkMC(1,'C')"> C) The formula only applies to slow laminar flow where viscosity dominates.</label>
-                <label class="option-label"><input type="radio" name="q1" value="D" onchange="checkMC(1,'D')"> D) \(Q_\text{ideal}\) equals the actual flow rate when \(C_d = 0\).</label>
+                <label class="option-label"><input type="radio" name="q1" value="D" onchange="checkMC(1,'D')"> D) Q_ideal equals the actual flow rate when Cd = 0.</label>
             </div>
             <div id="feedback1" class="feedback"></div>
         </div>
@@ -751,45 +698,98 @@
             </div>
             <p class="q-text">Without calculating, which statement correctly follows?</p>
             <div class="options">
-                <label class="option-label"><input type="radio" name="q2" value="A" onchange="checkMC(2,'A')"> A) The fluid slows down at the orifice because \(\Delta P\) consumes kinetic energy.</label>
-                <label class="option-label"><input type="radio" name="q2" value="B" onchange="checkMC(2,'B')"> B) \(V_2 \approx 2.78\,V_1\): the fluid must speed up at the orifice to keep \(Q\) constant (continuity equation).</label>
-                <label class="option-label"><input type="radio" name="q2" value="C" onchange="checkMC(2,'C')"> C) \(V_1 = V_2\) because \(Q\) is the same at both cross-sections.</label>
-                <label class="option-label"><input type="radio" name="q2" value="D" onchange="checkMC(2,'D')"> D) \(V_2\) depends only on \(\Delta P\), not on area.</label>
+                <label class="option-label"><input type="radio" name="q2" value="A" onchange="checkMC(2,'A')"> A) The fluid slows down at the orifice because ΔP consumes kinetic energy.</label>
+                <label class="option-label"><input type="radio" name="q2" value="B" onchange="checkMC(2,'B')"> B) V₁ = V₂ because Q is the same at both cross-sections.</label>
+                <label class="option-label"><input type="radio" name="q2" value="C" onchange="checkMC(2,'C')"> C) V₂ ≈ 2.78 × V₁: the fluid must speed up at the orifice to keep Q constant (continuity equation).</label>
+                <label class="option-label"><input type="radio" name="q2" value="D" onchange="checkMC(2,'D')"> D) V₂ depends only on ΔP, not on area.</label>
             </div>
             <div id="feedback2" class="feedback"></div>
         </div>
 
-        <!-- Q3 -->
+        <!-- Q3 — Rewritten with plain-language explanation of jet contraction -->
         <div class="question-card">
             <div class="q-label">Question 3 — Defining C<sub>d</sub></div>
             <h4>What does \(C_d = Q_\text{actual} / Q_\text{ideal}\) mean physically, and why is it always less than 1?</h4>
             <div class="math-block tight">
                 \[C_d = \frac{Q_\text{actual}}{Q_\text{ideal}} \qquad \text{where } Q_\text{actual} \text{ is measured by the rotameter}\]
             </div>
-            <p class="q-text">Which of the following best explains why \(C_d < 1\) for a real orifice plate?</p>
+            <p class="q-text">
+                For a sharp-edged orifice plate, \(C_d\) is typically around <strong>0.61–0.67</strong>.
+                Which of the following best explains why \(C_d &lt; 1\) for a real orifice plate?
+            </p>
             <div class="options">
-                <label class="option-label"><input type="radio" name="q3" value="A" onchange="checkMC(3,'A')"> A) The manometer over-reads \(\Delta P\), making \(Q_\text{ideal}\) artificially large.</label>
-                <label class="option-label"><input type="radio" name="q3" value="B" onchange="checkMC(3,'B')"> B) Real flow separates at the sharp orifice edge, forming a <em>vena contracta</em>. Turbulent mixing in the re-expansion zone dissipates energy that Bernoulli's ideal equation ignores.</label>
+                <label class="option-label"><input type="radio" name="q3" value="A" onchange="checkMC(3,'A')"> A) The manometer over-reads ΔP, making Q_ideal artificially large.</label>
+                <label class="option-label"><input type="radio" name="q3" value="B" onchange="checkMC(3,'B')"> B) Cd is less than 1 because D₂ is greater than D₁.</label>
                 <label class="option-label"><input type="radio" name="q3" value="C" onchange="checkMC(3,'C')"> C) The rotameter consistently under-reads the true flow rate.</label>
-                <label class="option-label"><input type="radio" name="q3" value="D" onchange="checkMC(3,'D')"> D) \(C_d < 1\) because \(D_2 > D_1\).</label>
+                <label class="option-label"><input type="radio" name="q3" value="D" onchange="checkMC(3,'D')"> D) The flow cannot turn the sharp corner at the orifice edge, so the jet separates from the wall and narrows to a cross-section smaller than the hole. Downstream, the jet re-expands chaotically, converting mechanical energy to heat — losses that Bernoulli's ideal equation ignores.</label>
             </div>
             <div id="feedback3" class="feedback"></div>
         </div>
 
-        <!-- Q4 -->
+        <!-- Q4 — Rewritten: clearer comparison, corrected Cd range -->
         <div class="question-card">
             <div class="q-label">Question 4 — Orifice plate vs venturi: why is C<sub>d</sub> lower?</div>
-            <h4>How does \(C_d\) for the orifice plate compare with the venturi meter, and why?</h4>
+            <h4>How does \(C_d\) for the orifice plate compare with a venturi meter, and why?</h4>
             <p class="q-text">
-                Typical values: &nbsp;<strong>Venturi</strong> \(C_d \approx 0.95\text{–}0.99\) &nbsp;|&nbsp;
-                <strong>Orifice plate</strong> \(C_d \approx 0.60\text{–}0.80\)
+                Typical values: &nbsp;<strong>Venturi</strong> \(C_d \approx 0.95\text{–}0.99\)
+                &nbsp;|&nbsp;
+                <strong>Sharp-edged orifice plate</strong> \(C_d \approx 0.61\text{–}0.67\)
             </p>
-            <p class="q-text">Which explanation best accounts for this difference?</p>
+            <p class="q-text">
+                The diagram below shows what happens at the orifice edge. Because water cannot turn
+                a sharp right-angle corner, the jet continues to contract <em>past</em> the orifice,
+                reaching its narrowest point (the <em>contracted jet</em>, historically called the
+                <em>vena contracta</em> — Latin for "contracted vein") a short distance downstream.
+                The actual flow area at this minimum is smaller than the orifice area \(A_2\),
+                which is why \(Q_\text{ideal}\) — which assumes full use of \(A_2\) — overpredicts the flow.
+            </p>
+            <!-- Inline SVG diagram of jet contraction -->
+            <div class="vc-diagram">
+                <svg viewBox="0 0 520 180" xmlns="http://www.w3.org/2000/svg" font-family="Inter,sans-serif" font-size="12">
+                    <!-- Pipe walls -->
+                    <rect x="10" y="10"  width="200" height="30" fill="#b0bec5" rx="2"/>
+                    <rect x="10" y="140" width="200" height="30" fill="#b0bec5" rx="2"/>
+                    <!-- Orifice plate -->
+                    <rect x="210" y="10"  width="16" height="56" fill="#455a64"/>
+                    <rect x="210" y="114" width="16" height="56" fill="#455a64"/>
+                    <!-- Downstream pipe walls (partial, opening wider) -->
+                    <rect x="226" y="10"  width="280" height="30" fill="#b0bec5" rx="2"/>
+                    <rect x="226" y="140" width="280" height="30" fill="#b0bec5" rx="2"/>
+                    <!-- Flow arrows upstream -->
+                    <line x1="30" y1="90" x2="190" y2="90" stroke="#1a4e8c" stroke-width="2" marker-end="url(#arr)"/>
+                    <!-- Contracted jet streamlines -->
+                    <path d="M226,66 Q270,66 290,80 Q310,90 350,90" fill="none" stroke="#2e7d32" stroke-width="2.5" stroke-dasharray="none"/>
+                    <path d="M226,114 Q270,114 290,100 Q310,90 350,90" fill="none" stroke="#2e7d32" stroke-width="2.5"/>
+                    <!-- Re-expansion streamlines -->
+                    <path d="M350,80 Q410,68 480,40" fill="none" stroke="#2e7d32" stroke-width="1.5" stroke-dasharray="5,3" opacity="0.7"/>
+                    <path d="M350,100 Q410,112 480,140" fill="none" stroke="#2e7d32" stroke-width="1.5" stroke-dasharray="5,3" opacity="0.7"/>
+                    <!-- Turbulent zone indicator -->
+                    <ellipse cx="420" cy="90" rx="55" ry="38" fill="#ffecb3" fill-opacity="0.5" stroke="#f9a825" stroke-width="1.5" stroke-dasharray="5,3"/>
+                    <text x="420" y="86" text-anchor="middle" fill="#bf360c" font-size="11" font-weight="600">Turbulent</text>
+                    <text x="420" y="99" text-anchor="middle" fill="#bf360c" font-size="11" font-weight="600">re-expansion</text>
+                    <!-- Vena contracta marker -->
+                    <line x1="350" y1="70" x2="350" y2="110" stroke="#2e7d32" stroke-width="2"/>
+                    <line x1="340" y1="80" x2="340" y2="100" stroke="#1b5e20" stroke-width="1" stroke-dasharray="3,2"/>
+                    <text x="350" y="58" text-anchor="middle" fill="#1b5e20" font-size="11" font-weight="700">Contracted jet</text>
+                    <text x="350" y="70" text-anchor="middle" fill="#1b5e20" font-size="10">(minimum area)</text>
+                    <!-- Labels -->
+                    <text x="100" y="95" text-anchor="middle" fill="#1a4e8c" font-weight="700">Upstream</text>
+                    <text x="218" y="95" text-anchor="middle" fill="#fff" font-weight="700" font-size="10">Plate</text>
+                    <!-- Arrow marker -->
+                    <defs>
+                        <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                            <path d="M0,0 L0,6 L8,3 z" fill="#1a4e8c"/>
+                        </marker>
+                    </defs>
+                </svg>
+                <p class="vc-caption">The jet narrows past the hole to a minimum cross-section (the contracted jet), then re-expands turbulently — permanently wasting energy as heat.</p>
+            </div>
+            <p class="q-text">Which explanation best accounts for the difference in Cd between the orifice plate and venturi?</p>
             <div class="options">
                 <label class="option-label"><input type="radio" name="q4" value="A" onchange="checkMC(4,'A')"> A) The orifice plate has a smaller throat so it is physically impossible to pass the same flow rate.</label>
-                <label class="option-label"><input type="radio" name="q4" value="B" onchange="checkMC(4,'B')"> B) The orifice plate's sharp edge causes flow separation and a vena contracta (effective flow area \({<}\,A_2\)) plus turbulent re-expansion losses. The venturi's smooth, gradual profile minimises separation and allows much better pressure recovery after the throat.</label>
-                <label class="option-label"><input type="radio" name="q4" value="C" onchange="checkMC(4,'C')"> C) The venturi measures \(\Delta P\) at the wrong position, making its \(C_d\) artificially high.</label>
-                <label class="option-label"><input type="radio" name="q4" value="D" onchange="checkMC(4,'D')"> D) The orifice plate always requires a higher Reynolds number, so low flows give an artificially low \(C_d\).</label>
+                <label class="option-label"><input type="radio" name="q4" value="B" onchange="checkMC(4,'B')"> B) The venturi measures ΔP at the wrong position, making its Cd artificially high.</label>
+                <label class="option-label"><input type="radio" name="q4" value="C" onchange="checkMC(4,'C')"> C) The sharp orifice edge forces the jet to contract (to a cross-section smaller than the orifice hole) and then re-expand chaotically downstream, wasting energy. The venturi's smooth, tapered profile prevents this — the flow stays attached to the walls, much less energy is lost, and Cd stays close to 1.</label>
+                <label class="option-label"><input type="radio" name="q4" value="D" onchange="checkMC(4,'D')"> D) The orifice plate always requires a higher Reynolds number, so low flows give an artificially low Cd.</label>
             </div>
             <div id="feedback4" class="feedback"></div>
         </div>
@@ -797,18 +797,18 @@
         <!-- Q5 -->
         <div class="question-card">
             <div class="q-label">Question 5 — Practical advantages of the orifice plate</div>
-            <h4>Despite its lower \(C_d\) and higher permanent pressure loss, why is the orifice plate widely used in industry?</h4>
+            <h4>Despite its lower Cd and higher permanent pressure loss, why is the orifice plate widely used in industry?</h4>
             <div class="options">
-                <label class="option-label"><input type="radio" name="q5" value="A" onchange="checkMC(5,'A')"> A) It is preferred because it has a higher \(C_d\) and therefore wastes less energy than the venturi.</label>
-                <label class="option-label"><input type="radio" name="q5" value="B" onchange="checkMC(5,'B')"> B) It is extremely simple to manufacture, cheap to install between existing pipe flanges, and easy to replace or inspect — making it cost-effective even though it produces more permanent pressure loss than a venturi.</label>
+                <label class="option-label"><input type="radio" name="q5" value="A" onchange="checkMC(5,'A')"> A) It is extremely simple to manufacture, cheap to install between existing pipe flanges, and easy to replace or inspect — making it cost-effective even though it produces more permanent pressure loss than a venturi.</label>
+                <label class="option-label"><input type="radio" name="q5" value="B" onchange="checkMC(5,'B')"> B) It is preferred because it has a higher Cd and therefore wastes less energy than the venturi.</label>
                 <label class="option-label"><input type="radio" name="q5" value="C" onchange="checkMC(5,'C')"> C) It is more accurate than any other flow device at all flow rates.</label>
-                <label class="option-label"><input type="radio" name="q5" value="D" onchange="checkMC(5,'D')"> D) Orifice plates never need calibration and \(C_d = 1.0\) under standard conditions.</label>
+                <label class="option-label"><input type="radio" name="q5" value="D" onchange="checkMC(5,'D')"> D) Orifice plates never need calibration and Cd = 1.0 under standard conditions.</label>
             </div>
             <div id="feedback5" class="feedback"></div>
         </div>
 
-        <!-- Open Q6 -->
-        <div class="quiz-section-label" style="margin-top:32px;">Open Questions — write 3–4 sentences, then reveal key points</div>
+        <!-- Open questions -->
+        <div class="quiz-section-label" style="margin-top:32px;">Discuss with your colleagues</div>
 
         <div class="open-card">
             <div class="q-label" style="color:var(--text-mute);">Question 6 — Reflection</div>
@@ -819,16 +819,6 @@
                 <strong>How does \(C_d\) for the orifice plate compare with the venturi?
                 Why is it typically lower? What does this tell you about energy losses in the two devices?</strong>
             </p>
-            <textarea class="open-ans" id="q6-text" placeholder="Write your answer here…"></textarea>
-            <br>
-            <button class="reveal-btn" onclick="toggleHint('hint6')">Show key points ›</button>
-            <div id="hint6" class="hint-box">
-                <strong>Key points to include:</strong><br><br>
-                • Orifice plate \(C_d \approx 0.60\text{–}0.80\) vs venturi \(C_d \approx 0.95\text{–}0.99\). For the same measured \(\Delta P\), the orifice plate delivers less actual flow than Bernoulli predicts.<br><br>
-                • The lower \(C_d\) reflects larger energy losses: the sharp edge causes flow separation, a <em>vena contracta</em> (jet narrower than \(A_2\)), and turbulent mixing downstream.<br><br>
-                • The venturi's smooth converging–diverging profile prevents separation and allows pressure to largely recover after the throat — far less energy is permanently lost to turbulence.<br><br>
-                • A lower \(C_d\) means more permanent pressure loss for the same flow rate, which means higher pumping costs in a real system.
-            </div>
         </div>
 
         <div class="open-card">
@@ -840,29 +830,14 @@
                 <br><br>
                 Think about cost, installation, maintenance, and flexibility.
             </p>
-            <textarea class="open-ans" id="q7-text" placeholder="Write your answer here…"></textarea>
-            <br>
-            <button class="reveal-btn" onclick="toggleHint('hint7')">Show key points ›</button>
-            <div id="hint7" class="hint-box">
-                <strong>Key points to include:</strong><br><br>
-                • <strong>Cost &amp; simplicity:</strong> An orifice plate is a machined disc — a fraction of the cost of a venturi's precision-cast body.<br><br>
-                • <strong>Installation:</strong> It fits between standard pipe flanges with no special pipework, installed or swapped without cutting the pipe.<br><br>
-                • <strong>Maintenance:</strong> The plate can be removed, inspected, or replaced with a different orifice size in minutes — very useful when process conditions change.<br><br>
-                • <strong>Proven standard:</strong> ISO 5167 provides well-established \(C_d\) data so accurate measurement is achievable without individual calibration.<br><br>
-                • <strong>Accepted trade-off:</strong> In many processes the higher permanent pressure loss is outweighed by capital and installation savings vs a venturi.
-            </div>
         </div>
 
-        <div class="btn-row" style="margin-top:28px;">
-            <button class="btn btn-export" onclick="exportAnswers()">⬇ Export Answers (.dat)</button>
-        </div>
-    </div>
+    </div><!-- /quiz -->
 
 </div><!-- container -->
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 <script>
-    // ── Constants ──────────────────────────────────────
     const D1 = 0.020, D2 = 0.012;
     const A1 = Math.PI * Math.pow(D1/2, 2);
     const A2 = Math.PI * Math.pow(D2/2, 2);
@@ -874,17 +849,14 @@
 
     window.onload = () => { addTrial(); addTrial(); addTrial(); };
 
-    // ── Tabs ───────────────────────────────────────────
     function showTab(name, ev) {
         document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         document.getElementById(name).classList.add('active');
         if (ev && ev.target) ev.target.classList.add('active');
-        // Re-render MathJax for the newly shown tab
         if (window.MathJax) MathJax.typesetPromise();
     }
 
-    // ── Trials ─────────────────────────────────────────
     function addTrial() {
         trialCount++;
         const d = document.createElement('div');
@@ -908,7 +880,6 @@
     }
     function deleteTrial(id) { document.getElementById(`trial-${id}`).remove(); }
 
-    // ── Analyse ────────────────────────────────────────
     function analyzeData() {
         trials = [];
         for (let i = 1; i <= trialCount; i++) {
@@ -926,16 +897,11 @@
             const V2      = Q_act / A2;
             const Re      = (rho * V2 * D2) / mu;
 
-            // Dynamic pressures — directly calculable from Q and areas
-            const dyn1 = 0.5 * rho * V1 * V1;   // ½ρV₁²
-            const dyn2 = 0.5 * rho * V2 * V2;   // ½ρV₂²
-            const dynDiff = dyn2 - dyn1;          // ½ρ(V₂²−V₁²) — Bernoulli predicts this = ΔP
-
-            // Energy loss: measured ΔP that was NOT converted to kinetic energy
-            // In ideal flow ΔP = dynDiff. Real loss = ΔP − dynDiff (via Bernoulli deficit)
-            // Alternatively: permanent pressure loss h_L = ΔP·(1 − Cd²) [standard orifice result]
-            const permLoss   = dp_Pa * (1 - Cd * Cd);   // permanent/irrecoverable pressure loss (Pa)
-            const bernIdeal  = dynDiff;                   // ideal KE gain predicted by Bernoulli
+            const dyn1 = 0.5 * rho * V1 * V1;
+            const dyn2 = 0.5 * rho * V2 * V2;
+            const dynDiff = dyn2 - dyn1;
+            const permLoss   = dp_Pa * (1 - Cd * Cd);
+            const bernIdeal  = dynDiff;
 
             trials.push({ trial: i, dp_mm, flow_lpm, Q_act, Q_ideal, Cd, V1, V2, Re,
                           dp_Pa, dyn1, dyn2, dynDiff, permLoss, bernIdeal });
@@ -953,7 +919,6 @@
         if (window.MathJax) MathJax.typesetPromise();
     }
 
-    // ── Summary table ──────────────────────────────────
     function buildTable() {
         let html = `<h3 style="margin-bottom:14px; font-family:'Inter',sans-serif; font-size:1rem; color:#263238;">Summary of Calculations</h3>
         <div class="table-scroll"><table><thead><tr>
@@ -974,7 +939,6 @@
         document.getElementById('summary-table-wrap').innerHTML = html;
     }
 
-    // ── Chart 1a: Bernoulli energy budget, per trial ──────
     function buildPressureSelector() {
         const sel = document.getElementById('trialSelector');
         sel.innerHTML = '';
@@ -989,9 +953,7 @@
     function updateEnergyBudget() {
         if (charts.energyBudget) charts.energyBudget.destroy();
         const t = trials[parseInt(document.getElementById('trialSelector').value)];
-        const lo = { position: 'top', labels: { font: { family: 'Inter', size: 13 } } };
 
-        // Three bars: measured ΔP, kinetic energy gain ½ρ(V₂²−V₁²), permanent loss h_L
         const labels = ['Measured ΔP', 'KE gain ½ρ(V₂²−V₁²)', 'Permanent loss hL'];
         const values = [t.dp_Pa, t.dynDiff, t.permLoss];
         const colors = ['#1a4e8c', '#2e7d32', '#bf360c'];
@@ -1044,15 +1006,12 @@
         });
     }
 
-    // ── Chart 1b: permanent loss bar chart — all trials ──
     function buildPermLossChart() {
         if (charts.permLoss) charts.permLoss.destroy();
         const sorted = [...trials].sort((a,b) => a.flow_lpm - b.flow_lpm);
-        const lo = { position: 'top', labels: { font: { family: 'Inter', size: 13 } } };
 
-        // Colour bars by fraction of ΔP that is lost: darker = worse
         const barColors = sorted.map(t => {
-            const frac = t.permLoss / t.dp_Pa;   // 0 → 1
+            const frac = t.permLoss / t.dp_Pa;
             const r = Math.round(60  + frac * 160);
             const g = Math.round(120 - frac * 80);
             const b = Math.round(40);
@@ -1093,7 +1052,7 @@
             options: {
                 responsive: true,
                 plugins: {
-                    legend: lo,
+                    legend: { position: 'top', labels: { font: { family: 'Inter', size: 13 } } },
                     tooltip: {
                         callbacks: {
                             label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)} Pa`,
@@ -1121,7 +1080,6 @@
         });
     }
 
-    // ── Other charts ───────────────────────────────────
     function buildCharts() {
         ['cdChart','dpChart','cdFlowChart'].forEach(id => { if (charts[id]) charts[id].destroy(); });
         buildPressureSelector();
@@ -1173,7 +1131,6 @@
         });
     }
 
-    // ── Insights ───────────────────────────────────────
     function buildInsights() {
         const avgCd = trials.reduce((s,t) => s+t.Cd, 0) / trials.length;
         const minCd = Math.min(...trials.map(t => t.Cd));
@@ -1191,17 +1148,16 @@
                 Velocity ratio \\(V_2/V_1\\) = <strong>${(avgV2/avgV1).toFixed(2)}</strong>
                 &nbsp;(theoretical \\(A_1/A_2 = ${(A1/A2).toFixed(2)}\\))
             </p>
+            <p>
+                For a sharp-edged orifice plate the expected range is \\(C_d \\approx 0.61\\text{–}0.67\\).
+                Values outside this range may indicate a leak, a partially blocked orifice, or a
+                calibration offset in the rotameter or manometer.
+            </p>
         </div>`;
         if (window.MathJax) MathJax.typesetPromise();
     }
 
-    // ── Quiz ───────────────────────────────────────────
-    function toggleHint(id) {
-        const el = document.getElementById(id);
-        el.style.display = el.style.display === 'block' ? 'none' : 'block';
-        if (window.MathJax) MathJax.typesetPromise();
-    }
-
+    // ── Quiz MC ────────────────────────────────────────
     function checkMC(qNum, answer) {
         if (answeredMC.has(qNum)) return;
         answeredMC.add(qNum); mcAnswers[qNum] = answer;
@@ -1212,22 +1168,22 @@
             r.parentElement.style.cursor  = 'default';
         });
 
-        const correct = { 1:'B', 2:'B', 3:'B', 4:'B', 5:'B' };
+        const correct = { 1:'A', 2:'C', 3:'D', 4:'C', 5:'A' };
         const isRight = answer === correct[qNum];
 
         const ct = {
             1: `✓ Correct! \\(Q_\\text{ideal}\\) is derived from Bernoulli's equation (energy conservation) combined with the continuity equation \\(Q = AV\\). It assumes the fluid is ideal — incompressible, inviscid, and in steady flow — so all of the measured \\(\\Delta P\\) goes into accelerating the fluid with zero losses. Real flow always has viscous losses, which is why \\(Q_\\text{actual} < Q_\\text{ideal}\\) and \\(C_d < 1\\).`,
             2: `✓ Correct! Continuity (\\(Q = AV\\)) means that when \\(A\\) decreases, \\(V\\) must increase to keep \\(Q\\) constant. So \\(V_2 = V_1 \\times (A_1/A_2) \\approx 2.78\\,V_1\\). This acceleration of the fluid at the orifice is precisely what Bernoulli converts into the pressure drop you measure.`,
-            3: `✓ Correct! At the sharp orifice edge the flow cannot follow the abrupt direction change — it separates and contracts to a minimum jet area (<em>vena contracta</em>) smaller than \\(A_2\\). Beyond it, the flow re-expands turbulently, permanently converting mechanical energy to heat. Bernoulli's ideal equation ignores all of this, so \\(Q_\\text{ideal}\\) overpredicts and \\(C_d < 1\\).`,
-            4: `✓ Correct! The geometry is the key difference. The venturi's smooth, gradual convergence and gentle divergence prevent flow separation and allow excellent pressure recovery after the throat (\\(C_d \\approx 0.95\\text{–}0.99\\)). The orifice plate's sharp edge causes immediate separation, a vena contracta, and turbulent re-expansion — large irreversible losses giving \\(C_d \\approx 0.60\\text{–}0.80\\).`,
+            3: `✓ Correct! At the sharp orifice edge the flow cannot follow the abrupt direction change — it separates from the wall and the jet continues to contract past the orifice hole to a narrower cross-section than \\(A_2\\). Beyond this point the jet re-expands chaotically, permanently converting mechanical energy to heat. Bernoulli's ideal equation ignores all of this, so \\(Q_\\text{ideal}\\) overpredicts and \\(C_d < 1\\). For a standard sharp-edged orifice, \\(C_d\\) is typically 0.61–0.67.`,
+            4: `✓ Correct! The geometry is the key difference. The venturi's smooth, gradual convergence and gentle divergence prevent the flow from detaching from the wall, so the jet fills the full throat area and pressure is largely recovered after the throat (\\(C_d \\approx 0.95\\text{–}0.99\\)). The orifice plate's sharp edge forces immediate jet contraction and turbulent re-expansion — large irreversible losses giving \\(C_d \\approx 0.61\\text{–}0.67\\).`,
             5: `✓ Correct! The orifice plate is just a flat machined disc: it costs a fraction of a venturi, fits between standard pipe flanges without special pipework, and can be removed and swapped in minutes. ISO 5167 provides reliable \\(C_d\\) data without individual calibration. Where the higher permanent pressure loss is acceptable, the orifice plate is the obvious engineering choice.`
         };
         const wt = {
-            1: `✗ Not quite — the correct answer is <strong>B</strong>. \\(Q_\\text{ideal}\\) assumes an ideal, incompressible, inviscid, steady fluid. The entire \\(\\Delta P\\) accelerates the flow with zero losses. Real fluids have viscosity, hence the need for \\(C_d\\).`,
-            2: `✗ Not quite — the correct answer is <strong>B</strong>. Continuity (\\(Q = AV\\)) shows that when \\(A\\) decreases, \\(V\\) must increase: \\(V_2 \\approx 2.78\\,V_1\\). The fluid speeds up — it does not slow down — at the orifice.`,
-            3: `✗ Not quite — the correct answer is <strong>B</strong>. \\(C_d < 1\\) because the sharp edge causes flow separation, a vena contracta (jet area \\({<}\\,A_2\\)), then turbulent re-expansion. This permanently converts mechanical energy to heat — losses Bernoulli does not model.`,
-            4: `✗ Not quite — the correct answer is <strong>B</strong>. The venturi's smooth profile prevents separation and gives good pressure recovery (\\(C_d \\approx 0.95\\text{–}0.99\\)). The orifice plate's sharp edge creates a vena contracta and turbulent losses, giving a much lower \\(C_d\\).`,
-            5: `✗ Not quite — the correct answer is <strong>B</strong>. Despite higher energy losses, the orifice plate dominates because it is cheap, simple, and fits between standard flanges. The capital and maintenance savings typically outweigh the higher pumping cost.`
+            1: `✗ Not quite — the correct answer is <strong>A</strong>. \\(Q_\\text{ideal}\\) assumes an ideal, incompressible, inviscid, steady fluid. The entire \\(\\Delta P\\) accelerates the flow with zero losses. Real fluids have viscosity, hence the need for \\(C_d\\).`,
+            2: `✗ Not quite — the correct answer is <strong>C</strong>. Continuity (\\(Q = AV\\)) shows that when \\(A\\) decreases, \\(V\\) must increase: \\(V_2 \\approx 2.78\\,V_1\\). The fluid speeds up — it does not slow down — at the orifice.`,
+            3: `✗ Not quite — the correct answer is <strong>D</strong>. \\(C_d < 1\\) because the sharp edge causes the jet to separate from the wall and contract to a minimum cross-section smaller than \\(A_2\\), then re-expand turbulently. This permanently converts mechanical energy to heat — losses Bernoulli does not model. Typical values are \\(C_d \\approx 0.61\\text{–}0.67\\).`,
+            4: `✗ Not quite — the correct answer is <strong>C</strong>. The venturi's smooth profile keeps the flow attached to the walls all the way through, giving good pressure recovery (\\(C_d \\approx 0.95\\text{–}0.99\\)). The orifice plate's sharp edge causes jet contraction and turbulent losses, giving a much lower \\(C_d \\approx 0.61\\text{–}0.67\\).`,
+            5: `✗ Not quite — the correct answer is <strong>A</strong>. Despite higher energy losses, the orifice plate dominates in industry because it is cheap, simple, and fits between standard flanges. The capital and maintenance savings typically outweigh the higher pumping cost.`
         };
 
         const el = document.getElementById(`feedback${qNum}`);
@@ -1236,23 +1192,6 @@
         el.style.display = 'block';
         el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         if (window.MathJax) MathJax.typesetPromise();
-    }
-
-    // ── Export ─────────────────────────────────────────
-    function exportAnswers() {
-        const now  = new Date();
-        const hhmm = now.getHours().toString().padStart(2,'0') + now.getMinutes().toString().padStart(2,'0');
-        let csv = 'Timestamp,Question,Answer\n';
-        for (let q = 1; q <= 5; q++) csv += `${now.toISOString()},Q${q}_MC,${mcAnswers[q] || 'N/A'}\n`;
-        const q6 = (document.getElementById('q6-text').value.trim() || 'N/A').replace(/"/g,'""');
-        const q7 = (document.getElementById('q7-text').value.trim() || 'N/A').replace(/"/g,'""');
-        csv += `${now.toISOString()},Q6_open,"${q6}"\n`;
-        csv += `${now.toISOString()},Q7_open,"${q7}"\n`;
-        const a = Object.assign(document.createElement('a'), {
-            href: URL.createObjectURL(new Blob([csv], { type: 'text/plain' })),
-            download: `Orificeplate${hhmm}.dat`
-        });
-        document.body.appendChild(a); a.click(); document.body.removeChild(a);
     }
 </script>
 </body>
