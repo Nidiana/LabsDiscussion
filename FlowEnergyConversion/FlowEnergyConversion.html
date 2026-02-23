@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Wind Tunnel Lab — Variable Cross-Section</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:        #f2f4f7;
+  --surface:   #ffffff;
+  --surface2:  #f5f7fa;
+  --border:    #d0d8e4;
+  --border-lt: #e2e8f0;
+  --text:      #1a202c;
+  --text-md:   #4a5568;
+  --text-lt:   #718096;
+  --accent:    #1a56a0;
+  --accent-h:  #0f3675;
+  --accent-bg: #ebf3fc;
+  --c-cont:    #b45309;
+  --c-throat:  #1a7a4a;
+  --c-diff:    #1a56a0;
+  --ok:        #1a7a4a;
+  --ok-bg:     #e6f6ee;
+  --err:       #b71c1c;
+  --err-bg:    #fdecea;
+  --ff:        'Inter', system-ui, sans-serif;
+  --serif:     'Source Serif 4', Georgia, serif;
+  --mono:      'JetBrains Mono', 'Courier New', monospace;
+  --r:         8px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 18px; }
+body {
+  font-family: var(--serif);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  min-height: 100vh;
+  -webkit-text-size-adjust: 100%;
+}
+.wizard { display: flex; flex-direction: column; height: 100dvh; }
+
+/* TOP BAR */
+.topbar {
+  flex-shrink: 0;
+  background: #1a2e44;
+  border-bottom: 4px solid var(--accent);
+  padding: 18px 20px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.topbar-title {
+  font-family: var(--ff);
+  font-size: clamp(1.1rem, 4vw, 1.45rem);
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.2;
+}
+.topbar-sub {
+  font-family: var(--serif);
+  font-size: clamp(0.78rem, 3vw, 0.92rem);
+  color: #90afc8;
+  font-style: italic;
+  margin-top: 2px;
+}
+.steps-row { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.step-pip {
+  cursor: pointer;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: 2px solid #344e6b;
+  background: #243a55;
+  color: #6a8ba8;
+  font-family: var(--ff);
+  font-size: 0.8rem;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.25s;
+  flex-shrink: 0;
+}
+.step-pip.active { border-color: var(--accent); background: var(--accent); color: #fff; }
+.step-pip.done   { border-color: var(--accent-h); background: var(--accent-bg); color: var(--accent); }
+.step-connector  { width: 18px; height: 2px; background: #344e6b; flex-shrink: 0; }
+
+/* SLIDES */
+.slides-viewport { flex: 1; position: relative; overflow: hidden; }
+.slide {
+  position: absolute; inset: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 22px 20px 40px;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(48px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  will-change: opacity, transform;
+}
+.slide.active { opacity: 1; pointer-events: all; transform: translateX(0); }
+.slide.exit   { opacity: 0; transform: translateX(-48px); }
+.slide-body   { max-width: 860px; margin: 0 auto; }
+
+.slide-h {
+  font-family: var(--ff);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1a2e44;
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+.slide-lead {
+  font-family: var(--serif);
+  font-size: 1rem;
+  color: var(--text-md);
+  font-style: italic;
+  margin-bottom: 22px;
+  line-height: 1.7;
+}
+
+/* DIAGRAM CARD */
+.diagram-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 16px 18px 12px;
+  margin-bottom: 18px;
+}
+.diagram-card svg { width: 100%; height: auto; display: block; }
+.diagram-note {
+  font-size: 0.8rem;
+  color: var(--text-lt);
+  font-style: italic;
+  margin-top: 8px;
+  line-height: 1.5;
+}
+
+/* INFO BOX */
+.info-box {
+  background: var(--accent-bg);
+  border-left: 5px solid var(--accent);
+  border-radius: 0 var(--r) var(--r) 0;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  font-family: var(--serif);
+  font-size: 0.95rem;
+  color: #0f2a4a;
+  line-height: 1.75;
+}
+.info-box .eq {
+  font-family: var(--mono);
+  font-size: 0.92rem;
+  font-weight: 500;
+  margin: 8px 0;
+  display: block;
+  line-height: 1.6;
+}
+.info-box .eq .cs { color: var(--c-cont);   font-weight: 700; }
+.info-box .eq .ct { color: var(--c-throat); font-weight: 700; }
+.info-box .eq .cd { color: var(--c-diff);   font-weight: 700; }
+
+/* SECTION BADGE */
+.sec-badge {
+  display: inline-block;
+  font-family: var(--ff);
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.sec-contraction { background: #fef3e0; color: #92400e; }
+.sec-throat      { background: #e6f6ee; color: #134e35; }
+.sec-diffuser    { background: var(--accent-bg); color: #0f3675; }
+
+/* MEASUREMENT SECTION */
+.meas-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+.meas-header {
+  padding: 13px 18px 10px;
+  border-bottom: 1px solid var(--border-lt);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.meas-header h3 {
+  font-family: var(--ff);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1a2e44;
+}
+.meas-body { padding: 16px 18px; }
+
+/* TAPPING GRID */
+.tap-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+@media (max-width: 520px) { .tap-grid { grid-template-columns: 1fr 1fr; } }
+
+.tap-fld { display: flex; flex-direction: column; gap: 4px; }
+.tap-fld label {
+  font-family: var(--ff);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--text-md);
+}
+.tap-fld.f-cont label { color: var(--c-cont); }
+.tap-fld.f-throat label { color: var(--c-throat); }
+.tap-fld.f-diff label { color: var(--c-diff); }
+.tap-sub {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--text-lt);
+  line-height: 1.2;
+}
+.tap-fld input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface2);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 1rem;
+  min-height: 44px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.tap-fld input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(26,86,160,0.15);
+  background: #fff;
+}
+
+/* PITOT SECTION */
+.pitot-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 5px solid #7c3aed;
+  border-radius: var(--r);
+  padding: 16px 18px;
+  margin-bottom: 10px;
+  transition: border-left-color 0.2s;
+}
+.pitot-card.complete { border-left-color: var(--ok); }
+.pitot-card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.pitot-label {
+  font-family: var(--ff);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #7c3aed;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+.pitot-label.complete { color: var(--ok); }
+.pitot-fields { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+@media (max-width: 500px) { .pitot-fields { grid-template-columns: 1fr 1fr; } }
+
+.btn-rm {
+  background: transparent;
+  color: #b71c1c;
+  border: 1px solid #b71c1c;
+  padding: 7px 14px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: var(--ff);
+  font-size: 0.82rem;
+  font-weight: 600;
+  min-height: 40px;
+  transition: background 0.15s;
+}
+.btn-rm:hover { background: var(--err-bg); }
+
+.btn-add {
+  font-family: var(--ff);
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 12px 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-md);
+  cursor: pointer;
+  min-height: 48px;
+  transition: border-color 0.15s, color 0.15s;
+}
+.btn-add:hover { border-color: var(--accent); color: var(--accent); }
+
+.btn-proceed {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--ff);
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 14px 28px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--r);
+  cursor: pointer;
+  min-height: 50px;
+  margin-top: 20px;
+  transition: background 0.15s, opacity 0.15s;
+}
+.btn-proceed:hover:not(:disabled) { background: var(--accent-h); }
+.btn-proceed:disabled { opacity: 0.35; cursor: not-allowed; }
+.btn-proceed .arr { font-size: 1.1rem; }
+
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--ff);
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 14px 24px;
+  background: var(--surface);
+  color: var(--text-md);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  cursor: pointer;
+  min-height: 50px;
+  transition: border-color 0.15s, color 0.15s;
+}
+.btn-back:hover { border-color: var(--accent); color: var(--accent); }
+.btn-back .arr { font-size: 1.1rem; }
+
+/* RESULTS CHARTS */
+.charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+@media (max-width: 640px) { .charts-grid { grid-template-columns: 1fr; } }
+.chart-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 20px 16px;
+}
+.chart-card h3 { font-family: var(--ff); font-size: 1rem; font-weight: 700; color: #1a2e44; margin-bottom: 6px; }
+.ch-note { font-family: var(--serif); font-size: 0.9rem; color: var(--text-md); line-height: 1.65; margin-bottom: 14px; }
+.clr-legend { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 10px; }
+.clr-item { display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--text-md); }
+.clr-swatch { width: 22px; height: 4px; border-radius: 2px; flex-shrink: 0; }
+.chart-sel-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.chart-sel-row label { font-family: var(--ff); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-md); }
+.chart-sel-row select {
+  font-family: var(--ff);
+  font-size: 0.9rem;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--surface2);
+  color: var(--text);
+  min-height: 40px;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* RESULTS TABLE */
+.res-table-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow-x: auto;
+  margin-bottom: 20px;
+}
+table.res-table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 0.8rem; }
+table.res-table thead th {
+  font-family: var(--ff);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-lt);
+  padding: 12px 14px 8px;
+  text-align: right;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+table.res-table thead th:first-child { text-align: left; }
+table.res-table tbody td { padding: 9px 14px; text-align: right; border-bottom: 1px solid var(--border-lt); }
+table.res-table tbody td:first-child { text-align: left; font-weight: 700; }
+table.res-table tbody tr:last-child td { border-bottom: none; }
+table.res-table tbody tr:hover td { background: #f8fafc; }
+.zone-tag {
+  display: inline-block;
+  font-family: var(--ff);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 10px;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+.zt-c { background: #fef3e0; color: #92400e; }
+.zt-t { background: #e6f6ee; color: #134e35; }
+.zt-d { background: var(--accent-bg); color: #0f3675; }
+
+/* QUIZ */
+.quiz-meta { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 22px; flex-wrap: wrap; }
+.q-prog-label { font-family: var(--ff); font-size: 0.78rem; color: var(--text-lt); }
+.q-prog-track { flex: 1; min-width: 100px; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.q-prog-fill  { height: 100%; background: var(--ok); border-radius: 3px; transition: width 0.35s ease; }
+
+.u-unit { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; margin-bottom: 16px; }
+.u-unit-body { padding: 18px 20px; }
+.u-stem { font-family: var(--ff); font-size: 1rem; font-weight: 700; color: #1a2e44; margin-bottom: 6px; line-height: 1.45; }
+.u-desc { font-family: var(--serif); font-size: 0.95rem; color: var(--text-md); line-height: 1.7; margin-bottom: 14px; }
+
+.q-badge {
+  display: inline-block;
+  font-family: var(--ff);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: 20px;
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+.q-obs { background: #e3f2fd; color: #0d47a1; }
+.q-exp { background: var(--ok-bg); color: #134e35; }
+.q-prd { background: #fff8e1; color: #e65100; }
+
+.mc-opt {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 13px 15px;
+  margin: 8px 0;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: var(--serif);
+  font-size: 1rem;
+  line-height: 1.55;
+  transition: border-color 0.15s, background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 48px;
+}
+.mc-opt:hover { border-color: var(--accent); background: var(--accent-bg); }
+.mc-opt input { margin-top: 4px; flex-shrink: 0; accent-color: var(--accent); width: 18px; height: 18px; }
+.mc-opt.locked { opacity: 0.6; cursor: default; pointer-events: none; }
+
+.q-feedback { display: none; margin-top: 14px; padding: 14px 16px; border-radius: 6px; font-family: var(--serif); font-size: 0.95rem; line-height: 1.7; }
+.q-feedback.show { display: block; }
+.fb-ok  { background: var(--ok-bg);  border-left: 5px solid var(--ok);  color: #133e28; }
+.fb-err { background: var(--err-bg); border-left: 5px solid var(--err); color: #5c0a0a; }
+
+.q-context {
+  font-family: var(--serif);
+  font-size: 0.95rem;
+  color: var(--text-md);
+  font-style: italic;
+  line-height: 1.7;
+  margin-bottom: 16px;
+  padding-left: 14px;
+  border-left: 4px solid var(--border);
+}
+
+/* COMPLETION */
+.completion-banner {
+  display: none;
+  margin-top: 28px;
+  padding: 28px 24px;
+  background: linear-gradient(135deg, var(--ok-bg) 0%, #f0faf5 100%);
+  border: 2px solid var(--ok);
+  border-radius: var(--r);
+  text-align: center;
+}
+.completion-banner.show { display: block; }
+.completion-icon { font-size: 2.8rem; line-height: 1; margin-bottom: 12px; }
+.completion-title { font-family: var(--ff); font-size: 1.3rem; font-weight: 700; color: #134e35; margin-bottom: 8px; }
+.completion-msg { font-family: var(--serif); font-size: 1rem; color: #1b4020; line-height: 1.75; max-width: 560px; margin: 0 auto; }
+</style>
+</head>
+<body>
+<div class="wizard">
+
+  <header class="topbar">
+    <div>
+      <div class="topbar-title">Wind Tunnel Lab — Variable Cross-Section</div>
+      <div class="topbar-sub">Continuity Equation · Bernoulli's Principle · Pitot Tube</div>
+    </div>
+    <div class="steps-row">
+      <div class="step-pip active" id="sp1" onclick="goTo(1)">1</div>
+      <div class="step-connector"></div>
+      <div class="step-pip" id="sp2" onclick="goTo(2)">2</div>
+      <div class="step-connector"></div>
+      <div class="step-pip" id="sp3" onclick="goTo(3)">3</div>
+      <div class="step-connector"></div>
+      <div class="step-pip" id="sp4" onclick="goTo(4)">4</div>
+    </div>
+  </header>
+
+  <div class="slides-viewport">
+
+    <!-- ══ SLIDE 1 — DATA ENTRY ══════════════════════════════════ -->
+    <div class="slide active" id="s1">
+      <div class="slide-body">
+        <div class="slide-h">Record your measurements</div>
+        <div class="slide-lead">Enter the gauge static pressure (mmH₂O) at each tapping point, then your pitot tube readings at the throat and in the diffuser.</div>
+
+        <!-- TUNNEL DIAGRAM -->
+        <div class="diagram-card">
+          <svg id="diag-svg" viewBox="0 0 820 170" xmlns="http://www.w3.org/2000/svg">
+            <!-- built by JS -->
+          </svg>
+          <div class="diagram-note">
+            Tapping points P1–P3: contraction · P4–P6: constant throat section · P7–P11: diffuser.
+          </div>
+        </div>
+
+        <!-- hidden fixed settings used by analysis -->
+        <input type="hidden" id="inp-rho" value="1.225">
+        <input type="hidden" id="inp-punit" value="mmH2O">
+        <input type="hidden" id="inp-ptype" value="gauge">
+
+        <!-- STATIC TAPPINGS: CONTRACTION -->
+        <div class="meas-section">
+          <div class="meas-header">
+            <span class="sec-badge sec-contraction">Contraction</span>
+            <h3>Static Pressure — P1 to P3 &nbsp;<span style="font-family:var(--mono);font-size:0.75rem;font-weight:400;color:var(--text-lt);">(mmH₂O gauge)</span></h3>
+          </div>
+          <div class="meas-body">
+            <div class="tap-grid">
+              <div class="tap-fld f-cont"><label>P1</label>
+                <input type="number" id="p1" step="0.1" placeholder="—" inputmode="decimal" oninput="checkReady()">
+              </div>
+              <div class="tap-fld f-cont"><label>P2</label>
+                <input type="number" id="p2" step="0.1" placeholder="—" inputmode="decimal" oninput="checkReady()">
+              </div>
+              <div class="tap-fld f-cont"><label>P3</label>
+                <input type="number" id="p3" step="0.1" placeholder="—" inputmode="decimal" oninput="checkReady()">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STATIC TAPPINGS: THROAT -->
+        <div class="meas-section">
+          <div class="meas-header">
+            <span class="sec-badge sec-throat">Throat (Constant Section)</span>
+            <h3>Static Pressure — P4 to P6 &nbsp;<span style="font-family:var(--mono);font-size:0.75rem;font-weight:400;color:var(--text-lt);">(mmH₂O gauge)</span></h3>
+          </div>
+          <div class="meas-body">
+            <div class="tap-grid">
+              <div class="tap-fld f-throat"><label>P4</label>
+                <input type="number" id="p4" step="0.1" placeholder="—" inputmode="decimal" oninput="checkReady()">
+              </div>
+              <div class="tap-fld f-throat"><label>P5</label>
+                <input type="number" id="p5" step="0.1" placeholder="—" inputmode="decimal" oninput="checkReady()">
+              </div>
+              <div class="tap-fld f-throat"><label>P6</label>
+                <input type="number" id="p6" step="0.1" placeholder="—" inputmode="decimal" oninput="checkReady()">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STATIC TAPPINGS: DIFFUSER -->
+        <div class="meas-section">
+          <div class="meas-header">
+            <span class="sec-badge sec-diffuser">Diffuser</span>
+            <h3>Static Pressure — P7 to P11 &nbsp;<span style="font-family:var(--mono);font-size:0.75rem;font-weight:400;color:var(--text-lt);">(mmH₂O gauge)</span></h3>
+          </div>
+          <div class="meas-body">
+            <div class="tap-grid">
+              <div class="tap-fld f-diff"><label>P7</label>
+                <input type="number" id="p7" step="0.1" placeholder="—" inputmode="decimal" oninput="checkReady()">
+              </div>
+              <div class="tap-fld f-diff"><label>P8</label>
+                <input type="number" id="p8" step="0.1" placeholder="—" inputmode="decimal" oninput="checkReady()">
+              </div>
+              <div class="tap-fld f-diff"><label>P9</label>
+                <input type="number" id="p9" step="0.1" placeholder="—" inputmode="decimal" oninput="checkReady()">
+              </div>
+              <div class="tap-fld f-diff"><label>P10</label>
+                <input type="number" id="p10" step="0.1" placeholder="—" inputmode="decimal" oninput="checkReady()">
+              </div>
+              <div class="tap-fld f-diff"><label>P11</label>
+                <input type="number" id="p11" step="0.1" placeholder="—" inputmode="decimal" oninput="checkReady()">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- THROAT PITOT -->
+        <div class="meas-section">
+          <div class="meas-header">
+            <span class="sec-badge sec-throat">Pitot Tube — Throat</span>
+            <h3>Pitot Readings at Throat &nbsp;<span style="font-family:var(--mono);font-size:0.75rem;font-weight:400;color:var(--text-lt);">(mmH₂O gauge)</span></h3>
+          </div>
+          <div class="meas-body">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+              <div class="tap-fld f-throat"><label>Total pressure P₀</label>
+                <input type="number" id="pitot-p0" step="0.1" placeholder="—" inputmode="decimal" oninput="checkReady()">
+              </div>
+              <div class="tap-fld f-throat"><label>Static pressure Pₛ</label>
+                <input type="number" id="pitot-ps" step="0.1" placeholder="—" inputmode="decimal" oninput="checkReady()">
+              </div>
+              <div class="tap-fld f-throat"><label>Direct velocity (m/s) <span style="font-weight:400;color:var(--text-lt);">optional</span></label>
+                <input type="number" id="pitot-v" step="0.01" placeholder="—" inputmode="decimal" oninput="checkReady()">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DIFFUSER PITOT TRAVERSES -->
+        <div class="meas-section" style="margin-bottom:16px;">
+          <div class="meas-header">
+            <span class="sec-badge sec-diffuser">Pitot Traverses — Diffuser</span>
+            <h3>Pitot Readings Between P7 and P8 &nbsp;<span style="font-family:var(--mono);font-size:0.75rem;font-weight:400;color:var(--text-lt);">(mmH₂O gauge · position from P7 in mm)</span></h3>
+          </div>
+          <div class="meas-body">
+            <div id="traverse-wrap"></div>
+            <button class="btn-add" style="margin-top:6px;" onclick="addTraverse()">+ Add traverse reading</button>
+          </div>
+        </div>
+
+        <button class="btn-proceed" id="btn-analyse" onclick="runAnalysis()" disabled>
+          Move to analysis <span class="arr">→</span>
+        </button>
+      </div>
+    </div><!-- /s1 -->
+
+    <!-- ══ SLIDE 2 — ANALYSIS ════════════════════════════════════ -->
+    <div class="slide" id="s2">
+      <div class="slide-body">
+        <div class="slide-h">Your results</div>
+        <div class="slide-lead">Velocity and pressure distributions computed from your measurements using the continuity equation.</div>
+
+        <div class="info-box">
+          <p style="margin-bottom:8px;">
+            The <strong>continuity equation</strong> for incompressible flow states that mass flux is conserved:
+          </p>
+          <span class="eq"><span class="cs">Q = A · V = constant</span></span>
+          <p style="margin-bottom:8px;">
+            So if we know velocity at the throat (from the pitot), we can estimate velocity at any other tapping point by:
+          </p>
+          <span class="eq"><span class="ct">V<sub>i</sub></span><span style="color:#555;"> = V<sub>throat</sub> × </span><span class="cd">A<sub>throat</sub> / A<sub>i</sub></span></span>
+          <p style="margin-top:8px;">
+            The <strong>pressure coefficient</strong> Cp = (Pᵢ − P<sub>ref</sub>) / q<sub>throat</sub>
+            where q<sub>throat</sub> = ½ρV²<sub>throat</sub> characterises pressure variation relative to dynamic pressure.
+          </p>
+        </div>
+
+        <div class="charts-grid">
+          <div class="chart-card">
+            <h3>Velocity distribution</h3>
+            <div class="clr-legend">
+              <span class="clr-item"><span class="clr-swatch" style="background:var(--c-cont)"></span>Contraction</span>
+              <span class="clr-item"><span class="clr-swatch" style="background:var(--c-throat)"></span>Throat</span>
+              <span class="clr-item"><span class="clr-swatch" style="background:var(--c-diff)"></span>Diffuser</span>
+            </div>
+            <div class="ch-note">Velocity estimated from pitot throat reading via continuity. Area decreases → velocity increases; area increases → velocity decreases.</div>
+            <canvas id="velChart" height="220"></canvas>
+          </div>
+          <div class="chart-card">
+            <h3>Static pressure distribution</h3>
+            <div class="clr-legend">
+              <span class="clr-item"><span class="clr-swatch" style="background:#334155"></span>Measured static P</span>
+              <span class="clr-item"><span class="clr-swatch" style="border-top:2px dashed #94a3b8;background:transparent;"></span>Pressure coefficient Cp</span>
+            </div>
+            <div class="ch-note">Pressure rises in the diffuser as flow decelerates — compare with the velocity chart.</div>
+            <canvas id="presChart" height="220"></canvas>
+          </div>
+        </div>
+
+        <!-- RESULTS TABLE -->
+        <div class="res-table-wrap">
+          <table class="res-table">
+            <thead>
+              <tr>
+                <th>Point</th>
+                <th>Width (mm)</th>
+                <th>Area (mm²)</th>
+                <th>P static (Pa)</th>
+                <th>V continuity (m/s)</th>
+                <th>V / V<sub>throat</sub></th>
+                <th>q dyn (Pa)</th>
+                <th>Cp</th>
+              </tr>
+            </thead>
+            <tbody id="res-tbody"></tbody>
+          </table>
+        </div>
+
+        <!-- PITOT TRAVERSE RESULTS (shown if data exists) -->
+        <div id="traverse-results" style="display:none;">
+          <div class="chart-card" style="margin-bottom:16px;">
+            <h3>Pitot traverses — diffuser (P7–P8)</h3>
+            <div class="ch-note">Each reading gives actual local velocity from ΔP = P₀ − Pₛ. Compare with continuity estimate for the same region.</div>
+            <canvas id="traverseChart" height="180"></canvas>
+          </div>
+          <div class="res-table-wrap">
+            <table class="res-table">
+              <thead>
+                <tr>
+                  <th>Reading</th>
+                  <th>Position (mm)</th>
+                  <th>P₀ (Pa)</th>
+                  <th>Pₛ (Pa)</th>
+                  <th>ΔP (Pa)</th>
+                  <th>V pitot (m/s)</th>
+                  <th>Cp</th>
+                </tr>
+              </thead>
+              <tbody id="trav-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:20px;">
+          <button class="btn-back" onclick="goTo(1)"><span class="arr">←</span> Back</button>
+          <button class="btn-proceed" style="margin-top:0;" onclick="goTo(3)">Move to understanding <span class="arr">→</span></button>
+        </div>
+      </div>
+    </div><!-- /s2 -->
+
+    <!-- ══ SLIDE 3 — UNDERSTANDING (5 questions) ════════════════ -->
+    <div class="slide" id="s3">
+      <div class="slide-body">
+        <div class="slide-h">Understanding</div>
+        <div class="slide-lead">Five questions based on your measurements and the principles governing flow through a variable cross-section duct.</div>
+
+        <div class="quiz-meta">
+          <span class="q-prog-label" id="uprog-lbl">0 of 5 answered</span>
+          <div class="q-prog-track"><div class="q-prog-fill" id="uprog-fill" style="width:0%"></div></div>
+        </div>
+
+        <!-- U1 — correct: B -->
+        <div class="u-unit">
+          <div class="u-unit-body">
+            <span class="q-badge q-obs">Observe</span>
+            <div class="u-stem">Q1 — Velocity in the Throat</div>
+            <div class="u-desc">Based on your measurements, what did you observe about the air velocity in the constant-width throat section (P4–P6) compared to the inlet (P1)?</div>
+            <label class="mc-opt"><input type="radio" name="u1" value="A" onchange="checkU(1,'A')"> A &nbsp; Velocity decreased significantly at the throat because pressure was higher there</label>
+            <label class="mc-opt"><input type="radio" name="u1" value="B" onchange="checkU(1,'B')"> B &nbsp; Velocity increased at the throat because the cross-sectional area is smaller</label>
+            <label class="mc-opt"><input type="radio" name="u1" value="C" onchange="checkU(1,'C')"> C &nbsp; Velocity was the same everywhere because mass flow rate is constant</label>
+            <label class="mc-opt"><input type="radio" name="u1" value="D" onchange="checkU(1,'D')"> D &nbsp; Velocity was unpredictable and showed no clear trend</label>
+            <div id="uFb1" class="q-feedback"></div>
+          </div>
+        </div>
+
+        <!-- U2 — correct: C -->
+        <div class="u-unit">
+          <div class="u-unit-body">
+            <span class="q-badge q-exp">Explain</span>
+            <div class="u-stem">Q2 — Continuity Equation</div>
+            <div class="u-desc">You estimated velocities at all tapping points using the pitot reading at the throat and the known areas. What physical principle makes this possible?</div>
+            <label class="mc-opt"><input type="radio" name="u2" value="A" onchange="checkU(2,'A')"> A &nbsp; Bernoulli's equation: total pressure is the same at all cross-sections</label>
+            <label class="mc-opt"><input type="radio" name="u2" value="B" onchange="checkU(2,'B')"> B &nbsp; Newton's second law: force equals rate of change of momentum</label>
+            <label class="mc-opt"><input type="radio" name="u2" value="C" onchange="checkU(2,'C')"> C &nbsp; Conservation of mass: for incompressible steady flow, Q = AV = constant along the duct</label>
+            <label class="mc-opt"><input type="radio" name="u2" value="D" onchange="checkU(2,'D')"> D &nbsp; The ideal gas law: pressure and volume are inversely proportional</label>
+            <div id="uFb2" class="q-feedback"></div>
+          </div>
+        </div>
+
+        <!-- U3 — correct: A -->
+        <div class="u-unit">
+          <div class="u-unit-body">
+            <span class="q-badge q-exp">Explain</span>
+            <div class="u-stem">Q3 — Static Pressure in the Diffuser</div>
+            <div class="u-desc">In the diverging diffuser section (P7–P11), the cross-sectional area increases. According to the continuity and Bernoulli equations, what should happen to static pressure?</div>
+            <label class="mc-opt"><input type="radio" name="u3" value="A" onchange="checkU(3,'A')"> A &nbsp; Static pressure should increase as velocity decreases — partial recovery of the pressure "lost" in the contraction</label>
+            <label class="mc-opt"><input type="radio" name="u3" value="B" onchange="checkU(3,'B')"> B &nbsp; Static pressure should continue to decrease because the flow is still moving forward</label>
+            <label class="mc-opt"><input type="radio" name="u3" value="C" onchange="checkU(3,'C')"> C &nbsp; Static pressure should remain constant because the geometry changes slowly</label>
+            <label class="mc-opt"><input type="radio" name="u3" value="D" onchange="checkU(3,'D')"> D &nbsp; Static pressure should fluctuate randomly as turbulence develops</label>
+            <div id="uFb3" class="q-feedback"></div>
+          </div>
+        </div>
+
+        <!-- U4 — correct: D -->
+        <div class="u-unit">
+          <div class="u-unit-body">
+            <span class="q-badge q-obs">Observe</span>
+            <div class="u-stem">Q4 — Pitot Tube Working Principle</div>
+            <div class="u-desc">The pitot tube gives you a total pressure P₀ and a static pressure Pₛ at the same point. How does this give you velocity?</div>
+            <label class="mc-opt"><input type="radio" name="u4" value="A" onchange="checkU(4,'A')"> A &nbsp; Velocity is the ratio P₀ / Pₛ</label>
+            <label class="mc-opt"><input type="radio" name="u4" value="B" onchange="checkU(4,'B')"> B &nbsp; Velocity is proportional to the sum P₀ + Pₛ</label>
+            <label class="mc-opt"><input type="radio" name="u4" value="C" onchange="checkU(4,'C')"> C &nbsp; Velocity is read directly from a calibration chart without any pressure difference</label>
+            <label class="mc-opt"><input type="radio" name="u4" value="D" onchange="checkU(4,'D')"> D &nbsp; The dynamic pressure ΔP = P₀ − Pₛ = ½ρV², so V = √(2ΔP/ρ)</label>
+            <div id="uFb4" class="q-feedback"></div>
+          </div>
+        </div>
+
+        <!-- U5 — correct: C -->
+        <div class="u-unit">
+          <div class="u-unit-body">
+            <span class="q-badge q-prd">Predict</span>
+            <div class="u-stem">Q5 — Pressure Recovery</div>
+            <div class="u-desc">If you compare the static pressure at P11 (diffuser exit) with P1 (inlet), would you expect them to be equal? Why or why not?</div>
+            <label class="mc-opt"><input type="radio" name="u5" value="A" onchange="checkU(5,'A')"> A &nbsp; Yes — the Bernoulli equation guarantees full pressure recovery</label>
+            <label class="mc-opt"><input type="radio" name="u5" value="B" onchange="checkU(5,'B')"> B &nbsp; Yes — continuity ensures the same flow conditions at inlet and exit</label>
+            <label class="mc-opt"><input type="radio" name="u5" value="C" onchange="checkU(5,'C')"> C &nbsp; No — viscous friction and boundary-layer losses dissipate some energy as heat, so P11 will be slightly lower than P1</label>
+            <label class="mc-opt"><input type="radio" name="u5" value="D" onchange="checkU(5,'D')"> D &nbsp; No — P11 will always be higher than P1 because of the expanding geometry</label>
+            <div id="uFb5" class="q-feedback"></div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:20px;">
+          <button class="btn-back" onclick="goTo(2)"><span class="arr">←</span> Back</button>
+          <button class="btn-proceed" style="margin-top:0;" onclick="goTo(4)">Move to deep understanding <span class="arr">→</span></button>
+        </div>
+      </div>
+    </div><!-- /s3 -->
+
+    <!-- ══ SLIDE 4 — DEEP UNDERSTANDING (3 questions) ═══════════ -->
+    <div class="slide" id="s4">
+      <div class="slide-body">
+        <div class="slide-h">Deep Understanding</div>
+        <div class="slide-lead">Three questions that connect your measurements to the underlying fluid mechanics — boundary layers, adverse pressure gradients, and measurement assumptions.</div>
+
+        <div class="quiz-meta">
+          <span class="q-prog-label" id="qprog-lbl">0 of 3 answered</span>
+          <div class="q-prog-track"><div class="q-prog-fill" id="qprog-fill" style="width:0%"></div></div>
+        </div>
+
+        <!-- DQ1 — correct: C -->
+        <div class="u-unit">
+          <div class="u-unit-body">
+            <span class="q-badge q-exp">Explain</span>
+            <div class="u-stem">Q1 — Assumption Behind the Continuity Estimate</div>
+            <div class="u-desc">You computed velocities at all 11 tapping points using V<sub>i</sub> = V<sub>throat</sub> × A<sub>throat</sub>/A<sub>i</sub>. What is the key assumption embedded in this calculation — and when would it break down?</div>
+            <div class="q-context">Think about what the continuity equation requires about the nature of the flow and the fluid.</div>
+            <label class="mc-opt"><input type="radio" name="q1" value="A" onchange="checkQ(1,'A')"> A &nbsp; It assumes the duct is perfectly straight — any curvature invalidates it</label>
+            <label class="mc-opt"><input type="radio" name="q1" value="B" onchange="checkQ(1,'B')"> B &nbsp; It assumes the pitot tube measures the average velocity across the cross-section</label>
+            <label class="mc-opt"><input type="radio" name="q1" value="C" onchange="checkQ(1,'C')"> C &nbsp; It assumes steady, incompressible flow (constant density) — it would break down at high Mach numbers or with significant flow separation</label>
+            <label class="mc-opt"><input type="radio" name="q1" value="D" onchange="checkQ(1,'D')"> D &nbsp; It assumes turbulent flow — the estimate is invalid for laminar conditions</label>
+            <div id="fb1" class="q-feedback"></div>
+          </div>
+        </div>
+
+        <!-- DQ2 — correct: B -->
+        <div class="u-unit">
+          <div class="u-unit-body">
+            <span class="q-badge q-obs">Observe</span>
+            <div class="u-stem">Q2 — Comparing Pitot Traverses with Continuity Estimates</div>
+            <div class="u-desc">Your pitot traverses in the diffuser (between P7 and P8) give local velocity at the centreline, while the continuity estimate gives a cross-sectional average. If the diffuser is working well, how should these two values compare — and what would a large discrepancy indicate?</div>
+            <div class="q-context">Consider the velocity profile shape in an attached boundary layer vs a separated flow.</div>
+            <label class="mc-opt"><input type="radio" name="q2" value="A" onchange="checkQ(2,'A')"> A &nbsp; The pitot value should always be much lower than the continuity estimate, because the pitot is near the wall where velocity is low</label>
+            <label class="mc-opt"><input type="radio" name="q2" value="B" onchange="checkQ(2,'B')"> B &nbsp; In attached flow the centreline pitot velocity should be modestly higher than the continuity average; a very large discrepancy would suggest boundary-layer separation or recirculation near the wall</label>
+            <label class="mc-opt"><input type="radio" name="q2" value="C" onchange="checkQ(2,'C')"> C &nbsp; They should be exactly equal because the continuity equation holds everywhere in the cross-section</label>
+            <label class="mc-opt"><input type="radio" name="q2" value="D" onchange="checkQ(2,'D')"> D &nbsp; The pitot value should be lower because it only measures static pressure, not total</label>
+            <div id="fb2" class="q-feedback"></div>
+          </div>
+        </div>
+
+        <!-- DQ3 — correct: D -->
+        <div class="u-unit">
+          <div class="u-unit-body">
+            <span class="q-badge q-prd">Predict</span>
+            <div class="u-stem">Q3 — Effect of Increasing Flow Speed</div>
+            <div class="u-desc">If you repeat this experiment at twice the fan speed (roughly doubling the throat velocity), predict how the pressure coefficient Cp at each tapping point would change compared to your current results.</div>
+            <div class="q-context">Cp = (Pᵢ − P<sub>ref</sub>) / (½ρV²<sub>throat</sub>). Think carefully about how both the numerator and denominator scale with velocity.</div>
+            <label class="mc-opt"><input type="radio" name="q3" value="A" onchange="checkQ(3,'A')"> A &nbsp; Cp would double at every point because the pressures are twice as large</label>
+            <label class="mc-opt"><input type="radio" name="q3" value="B" onchange="checkQ(3,'B')"> B &nbsp; Cp would halve because the dynamic pressure in the denominator doubles</label>
+            <label class="mc-opt"><input type="radio" name="q3" value="C" onchange="checkQ(3,'C')"> C &nbsp; Cp would increase unpredictably because turbulence changes at higher speeds</label>
+            <label class="mc-opt"><input type="radio" name="q3" value="D" onchange="checkQ(3,'D')"> D &nbsp; Cp should remain approximately the same — both the pressure differences and the dynamic pressure scale with V², so their ratio is independent of speed for the same geometry</label>
+            <div id="fb3" class="q-feedback"></div>
+          </div>
+        </div>
+
+        <div class="completion-banner" id="completion-banner">
+          <div class="completion-icon">🎉</div>
+          <div class="completion-title">Activity complete!</div>
+          <div class="completion-msg">
+            Well done — you have recorded your static pressure and pitot measurements, analysed the velocity and pressure distributions using the continuity equation, and answered all eight questions connecting your data to the underlying fluid mechanics.
+            Use the numbered steps above to revisit any section.
+          </div>
+        </div>
+
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:20px;">
+          <button class="btn-back" onclick="goTo(3)"><span class="arr">←</span> Back</button>
+        </div>
+      </div>
+    </div><!-- /s4 -->
+
+  </div><!-- /slides-viewport -->
+</div><!-- /wizard -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script>
+/* ─── TAPPING DATA ────────────────────────────────────── */
+const TAPS = [
+  { id:1,  w:149.0,  A:22350.0,  zone:'c' },
+  { id:2,  w:132.4,  A:19860.0,  zone:'c' },
+  { id:3,  w:115.8,  A:17370.0,  zone:'c' },
+  { id:4,  w:100.0,  A:15000.0,  zone:'t' },
+  { id:5,  w:100.0,  A:15000.0,  zone:'t' },
+  { id:6,  w:100.0,  A:15000.0,  zone:'t' },
+  { id:7,  w:109.3,  A:16395.0,  zone:'d' },
+  { id:8,  w:119.35, A:17902.5,  zone:'d' },
+  { id:9,  w:129.4,  A:19410.0,  zone:'d' },
+  { id:10, w:139.4,  A:20910.0,  zone:'d' },
+  { id:11, w:149.4,  A:22410.0,  zone:'d' },
+];
+const Z_COLOR = { c: '#b45309', t: '#1a7a4a', d: '#1a56a0' };
+const Z_LABEL = { c: 'Contraction', t: 'Throat', d: 'Diffuser' };
+
+let charts = {}, traverseCount = 0;
+let answeredQs = new Set(), answeredUs = new Set();
+
+/* ─── UNIT CONVERSION ─────────────────────────────────── */
+function toPa(v, unit) {
+  if (unit === 'Pa')    return v;
+  if (unit === 'mmH2O') return v * 9.80665;
+  if (unit === 'mbar')  return v * 100;
+  if (unit === 'mmHg')  return v * 133.322;
+  return v;
+}
+
+/* ─── DIAGRAM ─────────────────────────────────────────── */
+(function buildDiagram() {
+  const svg = document.getElementById('diag-svg');
+  const W = 820, H = 170, CY = 85;
+  const SCALE = 0.4; // mm → px for width display
+  const xStep = W / (TAPS.length + 1);
+  const xPos = TAPS.map((_, i) => xStep + i * xStep);
+  
+  let topPts = [], botPts = [];
+  xPos.forEach((x, i) => {
+    const hw = TAPS[i].w * SCALE / 2;
+    topPts.push([x, CY - hw]);
+    botPts.push([x, CY + hw]);
+  });
+  // Extend to edges
+  const topPath = `M 0,${topPts[0][1]} ` + topPts.map(p=>`L ${p[0]},${p[1]}`).join(' ') + ` L ${W},${topPts[10][1]}`;
+  const botPath = `M 0,${botPts[0][1]} ` + botPts.map(p=>`L ${p[0]},${p[1]}`).join(' ') + ` L ${W},${botPts[10][1]}`;
+
+  let html = '';
+  html += `<path d="${topPath}" stroke="#1a2e44" stroke-width="2.2" fill="none" stroke-linejoin="round"/>`;
+  html += `<path d="${botPath}" stroke="#1a2e44" stroke-width="2.2" fill="none" stroke-linejoin="round"/>`;
+
+  // Zone shading
+  const zBounds = [
+    { x1: xPos[0]-xStep*0.5, x2: (xPos[2]+xPos[3])/2, color:'rgba(180,83,9,0.06)' },
+    { x1: (xPos[2]+xPos[3])/2, x2: (xPos[5]+xPos[6])/2, color:'rgba(26,122,74,0.07)' },
+    { x1: (xPos[5]+xPos[6])/2, x2: xPos[10]+xStep*0.5, color:'rgba(26,86,160,0.06)' },
+  ];
+  // (simple rects for zone shading — approximate)
+  ['Contraction','Throat','Diffuser'].forEach((label, zi) => {
+    const x1 = zBounds[zi].x1, x2 = zBounds[zi].x2;
+    html += `<rect x="${x1}" y="${CY-50}" width="${x2-x1}" height="100" fill="${zBounds[zi].color}" rx="0"/>`;
+  });
+
+  // Tap markers
+  xPos.forEach((x, i) => {
+    const col = Z_COLOR[TAPS[i].zone];
+    const [ty, by] = [topPts[i][1], botPts[i][1]];
+    html += `<line x1="${x}" y1="${ty}" x2="${x}" y2="${ty-14}" stroke="${col}" stroke-width="1.4" stroke-dasharray="3,2"/>`;
+    html += `<circle cx="${x}" cy="${ty}" r="3.5" fill="${col}"/>`;
+    html += `<text x="${x}" y="${ty-18}" text-anchor="middle" fill="${col}" font-size="10" font-weight="700" font-family="monospace">P${TAPS[i].id}</text>`;
+    // bottom dimension
+    html += `<line x1="${x}" y1="${by}" x2="${x}" y2="${by+10}" stroke="${col}" stroke-width="1" stroke-dasharray="2,2"/>`;
+  });
+
+  // Flow arrow
+  html += `<defs><marker id="arr" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><polygon points="0,0 7,3.5 0,7" fill="#1a56a0"/></marker></defs>`;
+  html += `<line x1="16" y1="${CY}" x2="50" y2="${CY}" stroke="#1a56a0" stroke-width="1.8" marker-end="url(#arr)"/>`;
+  html += `<text x="14" y="${CY-6}" fill="#718096" font-size="9" font-family="monospace">Q</text>`;
+
+  // Zone labels at bottom
+  html += `<text x="${(xPos[0]+xPos[2])/2}" y="163" text-anchor="middle" fill="#92400e" font-size="9" font-family="monospace">CONTRACTION</text>`;
+  html += `<text x="${(xPos[3]+xPos[5])/2}" y="163" text-anchor="middle" fill="#134e35" font-size="9" font-family="monospace">THROAT</text>`;
+  html += `<text x="${(xPos[6]+xPos[10])/2}" y="163" text-anchor="middle" fill="#0f3675" font-size="9" font-family="monospace">DIFFUSER</text>`;
+
+  svg.innerHTML = html;
+})();
+
+/* ─── TRAVERSES ───────────────────────────────────────── */
+function addTraverse() {
+  traverseCount++;
+  const id = traverseCount;
+  const card = document.createElement('div');
+  card.className = 'pitot-card';
+  card.id = 'trav-' + id;
+  card.innerHTML = `
+    <div class="pitot-card-head">
+      <span class="pitot-label" id="trav-lbl-${id}">Traverse ${id}</span>
+      ${id > 1 ? `<button class="btn-rm" onclick="removeTraverse(${id})">Remove</button>` : ''}
+    </div>
+    <div class="pitot-fields">
+      <div class="tap-fld f-diff">
+        <label>Position from P7 (mm)</label>
+        <input type="number" id="trav-pos-${id}" step="1" placeholder="e.g. 50" inputmode="decimal" oninput="watchTraverse(${id})">
+      </div>
+      <div class="tap-fld f-diff">
+        <label>Total pressure P₀</label>
+        <input type="number" id="trav-p0-${id}" step="0.1" placeholder="—" inputmode="decimal" oninput="watchTraverse(${id})">
+      </div>
+      <div class="tap-fld f-diff">
+        <label>Static pressure Pₛ</label>
+        <input type="number" id="trav-ps-${id}" step="0.1" placeholder="—" inputmode="decimal" oninput="watchTraverse(${id})">
+      </div>
+    </div>`;
+  document.getElementById('traverse-wrap').appendChild(card);
+}
+function removeTraverse(id) { document.getElementById('trav-' + id)?.remove(); }
+function watchTraverse(id) {
+  const p0 = parseFloat(document.getElementById('trav-p0-' + id)?.value);
+  const ps = parseFloat(document.getElementById('trav-ps-' + id)?.value);
+  const pos = parseFloat(document.getElementById('trav-pos-' + id)?.value);
+  const ok = !isNaN(p0) && !isNaN(ps) && !isNaN(pos);
+  const card = document.getElementById('trav-' + id);
+  const lbl  = document.getElementById('trav-lbl-' + id);
+  if (card) card.classList.toggle('complete', ok);
+  if (lbl)  lbl.classList.toggle('complete', ok);
+}
+
+/* ─── READY CHECK ─────────────────────────────────────── */
+function checkReady() {
+  // Need at least one tapping + pitot data to proceed
+  const anyTap = TAPS.some(t => {
+    const v = parseFloat(document.getElementById('p' + t.id)?.value);
+    return !isNaN(v);
+  });
+  const hasPitot = (
+    (!isNaN(parseFloat(document.getElementById('pitot-v')?.value))) ||
+    (!isNaN(parseFloat(document.getElementById('pitot-p0')?.value)) &&
+     !isNaN(parseFloat(document.getElementById('pitot-ps')?.value)))
+  );
+  document.getElementById('btn-analyse').disabled = !(anyTap && hasPitot);
+}
+
+/* ─── ANALYSIS ────────────────────────────────────────── */
+function runAnalysis() {
+  const rho  = parseFloat(document.getElementById('inp-rho').value) || 1.225;
+  const unit = document.getElementById('inp-punit').value;
+  const ptype = document.getElementById('inp-ptype').value;
+
+  function getPa(rawId) {
+    const el = document.getElementById(rawId);
+    if (!el || el.value === '') return null;
+    return toPa(parseFloat(el.value), unit);
+  }
+
+  // Throat velocity
+  let Vt = null;
+  const directV = parseFloat(document.getElementById('pitot-v')?.value);
+  if (!isNaN(directV) && directV > 0) {
+    Vt = directV;
+  } else {
+    const p0 = getPa('pitot-p0'), ps = getPa('pitot-ps');
+    if (p0 !== null && ps !== null && p0 > ps) {
+      Vt = Math.sqrt(2 * (p0 - ps) / rho);
+    }
+  }
+  if (!Vt) { alert('Please enter valid pitot tube readings.'); return; }
+
+  const A_throat = 15000; // mm² (average P4–P6)
+  const q_throat = 0.5 * rho * Vt * Vt;
+
+  // Static pressures (keep in Pa)
+  const Pstatic = TAPS.map(t => getPa('p' + t.id));
+
+  // Reference static: use P4 (first throat)
+  const Pref = Pstatic[3]; // index 3 = P4
+
+  // Build results
+  const results = TAPS.map((t, i) => {
+    const P = Pstatic[i];
+    const V = Vt * (A_throat / t.A);
+    const q = 0.5 * rho * V * V;
+    const Cp = (P !== null && Pref !== null) ? (P - Pref) / q_throat : null;
+    return { tap: t, P, V, q, Cp };
+  });
+
+  // Traverses
+  const traverseData = [];
+  for (let id = 1; id <= traverseCount; id++) {
+    const el = document.getElementById('trav-' + id);
+    if (!el) continue;
+    const pos = parseFloat(document.getElementById('trav-pos-' + id)?.value);
+    const p0  = getPa('trav-p0-' + id);
+    const ps  = getPa('trav-ps-' + id);
+    if (p0 !== null && ps !== null && p0 > ps) {
+      const dP = p0 - ps;
+      const V  = Math.sqrt(2 * dP / rho);
+      const Cp = Pref !== null ? (ps - Pref) / q_throat : null;
+      traverseData.push({ pos: isNaN(pos) ? null : pos, p0, ps, dP, V, Cp });
+    }
+  }
+
+  // Render
+  buildResultsTable(results);
+  buildVelChart(results);
+  buildPresChart(results);
+
+  if (traverseData.length > 0) {
+    document.getElementById('traverse-results').style.display = 'block';
+    buildTraverseTable(traverseData);
+    buildTraverseChart(traverseData, Vt);
+  } else {
+    document.getElementById('traverse-results').style.display = 'none';
+  }
+
+  goTo(2);
+}
+
+function fmtNum(v, dp) { return v !== null && !isNaN(v) ? v.toFixed(dp) : '—'; }
+
+function buildResultsTable(results) {
+  const tbody = document.getElementById('res-tbody');
+  const Vt_ref = results.find(r => r.tap.zone === 't')?.V || 1;
+  tbody.innerHTML = results.map(r => {
+    const { tap, P, V, q, Cp } = r;
+    const zt = { c:'zt-c', t:'zt-t', d:'zt-d' }[tap.zone];
+    const zl = { c:'C', t:'T', d:'D' }[tap.zone];
+    return `<tr>
+      <td>P${tap.id} <span class="zone-tag ${zt}">${zl}</span></td>
+      <td>${tap.w}</td>
+      <td>${tap.A.toLocaleString()}</td>
+      <td>${fmtNum(P,1)}</td>
+      <td>${fmtNum(V,3)}</td>
+      <td>${fmtNum(V/Vt_ref,4)}</td>
+      <td>${fmtNum(q,2)}</td>
+      <td>${fmtNum(Cp,4)}</td>
+    </tr>`;
+  }).join('');
+}
+
+function buildVelChart(results) {
+  if (charts.vel) { try { charts.vel.destroy(); } catch(e){} }
+  const labels = results.map(r => 'P' + r.tap.id);
+  const vels   = results.map(r => r.V);
+  const colors = results.map(r => Z_COLOR[r.tap.zone] + 'CC');
+  charts.vel = new Chart(document.getElementById('velChart').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Velocity (m/s)',
+        data: vels,
+        backgroundColor: colors,
+        borderColor: results.map(r => Z_COLOR[r.tap.zone]),
+        borderWidth: 1.5
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        title: { display: true, text: `Throat velocity: ${vels[4]?.toFixed(2) ?? '—'} m/s`, color: '#4a5568', font: { size: 13, family: 'Inter' } }
+      },
+      scales: {
+        y: { beginAtZero: true, title: { display: true, text: 'Velocity (m/s)', font: { size: 12, family: 'Inter' } }, grid: { color: '#e2e8f0' } },
+        x: { grid: { color: '#e2e8f0' } }
+      }
+    }
+  });
+}
+
+function buildPresChart(results) {
+  if (charts.pres) { try { charts.pres.destroy(); } catch(e){} }
+  const labels = results.map(r => 'P' + r.tap.id);
+  const pVals  = results.map(r => r.P);
+  const cpVals = results.map(r => r.Cp);
+  charts.pres = new Chart(document.getElementById('presChart').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {
+          type: 'bar',
+          label: 'Static pressure (Pa)',
+          data: pVals,
+          backgroundColor: '#334155BB',
+          borderColor: '#1e293b',
+          borderWidth: 1.2,
+          yAxisID: 'yP'
+        },
+        {
+          type: 'line',
+          label: 'Cp',
+          data: cpVals,
+          borderColor: '#94a3b8',
+          borderWidth: 2,
+          borderDash: [5, 3],
+          pointRadius: 5,
+          pointBackgroundColor: '#fff',
+          pointBorderColor: '#64748b',
+          pointBorderWidth: 2,
+          fill: false,
+          yAxisID: 'yCp'
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 12, family: 'Inter' } } }
+      },
+      scales: {
+        yP: { type: 'linear', position: 'left', title: { display: true, text: 'P static (Pa)', font: { size: 12, family: 'Inter' } }, grid: { color: '#e2e8f0' } },
+        yCp: { type: 'linear', position: 'right', title: { display: true, text: 'Cp', font: { size: 12, family: 'Inter' } }, grid: { drawOnChartArea: false } },
+        x: { grid: { color: '#e2e8f0' } }
+      }
+    }
+  });
+}
+
+function buildTraverseTable(data) {
+  document.getElementById('trav-tbody').innerHTML = data.map((d, i) => `
+    <tr>
+      <td>${i+1}</td>
+      <td>${d.pos !== null ? d.pos.toFixed(1) : '—'}</td>
+      <td>${fmtNum(d.p0,2)}</td>
+      <td>${fmtNum(d.ps,2)}</td>
+      <td>${fmtNum(d.dP,2)}</td>
+      <td>${fmtNum(d.V,3)}</td>
+      <td>${fmtNum(d.Cp,4)}</td>
+    </tr>`).join('');
+}
+
+function buildTraverseChart(data, Vt) {
+  if (charts.trav) { try { charts.trav.destroy(); } catch(e){} }
+  const sorted = [...data].filter(d => d.pos !== null).sort((a,b) => a.pos - b.pos);
+  charts.trav = new Chart(document.getElementById('traverseChart').getContext('2d'), {
+    type: 'line',
+    data: {
+      labels: sorted.map(d => d.pos.toFixed(0) + ' mm'),
+      datasets: [
+        { label: 'Pitot velocity (m/s)', data: sorted.map(d => d.V), borderColor: '#1a56a0', backgroundColor: '#1a56a020', borderWidth: 2, pointRadius: 6, fill: true },
+        { label: 'Continuity estimate (m/s)', data: sorted.map(() => Vt * (15000/16395)), borderColor: '#b45309', borderWidth: 1.8, borderDash: [5,3], pointRadius: 0 }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 12, family: 'Inter' } } } },
+      scales: {
+        y: { title: { display: true, text: 'Velocity (m/s)', font: { size: 12, family: 'Inter' } }, grid: { color: '#e2e8f0' } },
+        x: { title: { display: true, text: 'Position from P7 (mm)', font: { size: 12, family: 'Inter' } }, grid: { color: '#e2e8f0' } }
+      }
+    }
+  });
+}
+
+/* ─── QUIZ — UNDERSTANDING ────────────────────────────── */
+const U_CORRECT = { 1:'B', 2:'C', 3:'A', 4:'D', 5:'C' };
+const U_FB = {
+  1: {
+    B: `<strong>✓ Correct.</strong> By the continuity equation Q = A·V = constant, a smaller cross-sectional area must be accompanied by a higher velocity. The throat is the narrowest section, so it has the highest air speed. Your pitot reading at the throat is therefore the maximum velocity in the duct.`,
+    def: `<strong>✗ Incorrect — correct answer: B.</strong> The continuity equation Q = A·V = constant means velocity and area are inversely related. The throat has the smallest area, so air must move fastest there.`
+  },
+  2: {
+    C: `<strong>✓ Correct.</strong> Conservation of mass for steady, incompressible flow gives Q = A₁V₁ = A₂V₂ = … = constant. Knowing Q at the throat (from the pitot) and the known areas at every other position allows us to calculate V at each point without any additional measurement. This is the continuity equation in action.`,
+    def: `<strong>✗ Incorrect — correct answer: C.</strong> Conservation of mass (continuity) is the principle: Q = A·V = constant for incompressible steady flow. This lets you propagate a single velocity measurement to all other cross-sections using their known areas.`
+  },
+  3: {
+    A: `<strong>✓ Correct.</strong> In the diffuser, area increases so continuity demands velocity decreases. By Bernoulli's principle (P + ½ρV² ≈ const), falling velocity means rising static pressure. This is "pressure recovery" — kinetic energy is being converted back to pressure. In a real duct this recovery is incomplete due to viscous losses.`,
+    def: `<strong>✗ Incorrect — correct answer: A.</strong> Continuity: larger area → lower velocity. Bernoulli: lower velocity → higher static pressure. The diffuser recovers some of the pressure that was "traded" for kinetic energy in the contraction.`
+  },
+  4: {
+    D: `<strong>✓ Correct.</strong> Bernoulli along the stagnation streamline gives P₀ = Pₛ + ½ρV². The total pressure (stagnation) P₀ is measured by the forward-facing hole and the static pressure Pₛ by the side hole. Their difference is the dynamic pressure, giving V = √(2(P₀ − Pₛ)/ρ).`,
+    def: `<strong>✗ Incorrect — correct answer: D.</strong> The pitot exploits Bernoulli along the stagnation streamline: P₀ − Pₛ = ½ρV². Measuring both pressures and dividing by ½ρ then taking the square root gives velocity.`
+  },
+  5: {
+    C: `<strong>✓ Correct.</strong> In a real duct, viscous friction continuously dissipates mechanical energy along the flow path, converting it to heat. Even though the geometry at P11 is similar to P1, total and static pressure will be slightly lower at the exit. The longer the duct and the higher the velocity, the larger this loss. It is why wind tunnels require a powered fan to maintain flow.`,
+    def: `<strong>✗ Incorrect — correct answer: C.</strong> Viscous friction dissipates energy along the flow. The static pressure at P11 will be slightly lower than at P1 because some mechanical energy has been converted to heat — regardless of the geometry returning to the same cross-sectional area.`
+  }
+};
+
+function checkU(qNum, answer) {
+  if (answeredUs.has(qNum)) return;
+  answeredUs.add(qNum);
+  document.querySelectorAll(`input[name="u${qNum}"]`).forEach(r => { r.disabled = true; r.closest('.mc-opt').classList.add('locked'); });
+  const fb = document.getElementById('uFb' + qNum);
+  const ok = answer === U_CORRECT[qNum];
+  fb.innerHTML = ok ? (U_FB[qNum][answer] || U_FB[qNum].def) : (U_FB[qNum][answer] || U_FB[qNum].def);
+  fb.className = 'q-feedback ' + (ok ? 'fb-ok' : 'fb-err') + ' show';
+  const n = answeredUs.size;
+  document.getElementById('uprog-lbl').textContent = `${n} of 5 answered`;
+  document.getElementById('uprog-fill').style.width = `${n/5*100}%`;
+  fb.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+/* ─── QUIZ — DEEP UNDERSTANDING ──────────────────────── */
+const DQ_CORRECT = { 1:'C', 2:'B', 3:'D' };
+const DQ_FB = {
+  1: {
+    C: `<strong>✓ Correct.</strong> The continuity equation in the form V<sub>i</sub> = V<sub>throat</sub> × A<sub>throat</sub>/A<sub>i</sub> assumes that the fluid is incompressible (density constant) and the flow is steady. For air at the low speeds in this tunnel, compressibility effects are negligible (Mach ≪ 0.3). However, if significant flow separation occurs — for instance in the diffuser at high angles — continuity still holds globally, but the velocity distribution across the cross-section becomes highly non-uniform and the simple scalar relation breaks down.`,
+    def: `<strong>✗ Incorrect — correct answer: C.</strong> The calculation assumes incompressible (constant density), steady flow. These are valid assumptions at low Mach numbers in a tunnel. The method would break down at transonic speeds or if flow separation creates large recirculation zones.`
+  },
+  2: {
+    B: `<strong>✓ Correct.</strong> In well-attached turbulent pipe flow, the centreline velocity is typically 15–20% higher than the cross-sectional average (the velocity profile is roughly parabolic for laminar flow and more blunt for turbulent flow). If the pitot reads very much higher than the continuity average, it suggests the boundary layer has separated near the walls, forcing the remaining attached flow to accelerate strongly on the centreline. This is an early sign of diffuser stall.`,
+    def: `<strong>✗ Incorrect — correct answer: B.</strong> In attached flow, the centreline pitot velocity should be modestly higher than the bulk average (velocity profile effect). A large over-reading relative to the continuity estimate would indicate boundary-layer separation and recirculation near the walls.`
+  },
+  3: {
+    D: `<strong>✓ Correct.</strong> Cp = ΔP / q<sub>ref</sub> where both ΔP and q<sub>ref</sub> scale with V². For example, doubling velocity quadruples both the pressure differences at each tap and the dynamic pressure. Their ratio — Cp — is therefore dimensionless and geometry-dependent, not speed-dependent (provided the flow regime, i.e. laminar vs turbulent, does not change). This is why wind tunnel data can be expressed as Cp and applied to different scales and speeds.`,
+    def: `<strong>✗ Incorrect — correct answer: D.</strong> Both pressure differences and dynamic pressure scale with V², so their ratio Cp is independent of velocity for a given geometry. This is the key power of dimensionless coefficients in fluid mechanics — one set of measurements applies to all dynamically similar conditions.`
+  }
+};
+
+function checkQ(qNum, answer) {
+  if (answeredQs.has(qNum)) return;
+  answeredQs.add(qNum);
+  document.querySelectorAll(`input[name="q${qNum}"]`).forEach(r => { r.disabled = true; r.closest('.mc-opt').classList.add('locked'); });
+  const fb = document.getElementById('fb' + qNum);
+  const ok = answer === DQ_CORRECT[qNum];
+  fb.innerHTML = ok ? (DQ_FB[qNum][answer] || DQ_FB[qNum].def) : (DQ_FB[qNum][answer] || DQ_FB[qNum].def);
+  fb.className = 'q-feedback ' + (ok ? 'fb-ok' : 'fb-err') + ' show';
+  const n = answeredQs.size;
+  document.getElementById('qprog-lbl').textContent = `${n} of 3 answered`;
+  document.getElementById('qprog-fill').style.width = `${n/3*100}%`;
+  if (n === 3) {
+    const banner = document.getElementById('completion-banner');
+    banner.classList.add('show');
+    banner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+  fb.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+/* ─── NAVIGATION ─────────────────────────────────────── */
+function goTo(n) {
+  document.querySelectorAll('.slide').forEach(s => {
+    if (s.classList.contains('active')) {
+      s.classList.remove('active');
+      s.classList.add('exit');
+      setTimeout(() => s.classList.remove('exit'), 340);
+    }
+  });
+  document.getElementById('s' + n).classList.add('active');
+  document.getElementById('s' + n).scrollTop = 0;
+  for (let i = 1; i <= 4; i++) {
+    const p = document.getElementById('sp' + i);
+    p.classList.remove('active', 'done');
+    if (i < n)      p.classList.add('done');
+    else if (i === n) p.classList.add('active');
+  }
+}
+</script>
+</body>
+</html>
