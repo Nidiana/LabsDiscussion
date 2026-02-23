@@ -491,6 +491,24 @@ table.res-table tbody tr:hover td { background: #f8fafc; }
 .completion-title { font-family: var(--ff); font-size: 1.3rem; font-weight: 700; color: #134e35; margin-bottom: 8px; }
 .completion-msg { font-family: var(--serif); font-size: 1rem; color: #1b4020; line-height: 1.75; max-width: 560px; margin: 0 auto; }
 
+/* INLINE MINI-CHART CARDS IN QUESTIONS */
+.q-chart-card {
+  background: var(--surface2);
+  border: 1px solid var(--border-lt);
+  border-radius: 6px;
+  padding: 14px 16px 10px;
+  margin-bottom: 16px;
+}
+.q-chart-card .q-chart-title {
+  font-family: var(--ff);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-lt);
+  margin-bottom: 10px;
+}
+
 /* DYN INFO BUTTON */
 .btn-dyn-info {
   font-family: var(--ff);
@@ -694,6 +712,7 @@ table.res-table tbody tr:hover td { background: #f8fafc; }
               <div class="clr-legend" style="margin-bottom:0;">
                 <span class="clr-item"><span class="clr-swatch" style="background:#1a56a0;"></span>Static pressure (Pa)</span>
                 <span class="clr-item"><span class="clr-swatch" style="background:#bf360c;"></span>Dynamic pressure (Pa)</span>
+                <span class="clr-item"><span class="clr-swatch" style="background:#263238;"></span>Total pressure (Pa)</span>
               </div>
             </div>
             <button class="btn-dyn-info" id="btn-dyn-info" onclick="toggleDynInfo()">How is dynamic pressure calculated?</button>
@@ -751,12 +770,16 @@ table.res-table tbody tr:hover td { background: #f8fafc; }
         <div class="u-unit">
           <div class="u-unit-body">
             <span class="q-badge q-obs">Observe</span>
-            <div class="u-stem">Q1 — Velocity in the Throat</div>
-            <div class="u-desc">Based on your measurements, what did you observe about the air velocity in the constant-width throat section (P4–P6) compared to the inlet (P1)?</div>
-            <label class="mc-opt"><input type="radio" name="u1" value="A" onchange="checkU(1,'A')"> A &nbsp; Velocity decreased significantly at the throat because pressure was higher there</label>
-            <label class="mc-opt"><input type="radio" name="u1" value="B" onchange="checkU(1,'B')"> B &nbsp; Velocity increased at the throat because the cross-sectional area is smaller</label>
-            <label class="mc-opt"><input type="radio" name="u1" value="C" onchange="checkU(1,'C')"> C &nbsp; Velocity was the same everywhere because mass flow rate is constant</label>
-            <label class="mc-opt"><input type="radio" name="u1" value="D" onchange="checkU(1,'D')"> D &nbsp; Velocity was unpredictable and showed no clear trend</label>
+            <div class="u-stem">Q1 — Velocity across the duct</div>
+            <div class="u-desc">Look at the velocity profile plotted below, estimated from your pitot measurement using the continuity equation. How does the velocity at the throat (P4–P6) compare to the inlet (P1) and the diffuser exit (P11)?</div>
+            <div class="q-chart-card">
+              <div class="q-chart-title">Estimated velocity — P1 to P11</div>
+              <canvas id="q1-velChart" height="160"></canvas>
+            </div>
+            <label class="mc-opt"><input type="radio" name="u1" value="A" onchange="checkU(1,'A')"> A &nbsp; Velocity is highest at the inlet P1 and decreases continuously toward the exit</label>
+            <label class="mc-opt"><input type="radio" name="u1" value="B" onchange="checkU(1,'B')"> B &nbsp; Velocity peaks at the throat (P4–P6) where the duct is narrowest, then decreases again in the diffuser</label>
+            <label class="mc-opt"><input type="radio" name="u1" value="C" onchange="checkU(1,'C')"> C &nbsp; Velocity is constant everywhere because the mass flow rate is constant</label>
+            <label class="mc-opt"><input type="radio" name="u1" value="D" onchange="checkU(1,'D')"> D &nbsp; Velocity is lowest at the throat because pressure is lowest there</label>
             <div id="uFb1" class="q-feedback"></div>
           </div>
         </div>
@@ -765,11 +788,11 @@ table.res-table tbody tr:hover td { background: #f8fafc; }
         <div class="u-unit">
           <div class="u-unit-body">
             <span class="q-badge q-exp">Explain</span>
-            <div class="u-stem">Q2 — Continuity Equation</div>
-            <div class="u-desc">You estimated velocities at all tapping points using the pitot reading at the throat and the known areas. What physical principle makes this possible?</div>
+            <div class="u-stem">Q2 — How were velocities estimated at every tapping point?</div>
+            <div class="u-desc">The velocities shown in the chart above were estimated at all 11 tapping points using the pitot tube reading at the throat together with the known cross-sectional areas at each position. What physical principle makes it possible to propagate a single velocity measurement to every other location in the duct?</div>
             <label class="mc-opt"><input type="radio" name="u2" value="A" onchange="checkU(2,'A')"> A &nbsp; Bernoulli's equation: total pressure is the same at all cross-sections</label>
             <label class="mc-opt"><input type="radio" name="u2" value="B" onchange="checkU(2,'B')"> B &nbsp; Newton's second law: force equals rate of change of momentum</label>
-            <label class="mc-opt"><input type="radio" name="u2" value="C" onchange="checkU(2,'C')"> C &nbsp; Conservation of mass: for incompressible steady flow, Q = AV = constant along the duct</label>
+            <label class="mc-opt"><input type="radio" name="u2" value="C" onchange="checkU(2,'C')"> C &nbsp; Conservation of mass: for incompressible steady flow, Q = AV = constant, so knowing V at one cross-section and all areas gives V everywhere</label>
             <label class="mc-opt"><input type="radio" name="u2" value="D" onchange="checkU(2,'D')"> D &nbsp; The ideal gas law: pressure and volume are inversely proportional</label>
             <div id="uFb2" class="q-feedback"></div>
           </div>
@@ -806,13 +829,17 @@ table.res-table tbody tr:hover td { background: #f8fafc; }
         <!-- U5 — correct: C -->
         <div class="u-unit">
           <div class="u-unit-body">
-            <span class="q-badge q-prd">Predict</span>
+            <span class="q-badge q-prd">Observe &amp; Predict</span>
             <div class="u-stem">Q5 — Pressure Recovery</div>
-            <div class="u-desc">If you compare the static pressure at P11 (diffuser exit) with P1 (inlet), would you expect them to be equal? Why or why not?</div>
-            <label class="mc-opt"><input type="radio" name="u5" value="A" onchange="checkU(5,'A')"> A &nbsp; Yes — the Bernoulli equation guarantees full pressure recovery</label>
-            <label class="mc-opt"><input type="radio" name="u5" value="B" onchange="checkU(5,'B')"> B &nbsp; Yes — continuity ensures the same flow conditions at inlet and exit</label>
-            <label class="mc-opt"><input type="radio" name="u5" value="C" onchange="checkU(5,'C')"> C &nbsp; No — viscous friction and boundary-layer losses dissipate some energy as heat, so P11 will be slightly lower than P1</label>
-            <label class="mc-opt"><input type="radio" name="u5" value="D" onchange="checkU(5,'D')"> D &nbsp; No — P11 will always be higher than P1 because of the expanding geometry</label>
+            <div class="u-desc">Observe the static pressure readings plotted below. Compare P1 (inlet) and P11 (diffuser exit) — they have roughly the same cross-sectional area, so in an ideal frictionless flow they would have the same static pressure. What does your data show, and why?</div>
+            <div class="q-chart-card">
+              <div class="q-chart-title">Static pressure — P1 to P11 (your data)</div>
+              <canvas id="q5-staticChart" height="160"></canvas>
+            </div>
+            <label class="mc-opt"><input type="radio" name="u5" value="A" onchange="checkU(5,'A')"> A &nbsp; P1 and P11 are equal — Bernoulli guarantees full pressure recovery when the geometry returns to the same area</label>
+            <label class="mc-opt"><input type="radio" name="u5" value="B" onchange="checkU(5,'B')"> B &nbsp; P11 is higher than P1 because the flow has slowed down in the diffuser</label>
+            <label class="mc-opt"><input type="radio" name="u5" value="C" onchange="checkU(5,'C')"> C &nbsp; P11 is slightly lower than P1 — viscous friction along the duct walls dissipates energy as heat, so full static pressure recovery is never achieved</label>
+            <label class="mc-opt"><input type="radio" name="u5" value="D" onchange="checkU(5,'D')"> D &nbsp; P11 is much lower than P1 because all the energy has been converted to kinetic energy</label>
             <div id="uFb5" class="q-feedback"></div>
           </div>
         </div>
@@ -824,67 +851,80 @@ table.res-table tbody tr:hover td { background: #f8fafc; }
       </div>
     </div><!-- /s3 -->
 
-    <!-- ══ SLIDE 4 — DEEP UNDERSTANDING (3 questions) ═══════════ -->
+    <!-- ══ SLIDE 4 — DEEP UNDERSTANDING ════════════════════════ -->
     <div class="slide" id="s4">
       <div class="slide-body">
         <div class="slide-h">Deep Understanding</div>
-        <div class="slide-lead">Three questions that connect your measurements to the underlying fluid mechanics — boundary layers, adverse pressure gradients, and measurement assumptions.</div>
+        <div class="slide-lead">Use your data and the plots below to guide a discussion with your colleagues.</div>
 
-        <div class="quiz-meta">
-          <span class="q-prog-label" id="qprog-lbl">0 of 3 answered</span>
-          <div class="q-prog-track"><div class="q-prog-fill" id="qprog-fill" style="width:0%"></div></div>
-        </div>
-
-        <!-- DQ1 — correct: C -->
-        <div class="u-unit">
+        <!-- DISCUSSION PROMPT -->
+        <div class="u-unit" style="border-left:5px solid var(--accent);">
           <div class="u-unit-body">
-            <span class="q-badge q-exp">Explain</span>
-            <div class="u-stem">Q1 — Assumption Behind the Continuity Estimate</div>
-            <div class="u-desc">You computed velocities at all 11 tapping points using V<sub>i</sub> = V<sub>throat</sub> × A<sub>throat</sub>/A<sub>i</sub>. What is the key assumption embedded in this calculation — and when would it break down?</div>
-            <div class="q-context">Think about what the continuity equation requires about the nature of the flow and the fluid.</div>
-            <label class="mc-opt"><input type="radio" name="q1" value="A" onchange="checkQ(1,'A')"> A &nbsp; It assumes the duct is perfectly straight — any curvature invalidates it</label>
-            <label class="mc-opt"><input type="radio" name="q1" value="B" onchange="checkQ(1,'B')"> B &nbsp; It assumes the pitot tube measures the average velocity across the cross-section</label>
-            <label class="mc-opt"><input type="radio" name="q1" value="C" onchange="checkQ(1,'C')"> C &nbsp; It assumes steady, incompressible flow (constant density) — it would break down at high Mach numbers or with significant flow separation</label>
-            <label class="mc-opt"><input type="radio" name="q1" value="D" onchange="checkQ(1,'D')"> D &nbsp; It assumes turbulent flow — the estimate is invalid for laminar conditions</label>
-            <div id="fb1" class="q-feedback"></div>
+            <span class="q-badge q-exp" style="background:#e3f2fd;color:#0d47a1;">Discuss with your colleagues</span>
+            <div class="u-stem" style="margin-top:10px;">Comparing predictions with pitot tube readings</div>
+            <div class="u-desc" style="margin-bottom:18px;">
+              In this experiment the pitot tube was read at two locations: the <strong>throat</strong> and a point in the <strong>diffuser</strong>.
+              Both readings give total pressure and velocity directly. The plots below show those two measured values
+              alongside the predictions derived from the continuity equation at all 11 tapping points.
+              <br><br>
+              Examine the charts and discuss with your colleagues:
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;padding-left:4px;">
+              <div style="display:flex;gap:10px;align-items:flex-start;">
+                <span style="font-family:var(--ff);font-weight:700;color:var(--accent);font-size:1.1rem;flex-shrink:0;">①</span>
+                <span style="font-family:var(--serif);font-size:0.97rem;line-height:1.65;">Do the pitot tube readings of <strong>total pressure</strong> agree with the predicted values at the throat and diffuser? What do you observe?</span>
+              </div>
+              <div style="display:flex;gap:10px;align-items:flex-start;">
+                <span style="font-family:var(--ff);font-weight:700;color:var(--accent);font-size:1.1rem;flex-shrink:0;">②</span>
+                <span style="font-family:var(--serif);font-size:0.97rem;line-height:1.65;">Do the pitot tube readings of <strong>velocity</strong> agree with the continuity predictions at those positions?</span>
+              </div>
+              <div style="display:flex;gap:10px;align-items:flex-start;">
+                <span style="font-family:var(--ff);font-weight:700;color:var(--accent);font-size:1.1rem;flex-shrink:0;">③</span>
+                <span style="font-family:var(--serif);font-size:0.97rem;line-height:1.65;">Look at the total pressure curve across P1–P11. <strong>Why is the predicted total pressure close to zero</strong> at every tapping point? What does this tell you about how the pressures were recorded?</span>
+              </div>
+            </div>
+
+            <!-- CHART 1: Total pressure — prediction vs pitot -->
+            <div class="q-chart-card" style="margin-bottom:18px;">
+              <div class="q-chart-title">Total pressure (mmH₂O) — prediction at P1–P11 &amp; pitot readings</div>
+              <canvas id="dq-totalPChart" height="200"></canvas>
+            </div>
+
+            <!-- CHART 2: Velocity — prediction vs pitot -->
+            <div class="q-chart-card" style="margin-bottom:20px;">
+              <div class="q-chart-title">Velocity (m/s) — prediction at P1–P11 &amp; pitot readings</div>
+              <canvas id="dq-velChart" height="200"></canvas>
+            </div>
+
+            <!-- HINT ACCORDION -->
+            <div style="margin-bottom:16px;">
+              <button onclick="toggleDqHint()" id="btn-dq-hint"
+                style="font-family:var(--ff);font-size:0.82rem;font-weight:600;padding:9px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text-md);cursor:pointer;min-height:40px;transition:background 0.15s;">
+                💡 Show guidance notes
+              </button>
+              <div id="dq-hint-panel" style="display:none;margin-top:12px;padding:16px 18px;background:#f0faf5;border-left:5px solid var(--ok);border-radius:0 6px 6px 0;">
+                <p style="font-family:var(--ff);font-size:0.85rem;font-weight:700;color:#134e35;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.04em;">Guidance notes</p>
+                <p style="font-family:var(--serif);font-size:0.93rem;color:#1b4020;line-height:1.75;margin-bottom:10px;">
+                  <strong>On total pressure agreement:</strong> In an ideal (inviscid) flow, total pressure P₀ = P<sub>static</sub> + ½ρV² is conserved along a streamline (Bernoulli). A pitot tube measures this directly. If the pitot readings match the predicted total pressure, it confirms the flow behaves close to ideal at those positions. Discrepancies — particularly a <em>lower</em> pitot total pressure than predicted — indicate viscous losses or flow separation between the tapping and the pitot measurement point.
+                </p>
+                <p style="font-family:var(--serif);font-size:0.93rem;color:#1b4020;line-height:1.75;margin-bottom:10px;">
+                  <strong>On velocity agreement:</strong> The continuity prediction assumes a uniform velocity profile across each cross-section. The pitot tube measures velocity at one point (the centreline). In attached turbulent flow, the centreline velocity is typically 10–20% higher than the bulk average. A large over-reading would suggest flow separation in the diffuser.
+                </p>
+                <p style="font-family:var(--serif);font-size:0.93rem;color:#1b4020;line-height:1.75;">
+                  <strong>Why is total pressure near zero?</strong> The tapping pressures are recorded as <em>gauge</em> values relative to atmospheric — the manometer reads the difference from the lab ambient pressure. Since the duct inlet is open to atmosphere and the flow speed is low, the absolute total pressure throughout the duct is very close to atmospheric. Expressed as gauge (i.e. relative to atmospheric), total pressure ≈ P<sub>static,gauge</sub> + q ≈ 0. Any non-zero value you see represents small losses and the slight sub-atmospheric condition created by the fan.
+                </p>
+              </div>
+            </div>
+
           </div>
         </div>
 
-        <!-- DQ2 — correct: B -->
-        <div class="u-unit">
-          <div class="u-unit-body">
-            <span class="q-badge q-obs">Observe</span>
-            <div class="u-stem">Q2 — Comparing Pitot Traverses with Continuity Estimates</div>
-            <div class="u-desc">Your pitot traverses in the diffuser (between P7 and P8) give local velocity at the centreline, while the continuity estimate gives a cross-sectional average. If the diffuser is working well, how should these two values compare — and what would a large discrepancy indicate?</div>
-            <div class="q-context">Consider the velocity profile shape in an attached boundary layer vs a separated flow.</div>
-            <label class="mc-opt"><input type="radio" name="q2" value="A" onchange="checkQ(2,'A')"> A &nbsp; The pitot value should always be much lower than the continuity estimate, because the pitot is near the wall where velocity is low</label>
-            <label class="mc-opt"><input type="radio" name="q2" value="B" onchange="checkQ(2,'B')"> B &nbsp; In attached flow the centreline pitot velocity should be modestly higher than the continuity average; a very large discrepancy would suggest boundary-layer separation or recirculation near the wall</label>
-            <label class="mc-opt"><input type="radio" name="q2" value="C" onchange="checkQ(2,'C')"> C &nbsp; They should be exactly equal because the continuity equation holds everywhere in the cross-section</label>
-            <label class="mc-opt"><input type="radio" name="q2" value="D" onchange="checkQ(2,'D')"> D &nbsp; The pitot value should be lower because it only measures static pressure, not total</label>
-            <div id="fb2" class="q-feedback"></div>
-          </div>
-        </div>
-
-        <!-- DQ3 — correct: D -->
-        <div class="u-unit">
-          <div class="u-unit-body">
-            <span class="q-badge q-prd">Predict</span>
-            <div class="u-stem">Q3 — Effect of Increasing Flow Speed</div>
-            <div class="u-desc">If you repeat this experiment at twice the fan speed (roughly doubling the throat velocity), predict how the pressure coefficient Cp at each tapping point would change compared to your current results.</div>
-            <div class="q-context">Cp = (Pᵢ − P<sub>ref</sub>) / (½ρV²<sub>throat</sub>). Think carefully about how both the numerator and denominator scale with velocity.</div>
-            <label class="mc-opt"><input type="radio" name="q3" value="A" onchange="checkQ(3,'A')"> A &nbsp; Cp would double at every point because the pressures are twice as large</label>
-            <label class="mc-opt"><input type="radio" name="q3" value="B" onchange="checkQ(3,'B')"> B &nbsp; Cp would halve because the dynamic pressure in the denominator doubles</label>
-            <label class="mc-opt"><input type="radio" name="q3" value="C" onchange="checkQ(3,'C')"> C &nbsp; Cp would increase unpredictably because turbulence changes at higher speeds</label>
-            <label class="mc-opt"><input type="radio" name="q3" value="D" onchange="checkQ(3,'D')"> D &nbsp; Cp should remain approximately the same — both the pressure differences and the dynamic pressure scale with V², so their ratio is independent of speed for the same geometry</label>
-            <div id="fb3" class="q-feedback"></div>
-          </div>
-        </div>
-
-        <div class="completion-banner" id="completion-banner">
+        <div class="completion-banner show" id="completion-banner">
           <div class="completion-icon">🎉</div>
           <div class="completion-title">Activity complete!</div>
           <div class="completion-msg">
-            Well done — you have recorded your static pressure and pitot measurements, analysed the velocity and pressure distributions using the continuity equation, and answered all eight questions connecting your data to the underlying fluid mechanics.
+            Well done — you have recorded your measurements, analysed the pressure and velocity distributions, answered the understanding questions, and discussed the comparison between predictions and direct pitot tube readings.
             Use the numbered steps above to revisit any section.
           </div>
         </div>
@@ -1081,56 +1121,52 @@ function runAnalysis() {
     const P = Pstatic[i];
     const V = Vt * (A_throat / t.A);
     const q = 0.5 * rho * V * V;
+    // Total pressure: static (negated, i.e. gauge sign) + dynamic
+    const Ptotal = (P !== null) ? (-P + q) : null;
     const Cp = (P !== null && Pref !== null) ? (P - Pref) / q_throat : null;
-    return { tap: t, P, V, q, Cp };
+    return { tap: t, P, V, q, Ptotal, Cp };
   });
 
+  // Store globally so slide-3 mini-charts can access results after navigation
+  window._lastResults = results;
 
-  // Render
+  // Render main chart
   buildPressureChart(results);
 
   goTo(2);
 }
 
+function makeLineDataset(label, data, color, dash) {
+  return {
+    label, data,
+    borderColor: color,
+    backgroundColor: color,
+    borderWidth: 2.5,
+    borderDash: dash || [],
+    pointRadius: 6,
+    pointHoverRadius: 8,
+    pointBackgroundColor: '#fff',
+    pointBorderColor: color,
+    pointBorderWidth: 2.5,
+    tension: 0.35,
+    fill: false,
+  };
+}
+
 function buildPressureChart(results) {
   if (charts.main) { try { charts.main.destroy(); } catch(e){} }
   const labels  = results.map(r => 'P' + r.tap.id);
-  // Static pressures: negate (manometer reads magnitude; pressures are below atm in contraction/throat)
   const pStatic = results.map(r => r.P !== null ? parseFloat((-r.P).toFixed(2)) : null);
   const pDyn    = results.map(r => parseFloat(r.q.toFixed(2)));
+  const pTotal  = results.map(r => r.Ptotal !== null ? parseFloat(r.Ptotal.toFixed(2)) : null);
   charts.main = new Chart(document.getElementById('pressureChart').getContext('2d'), {
     type: 'line',
     data: {
       labels,
       datasets: [
-        {
-          label: 'Static pressure (Pa)',
-          data: pStatic,
-          borderColor: '#1a56a0',
-          backgroundColor: '#1a56a0',
-          borderWidth: 2.5,
-          pointRadius: 6,
-          pointHoverRadius: 8,
-          pointBackgroundColor: '#fff',
-          pointBorderColor: '#1a56a0',
-          pointBorderWidth: 2.5,
-          tension: 0.35,
-          fill: false,
-        },
-        {
-          label: 'Dynamic pressure (Pa)',
-          data: pDyn,
-          borderColor: '#bf360c',
-          backgroundColor: '#bf360c',
-          borderWidth: 2.5,
-          pointRadius: 6,
-          pointHoverRadius: 8,
-          pointBackgroundColor: '#fff',
-          pointBorderColor: '#bf360c',
-          pointBorderWidth: 2.5,
-          tension: 0.35,
-          fill: false,
-        }
+        makeLineDataset('Static pressure (Pa)',  pStatic, '#1a56a0'),
+        makeLineDataset('Dynamic pressure (Pa)', pDyn,    '#bf360c'),
+        makeLineDataset('Total pressure (Pa)',   pTotal,  '#263238', [6,3]),
       ]
     },
     options: {
@@ -1151,6 +1187,56 @@ function buildPressureChart(results) {
       }
     }
   });
+}
+
+/* mini charts for slide-3 questions — called when slide 3 becomes visible */
+function buildMiniCharts() {
+  const results = window._lastResults;
+  if (!results) return;
+  const labels = results.map(r => 'P' + r.tap.id);
+
+  // Q1: velocity chart
+  if (charts.q1vel) { try { charts.q1vel.destroy(); } catch(e){} }
+  const canvas1 = document.getElementById('q1-velChart');
+  if (canvas1) {
+    charts.q1vel = new Chart(canvas1.getContext('2d'), {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [makeLineDataset('Velocity (m/s)', results.map(r => parseFloat(r.V.toFixed(3))), '#1a7a4a')]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { title: { display: true, text: 'V (m/s)', font: { size: 11, family: 'Inter' } }, grid: { color: '#e2e8f0' } },
+          x: { title: { display: true, text: 'Tapping point', font: { size: 11, family: 'Inter' } }, grid: { color: '#e2e8f0' } }
+        }
+      }
+    });
+  }
+
+  // Q5: static pressure only
+  if (charts.q5stat) { try { charts.q5stat.destroy(); } catch(e){} }
+  const canvas5 = document.getElementById('q5-staticChart');
+  if (canvas5) {
+    const pStatic = results.map(r => r.P !== null ? parseFloat((-r.P).toFixed(2)) : null);
+    charts.q5stat = new Chart(canvas5.getContext('2d'), {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [makeLineDataset('Static pressure (Pa)', pStatic, '#1a56a0')]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { title: { display: true, text: 'Static P (Pa)', font: { size: 11, family: 'Inter' } }, grid: { color: '#e2e8f0' } },
+          x: { title: { display: true, text: 'Tapping point', font: { size: 11, family: 'Inter' } }, grid: { color: '#e2e8f0' } }
+        }
+      }
+    });
+  }
 }
 
 function tryNextImgSrc(img) {
@@ -1218,40 +1304,182 @@ function checkU(qNum, answer) {
   fb.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
-/* ─── QUIZ — DEEP UNDERSTANDING ──────────────────────── */
-const DQ_CORRECT = { 1:'C', 2:'B', 3:'D' };
-const DQ_FB = {
-  1: {
-    C: `<strong>✓ Correct.</strong> The continuity equation in the form V<sub>i</sub> = V<sub>throat</sub> × A<sub>throat</sub>/A<sub>i</sub> assumes that the fluid is incompressible (density constant) and the flow is steady. For air at the low speeds in this tunnel, compressibility effects are negligible (Mach ≪ 0.3). However, if significant flow separation occurs — for instance in the diffuser at high angles — continuity still holds globally, but the velocity distribution across the cross-section becomes highly non-uniform and the simple scalar relation breaks down.`,
-    def: `<strong>✗ Incorrect — correct answer: C.</strong> The calculation assumes incompressible (constant density), steady flow. These are valid assumptions at low Mach numbers in a tunnel. The method would break down at transonic speeds or if flow separation creates large recirculation zones.`
-  },
-  2: {
-    B: `<strong>✓ Correct.</strong> In well-attached turbulent pipe flow, the centreline velocity is typically 15–20% higher than the cross-sectional average (the velocity profile is roughly parabolic for laminar flow and more blunt for turbulent flow). If the pitot reads very much higher than the continuity average, it suggests the boundary layer has separated near the walls, forcing the remaining attached flow to accelerate strongly on the centreline. This is an early sign of diffuser stall.`,
-    def: `<strong>✗ Incorrect — correct answer: B.</strong> In attached flow, the centreline pitot velocity should be modestly higher than the bulk average (velocity profile effect). A large over-reading relative to the continuity estimate would indicate boundary-layer separation and recirculation near the walls.`
-  },
-  3: {
-    D: `<strong>✓ Correct.</strong> Cp = ΔP / q<sub>ref</sub> where both ΔP and q<sub>ref</sub> scale with V². For example, doubling velocity quadruples both the pressure differences at each tap and the dynamic pressure. Their ratio — Cp — is therefore dimensionless and geometry-dependent, not speed-dependent (provided the flow regime, i.e. laminar vs turbulent, does not change). This is why wind tunnel data can be expressed as Cp and applied to different scales and speeds.`,
-    def: `<strong>✗ Incorrect — correct answer: D.</strong> Both pressure differences and dynamic pressure scale with V², so their ratio Cp is independent of velocity for a given geometry. This is the key power of dimensionless coefficients in fluid mechanics — one set of measurements applies to all dynamically similar conditions.`
-  }
-};
+/* ─── DEEP UNDERSTANDING — hint toggle + charts ──────── */
+function toggleDqHint() {
+  const panel = document.getElementById('dq-hint-panel');
+  const btn   = document.getElementById('btn-dq-hint');
+  const open  = panel.style.display === 'none';
+  panel.style.display = open ? 'block' : 'none';
+  btn.textContent = open ? '💡 Hide guidance notes' : '💡 Show guidance notes';
+}
 
-function checkQ(qNum, answer) {
-  if (answeredQs.has(qNum)) return;
-  answeredQs.add(qNum);
-  document.querySelectorAll(`input[name="q${qNum}"]`).forEach(r => { r.disabled = true; r.closest('.mc-opt').classList.add('locked'); });
-  const fb = document.getElementById('fb' + qNum);
-  const ok = answer === DQ_CORRECT[qNum];
-  fb.innerHTML = ok ? (DQ_FB[qNum][answer] || DQ_FB[qNum].def) : (DQ_FB[qNum][answer] || DQ_FB[qNum].def);
-  fb.className = 'q-feedback ' + (ok ? 'fb-ok' : 'fb-err') + ' show';
-  const n = answeredQs.size;
-  document.getElementById('qprog-lbl').textContent = `${n} of 3 answered`;
-  document.getElementById('qprog-fill').style.width = `${n/3*100}%`;
-  if (n === 3) {
-    const banner = document.getElementById('completion-banner');
-    banner.classList.add('show');
-    banner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+function buildDqCharts() {
+  const results = window._lastResults;
+  if (!results) return;
+  const rho  = parseFloat(document.getElementById('inp-rho').value) || 1.225;
+  const unit = document.getElementById('inp-punit').value;  // mmH2O
+
+  function getPa(id) {
+    const el = document.getElementById(id);
+    if (!el || el.value === '') return null;
+    return toPa(parseFloat(el.value), unit);
   }
-  fb.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  function toMmH2O(pa) { return pa / 9.80665; }
+
+  const labels = results.map(r => 'P' + r.tap.id);
+
+  // Predicted total pressure in mmH2O (= -static_gauge + dynamic; static already negated in Ptotal)
+  const predTotalMmH2O = results.map(r =>
+    r.Ptotal !== null ? parseFloat(toMmH2O(r.Ptotal).toFixed(2)) : null
+  );
+
+  // Pitot throat: total pressure reading (P0) in mmH2O — user entered positive gauge
+  const throatP0_raw = parseFloat(document.getElementById('pitot-p0')?.value);
+  const diffP0_raw   = parseFloat(document.getElementById('diff-p0')?.value);
+
+  // Throat pitot is at ~P4-P6 region, place at index 4 (P5 = centre throat)
+  // Diffuser pitot is between P7-P8, place at index 7 (P8)
+  const pitotTotalMmH2O = results.map((r, i) => null); // sparse
+  if (!isNaN(throatP0_raw)) pitotTotalMmH2O[4] = parseFloat(throatP0_raw.toFixed(2));  // P5
+  if (!isNaN(diffP0_raw))   pitotTotalMmH2O[7] = parseFloat(diffP0_raw.toFixed(2));    // P8
+
+  // Predicted velocity m/s
+  const predVel = results.map(r => parseFloat(r.V.toFixed(3)));
+
+  // Pitot velocities (sparse)
+  const pitotVel = results.map(() => null);
+  // Throat velocity
+  let Vt = null;
+  const directV = parseFloat(document.getElementById('pitot-v')?.value);
+  if (!isNaN(directV) && directV > 0) {
+    Vt = directV;
+  } else {
+    const p0 = getPa('pitot-p0'), ps = getPa('pitot-ps');
+    if (p0 !== null && ps !== null && p0 > ps) Vt = Math.sqrt(2*(p0-ps)/rho);
+  }
+  if (Vt) pitotVel[4] = parseFloat(Vt.toFixed(3));  // P5
+
+  // Diffuser velocity
+  let Vd = null;
+  const directVd = parseFloat(document.getElementById('diff-v')?.value);
+  if (!isNaN(directVd) && directVd > 0) {
+    Vd = directVd;
+  } else {
+    const p0d = getPa('diff-p0'), psd = getPa('diff-ps');
+    if (p0d !== null && psd !== null && p0d > psd) Vd = Math.sqrt(2*(p0d-psd)/rho);
+  }
+  if (Vd) pitotVel[7] = parseFloat(Vd.toFixed(3));  // P8
+
+  // ── CHART 1: Total pressure ──
+  if (charts.dqTot) { try { charts.dqTot.destroy(); } catch(e){} }
+  charts.dqTot = new Chart(document.getElementById('dq-totalPChart').getContext('2d'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Predicted total pressure (mmH₂O)',
+          data: predTotalMmH2O,
+          borderColor: '#263238',
+          backgroundColor: '#263238',
+          borderWidth: 2.5,
+          borderDash: [6, 3],
+          pointRadius: 5,
+          pointHoverRadius: 7,
+          pointBackgroundColor: '#fff',
+          pointBorderColor: '#263238',
+          pointBorderWidth: 2.5,
+          tension: 0.35,
+          fill: false,
+        },
+        {
+          label: 'Pitot total pressure (mmH₂O)',
+          data: pitotTotalMmH2O,
+          borderColor: '#e65100',
+          backgroundColor: '#e65100',
+          borderWidth: 0,
+          pointRadius: results.map((r,i) => pitotTotalMmH2O[i] !== null ? 10 : 0),
+          pointHoverRadius: 12,
+          pointStyle: 'rectRot',
+          pointBackgroundColor: '#e65100',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          tension: 0,
+          fill: false,
+          spanGaps: false,
+          showLine: false,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'bottom', labels: { boxWidth: 14, font: { size: 12, family: 'Inter' }, padding: 18 } },
+        tooltip: { mode: 'index', intersect: false,
+          callbacks: { label: ctx => ctx.raw !== null ? `${ctx.dataset.label}: ${ctx.raw}` : null }
+        }
+      },
+      scales: {
+        y: { title: { display: true, text: 'Total pressure (mmH₂O)', font: { size: 12, family: 'Inter' } }, grid: { color: '#e2e8f0' } },
+        x: { title: { display: true, text: 'Tapping point', font: { size: 12, family: 'Inter' } }, grid: { color: '#e2e8f0' } }
+      }
+    }
+  });
+
+  // ── CHART 2: Velocity ──
+  if (charts.dqVel) { try { charts.dqVel.destroy(); } catch(e){} }
+  charts.dqVel = new Chart(document.getElementById('dq-velChart').getContext('2d'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Predicted velocity — continuity (m/s)',
+          data: predVel,
+          borderColor: '#1a7a4a',
+          backgroundColor: '#1a7a4a',
+          borderWidth: 2.5,
+          pointRadius: 5,
+          pointHoverRadius: 7,
+          pointBackgroundColor: '#fff',
+          pointBorderColor: '#1a7a4a',
+          pointBorderWidth: 2.5,
+          tension: 0.35,
+          fill: false,
+        },
+        {
+          label: 'Pitot velocity (m/s)',
+          data: pitotVel,
+          borderColor: '#e65100',
+          backgroundColor: '#e65100',
+          borderWidth: 0,
+          pointRadius: results.map((r,i) => pitotVel[i] !== null ? 10 : 0),
+          pointHoverRadius: 12,
+          pointStyle: 'rectRot',
+          pointBackgroundColor: '#e65100',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          tension: 0,
+          fill: false,
+          spanGaps: false,
+          showLine: false,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'bottom', labels: { boxWidth: 14, font: { size: 12, family: 'Inter' }, padding: 18 } },
+        tooltip: { mode: 'index', intersect: false,
+          callbacks: { label: ctx => ctx.raw !== null ? `${ctx.dataset.label}: ${ctx.raw}` : null }
+        }
+      },
+      scales: {
+        y: { title: { display: true, text: 'Velocity (m/s)', font: { size: 12, family: 'Inter' } }, grid: { color: '#e2e8f0' } },
+        x: { title: { display: true, text: 'Tapping point', font: { size: 12, family: 'Inter' } }, grid: { color: '#e2e8f0' } }
+      }
+    }
+  });
 }
 
 /* ─── NAVIGATION ─────────────────────────────────────── */
@@ -1271,6 +1499,9 @@ function goTo(n) {
     if (i < n)      p.classList.add('done');
     else if (i === n) p.classList.add('active');
   }
+  // Build mini-charts when landing on slide 3 or 4
+  if (n === 3) { setTimeout(buildMiniCharts, 50); }
+  if (n === 4) { setTimeout(buildDqCharts, 50); }
 }
 </script>
 </body>
