@@ -698,7 +698,7 @@ body {
     <div class="slide" id="s4">
       <div class="slide-body">
         <div class="slide-h">Deep Understanding</div>
-        <div class="slide-lead">Three CFD simulations at 28 L/min, each paired with a question. These show what is happening <em>everywhere</em> in the flow field — not just at the three measurement points.</div>
+        <div class="slide-lead">Three CFD simulations at 7 L/min, each paired with a question. These show what is happening <em>everywhere</em> in the flow field .</div>
 
         <div class="quiz-meta">
           <span class="q-prog-label" id="qprog-lbl">0 of 3 answered</span>
@@ -712,14 +712,14 @@ body {
             <p>Blue = lowest (most negative) static pressure; red = highest. The colour gradient shows the full continuous pressure field that your three tapping points sample at just three locations.</p>
           </div>
           <div class="cfd-img-area">
-            <img src="https://github.com/Nidiana/LabsDiscussion/raw/main/Venturi_Effect/StaticP_28LPM.png" alt="CFD static pressure contour 28 LPM" loading="lazy">
+            <img src="https://github.com/Nidiana/LabsDiscussion/raw/main/Venturi_Effect/StaticField7LPM.png" alt="CFD static pressure contour 7 LPM" loading="lazy">
           </div>
           <div class="cfd-observe">
             <strong>Observe:</strong> P₁ (inlet) sits in a deep red region — high static pressure in the wide, slow-moving section. P₂ (throat) is where the colour shifts to blue, the lowest static pressure in the whole field. P₃ (outlet) shows a partial return toward red — incomplete pressure recovery due to friction in the diverging section. The pressure varies <em>continuously</em> between the taps; your piezometers capture only three samples of this curve. Also note that near the converging and diverging transitions the contours are not perfectly parallel — this is why taps must be placed in the straight, fully developed sections.
           </div>
           <div class="cfd-question">
             <span class="q-badge q-exp">Explain</span>
-            <div class="q-stem">Q1 — Why can we apply Bernoulli between these three positions, even though the total pressure CFD (shown in Unit 3) reveals that Bernoulli is violated near the walls?</div>
+            <div class="q-stem">Q1 — Why can we apply Bernoulli between these three positions, even though  Bernoulli is violated near the walls?</div>
             <div class="q-context">Consider where P₁, P₂ and P₃ are located and what the static pressure contours tell you about those specific regions.</div>
             <label class="mc-opt"><input type="radio" name="q1" value="A" onchange="checkQ(1,'A')"> A &nbsp; Because Bernoulli is valid everywhere in liquid flows at these velocities</label>
             <label class="mc-opt"><input type="radio" name="q1" value="B" onchange="checkQ(1,'B')"> B &nbsp; Because pressure losses only occur at the throat, not at the tap positions</label>
@@ -736,7 +736,7 @@ body {
             <p>Blue = lowest velocity; red = highest. Velocity is <em>not uniform</em> across the cross-section — it is highest on the centreline and falls to zero at the wall. This non-uniformity is the physical origin of C<sub>d</sub> &lt; 1.</p>
           </div>
           <div class="cfd-img-area">
-            <img src="https://github.com/Nidiana/LabsDiscussion/raw/main/Venturi_Effect/Vel_28LPM.png" alt="CFD velocity magnitude contour 28 LPM" loading="lazy">
+            <img src="https://github.com/Nidiana/LabsDiscussion/raw/main/Venturi_Effect/VelField7LPM.png" alt="CFD velocity magnitude contour 7 LPM" loading="lazy">
           </div>
           <div class="cfd-observe">
             <strong>Observe:</strong> The blue region clinging to the wall is the <em>boundary layer</em> — fluid slowed almost to zero by the no-slip condition. At the throat, where the geometry is narrowest, this slow wall layer means the effective flow area is slightly smaller than the geometric 78.5 mm². Bernoulli-based theory assumes plug flow (uniform velocity across the section), so it predicts a higher Q than is actually achieved — which is exactly why C<sub>d</sub> &lt; 1. Also observe the diverging section: the boundary layer thickens as the flow decelerates against rising pressure. If the diverging angle were too steep, this layer would separate entirely from the wall, destroying pressure recovery.
@@ -760,7 +760,7 @@ body {
             <p>Blue = lowest total pressure; red = highest. If Bernoulli held everywhere, this map would be a single uniform colour. It is not — understanding <em>where</em> it varies and why is the key engineering insight of this experiment.</p>
           </div>
           <div class="cfd-img-area">
-            <img src="https://github.com/Nidiana/LabsDiscussion/raw/main/Venturi_Effect/TotalP_28LPM.png" alt="CFD total pressure contour 28 LPM" loading="lazy">
+            <img src="https://github.com/Nidiana/LabsDiscussion/raw/main/Venturi_Effect/TotalField7LPM.png" alt="CFD total pressure contour 7 LPM" loading="lazy">
           </div>
           <div class="cfd-observe">
             <strong>Observe:</strong> The core of the flow is largely uniform in colour — total pressure is approximately conserved there, consistent with the Bernoulli approximation. Near the walls the colour shifts toward blue: viscosity is converting mechanical energy to heat in the boundary layer, in direct violation of Bernoulli's inviscid assumption. The total pressure also decreases slightly from inlet to outlet even in the core — this is the real friction loss your experiment measured as P₁<sub>total</sub> − P₃<sub>total</sub>. Crucially, the three tap positions sample the core where this loss is small between adjacent taps — which is why the Bernoulli approximation is usable for your measurements despite the field not being truly inviscid.
