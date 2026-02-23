@@ -490,6 +490,27 @@ table.res-table tbody tr:hover td { background: #f8fafc; }
 .completion-icon { font-size: 2.8rem; line-height: 1; margin-bottom: 12px; }
 .completion-title { font-family: var(--ff); font-size: 1.3rem; font-weight: 700; color: #134e35; margin-bottom: 8px; }
 .completion-msg { font-family: var(--serif); font-size: 1rem; color: #1b4020; line-height: 1.75; max-width: 560px; margin: 0 auto; }
+
+/* DYN INFO BUTTON */
+.btn-dyn-info {
+  font-family: var(--ff);
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 9px 16px;
+  background: var(--surface2);
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  color: var(--accent);
+  cursor: pointer;
+  min-height: 40px;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.btn-dyn-info:hover, .btn-dyn-info.open {
+  background: var(--accent);
+  color: #fff;
+}
 </style>
 </head>
 <body>
@@ -497,8 +518,8 @@ table.res-table tbody tr:hover td { background: #f8fafc; }
 
   <header class="topbar">
     <div>
-      <div class="topbar-title">Wind Tunnel Lab — Variable Cross-Section</div>
-      <div class="topbar-sub">Continuity Equation · Bernoulli's Principle · Pitot Tube</div>
+      <div class="topbar-title">Flow Energy Conservation</div>
+      <div class="topbar-sub">Static &amp; Dynamic Pressure · Continuity · Pitot Tube</div>
     </div>
     <div class="steps-row">
       <div class="step-pip active" id="sp1" onclick="goTo(1)">1</div>
@@ -624,17 +645,28 @@ table.res-table tbody tr:hover td { background: #f8fafc; }
           </div>
         </div>
 
-        <!-- DIFFUSER PITOT TRAVERSES -->
-        <div class="meas-section" style="margin-bottom:16px;">
+        <!-- DIFFUSER PITOT (fixed single reading) -->
+        <div class="meas-section">
           <div class="meas-header">
-            <span class="sec-badge sec-diffuser">Pitot Traverses — Diffuser</span>
-            <h3>Pitot Readings Between P7 and P8 &nbsp;<span style="font-family:var(--mono);font-size:0.75rem;font-weight:400;color:var(--text-lt);">(mmH₂O gauge · position from P7 in mm)</span></h3>
+            <span class="sec-badge sec-diffuser">Pitot Tube — Diffuser</span>
+            <h3>Pitot Readings in Diffuser &nbsp;<span style="font-family:var(--mono);font-size:0.75rem;font-weight:400;color:var(--text-lt);">(mmH₂O gauge)</span></h3>
           </div>
           <div class="meas-body">
-            <div id="traverse-wrap"></div>
-            <button class="btn-add" style="margin-top:6px;" onclick="addTraverse()">+ Add traverse reading</button>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+              <div class="tap-fld f-diff"><label>Total pressure P₀</label>
+                <input type="number" id="diff-p0" step="0.1" placeholder="—" inputmode="decimal">
+              </div>
+              <div class="tap-fld f-diff"><label>Static pressure Pₛ</label>
+                <input type="number" id="diff-ps" step="0.1" placeholder="—" inputmode="decimal">
+              </div>
+              <div class="tap-fld f-diff"><label>Direct velocity (m/s) <span style="font-weight:400;color:var(--text-lt);">optional</span></label>
+                <input type="number" id="diff-v" step="0.01" placeholder="—" inputmode="decimal">
+              </div>
+            </div>
           </div>
         </div>
+
+
 
         <button class="btn-proceed" id="btn-analyse" onclick="runAnalysis()" disabled>
           Move to analysis <span class="arr">→</span>
@@ -645,88 +677,56 @@ table.res-table tbody tr:hover td { background: #f8fafc; }
     <!-- ══ SLIDE 2 — ANALYSIS ════════════════════════════════════ -->
     <div class="slide" id="s2">
       <div class="slide-body">
-        <div class="slide-h">Your results</div>
-        <div class="slide-lead">Velocity and pressure distributions computed from your measurements using the continuity equation.</div>
+        <div class="slide-h">Analysis</div>
+        <div class="slide-lead">Static and dynamic pressure at each tapping point, plotted along the duct.</div>
 
-        <div class="info-box">
-          <p style="margin-bottom:8px;">
-            The <strong>continuity equation</strong> for incompressible flow states that mass flux is conserved:
-          </p>
-          <span class="eq"><span class="cs">Q = A · V = constant</span></span>
-          <p style="margin-bottom:8px;">
-            So if we know velocity at the throat (from the pitot), we can estimate velocity at any other tapping point by:
-          </p>
-          <span class="eq"><span class="ct">V<sub>i</sub></span><span style="color:#555;"> = V<sub>throat</sub> × </span><span class="cd">A<sub>throat</sub> / A<sub>i</sub></span></span>
-          <p style="margin-top:8px;">
-            The <strong>pressure coefficient</strong> Cp = (Pᵢ − P<sub>ref</sub>) / q<sub>throat</sub>
-            where q<sub>throat</sub> = ½ρV²<sub>throat</sub> characterises pressure variation relative to dynamic pressure.
-          </p>
-        </div>
-
-        <div class="charts-grid">
-          <div class="chart-card">
-            <h3>Velocity distribution</h3>
-            <div class="clr-legend">
-              <span class="clr-item"><span class="clr-swatch" style="background:var(--c-cont)"></span>Contraction</span>
-              <span class="clr-item"><span class="clr-swatch" style="background:var(--c-throat)"></span>Throat</span>
-              <span class="clr-item"><span class="clr-swatch" style="background:var(--c-diff)"></span>Diffuser</span>
+        <!-- COMBINED PRESSURE CHART -->
+        <div class="chart-card" style="margin-bottom:16px;">
+          <!-- SIGN CONVENTION NOTE -->
+          <div style="margin-bottom:14px;padding:11px 14px;background:#fff8e1;border-left:4px solid #f59e0b;border-radius:0 6px 6px 0;font-family:var(--serif);font-size:0.9rem;color:#78350f;line-height:1.65;">
+            <strong style="font-family:var(--ff);">Note on sign convention:</strong> The electronic manometer reads magnitude — it always shows a positive number.
+            In this experiment the static pressures in the contraction and throat are below atmospheric, so we convert them to
+            <em>negative values</em> before plotting. You enter the positive reading from the wind tunnel software; the tool applies the sign automatically.
+          </div>
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:4px;">
+            <div>
+              <h3 style="margin-bottom:4px;">Pressure distribution — P1 to P11</h3>
+              <div class="clr-legend" style="margin-bottom:0;">
+                <span class="clr-item"><span class="clr-swatch" style="background:#1a56a0;"></span>Static pressure (Pa)</span>
+                <span class="clr-item"><span class="clr-swatch" style="background:#bf360c;"></span>Dynamic pressure (Pa)</span>
+              </div>
             </div>
-            <div class="ch-note">Velocity estimated from pitot throat reading via continuity. Area decreases → velocity increases; area increases → velocity decreases.</div>
-            <canvas id="velChart" height="220"></canvas>
+            <button class="btn-dyn-info" id="btn-dyn-info" onclick="toggleDynInfo()">How is dynamic pressure calculated?</button>
           </div>
-          <div class="chart-card">
-            <h3>Static pressure distribution</h3>
-            <div class="clr-legend">
-              <span class="clr-item"><span class="clr-swatch" style="background:#334155"></span>Measured static P</span>
-              <span class="clr-item"><span class="clr-swatch" style="border-top:2px dashed #94a3b8;background:transparent;"></span>Pressure coefficient Cp</span>
+
+          <!-- EXPANDABLE EXPLANATION -->
+          <div id="dyn-info-panel" style="display:none;margin:14px 0 6px;padding:16px 18px;background:var(--accent-bg);border-left:5px solid var(--accent);border-radius:0 var(--r) var(--r) 0;">
+            <p style="font-family:var(--ff);font-size:0.9rem;font-weight:700;color:#0f2a4a;margin-bottom:8px;">How dynamic pressure is estimated at each tapping point</p>
+            <p style="font-family:var(--serif);font-size:0.93rem;color:#0f2a4a;line-height:1.7;margin-bottom:12px;">
+              We measure velocity directly at the throat using the pitot tube: the pitot gives total pressure P₀ and static pressure Pₛ,
+              and from these we compute the throat velocity. We then apply the <strong>continuity equation</strong> to estimate velocity
+              at every other tapping position — since mass must be conserved, a smaller cross-section means higher velocity, and vice versa.
+              Dynamic pressure at each point follows as ½ρV².
+            </p>
+            <div style="background:#fff;border:1px solid var(--border);border-radius:6px;padding:12px 16px;margin-bottom:14px;font-family:var(--mono);font-size:0.95rem;color:#1a2e44;line-height:1.9;">
+              <div style="color:#1a7a4a;font-weight:700;">V<sub style="font-size:0.75em;">throat</sub> = √( 2 × (P₀ − Pₛ) / ρ )</div>
+              <div style="color:#1a56a0;font-weight:700;margin-top:4px;">V<sub style="font-size:0.75em;">i</sub> = V<sub style="font-size:0.75em;">throat</sub> × A<sub style="font-size:0.75em;">throat</sub> / A<sub style="font-size:0.75em;">i</sub></div>
+              <div style="color:#b45309;font-weight:700;margin-top:4px;">q<sub style="font-size:0.75em;">i</sub> = ½ ρ V<sub style="font-size:0.75em;">i</sub>²</div>
             </div>
-            <div class="ch-note">Pressure rises in the diffuser as flow decelerates — compare with the velocity chart.</div>
-            <canvas id="presChart" height="220"></canvas>
+            <p style="font-family:var(--ff);font-size:0.8rem;font-weight:700;color:#0f2a4a;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.05em;">Tapping point positions on the duct</p>
+            <div style="border:1px solid var(--border);border-radius:6px;overflow:hidden;background:#fff;">
+              <img id="tappings-img"
+                   src="https://raw.githubusercontent.com/Nidiana/LabsDiscussion/refs/heads/main/FlowEnergyConversion/tappings.PNG"
+                   alt="Tapping point locations on the variable cross-section duct"
+                   style="width:100%;display:block;"
+                   onerror="tryNextImgSrc(this)">
+              <div id="tappings-fallback" style="display:none;padding:14px;font-family:var(--serif);font-size:0.88rem;color:var(--text-lt);text-align:center;">
+                Image could not be loaded.
+              </div>
+            </div>
           </div>
-        </div>
 
-        <!-- RESULTS TABLE -->
-        <div class="res-table-wrap">
-          <table class="res-table">
-            <thead>
-              <tr>
-                <th>Point</th>
-                <th>Width (mm)</th>
-                <th>Area (mm²)</th>
-                <th>P static (Pa)</th>
-                <th>V continuity (m/s)</th>
-                <th>V / V<sub>throat</sub></th>
-                <th>q dyn (Pa)</th>
-                <th>Cp</th>
-              </tr>
-            </thead>
-            <tbody id="res-tbody"></tbody>
-          </table>
-        </div>
-
-        <!-- PITOT TRAVERSE RESULTS (shown if data exists) -->
-        <div id="traverse-results" style="display:none;">
-          <div class="chart-card" style="margin-bottom:16px;">
-            <h3>Pitot traverses — diffuser (P7–P8)</h3>
-            <div class="ch-note">Each reading gives actual local velocity from ΔP = P₀ − Pₛ. Compare with continuity estimate for the same region.</div>
-            <canvas id="traverseChart" height="180"></canvas>
-          </div>
-          <div class="res-table-wrap">
-            <table class="res-table">
-              <thead>
-                <tr>
-                  <th>Reading</th>
-                  <th>Position (mm)</th>
-                  <th>P₀ (Pa)</th>
-                  <th>Pₛ (Pa)</th>
-                  <th>ΔP (Pa)</th>
-                  <th>V pitot (m/s)</th>
-                  <th>Cp</th>
-                </tr>
-              </thead>
-              <tbody id="trav-tbody"></tbody>
-            </table>
-          </div>
+          <canvas id="pressureChart" height="260"></canvas>
         </div>
 
         <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:20px;">
@@ -917,7 +917,7 @@ const TAPS = [
 const Z_COLOR = { c: '#b45309', t: '#1a7a4a', d: '#1a56a0' };
 const Z_LABEL = { c: 'Contraction', t: 'Throat', d: 'Diffuser' };
 
-let charts = {}, traverseCount = 0;
+let charts = {};
 let answeredQs = new Set(), answeredUs = new Set();
 
 /* ─── UNIT CONVERSION ─────────────────────────────────── */
@@ -1085,174 +1085,98 @@ function runAnalysis() {
     return { tap: t, P, V, q, Cp };
   });
 
-  // Traverses
-  const traverseData = [];
-  for (let id = 1; id <= traverseCount; id++) {
-    const el = document.getElementById('trav-' + id);
-    if (!el) continue;
-    const pos = parseFloat(document.getElementById('trav-pos-' + id)?.value);
-    const p0  = getPa('trav-p0-' + id);
-    const ps  = getPa('trav-ps-' + id);
-    if (p0 !== null && ps !== null && p0 > ps) {
-      const dP = p0 - ps;
-      const V  = Math.sqrt(2 * dP / rho);
-      const Cp = Pref !== null ? (ps - Pref) / q_throat : null;
-      traverseData.push({ pos: isNaN(pos) ? null : pos, p0, ps, dP, V, Cp });
-    }
-  }
 
   // Render
-  buildResultsTable(results);
-  buildVelChart(results);
-  buildPresChart(results);
-
-  if (traverseData.length > 0) {
-    document.getElementById('traverse-results').style.display = 'block';
-    buildTraverseTable(traverseData);
-    buildTraverseChart(traverseData, Vt);
-  } else {
-    document.getElementById('traverse-results').style.display = 'none';
-  }
+  buildPressureChart(results);
 
   goTo(2);
 }
 
-function fmtNum(v, dp) { return v !== null && !isNaN(v) ? v.toFixed(dp) : '—'; }
-
-function buildResultsTable(results) {
-  const tbody = document.getElementById('res-tbody');
-  const Vt_ref = results.find(r => r.tap.zone === 't')?.V || 1;
-  tbody.innerHTML = results.map(r => {
-    const { tap, P, V, q, Cp } = r;
-    const zt = { c:'zt-c', t:'zt-t', d:'zt-d' }[tap.zone];
-    const zl = { c:'C', t:'T', d:'D' }[tap.zone];
-    return `<tr>
-      <td>P${tap.id} <span class="zone-tag ${zt}">${zl}</span></td>
-      <td>${tap.w}</td>
-      <td>${tap.A.toLocaleString()}</td>
-      <td>${fmtNum(P,1)}</td>
-      <td>${fmtNum(V,3)}</td>
-      <td>${fmtNum(V/Vt_ref,4)}</td>
-      <td>${fmtNum(q,2)}</td>
-      <td>${fmtNum(Cp,4)}</td>
-    </tr>`;
-  }).join('');
-}
-
-function buildVelChart(results) {
-  if (charts.vel) { try { charts.vel.destroy(); } catch(e){} }
-  const labels = results.map(r => 'P' + r.tap.id);
-  const vels   = results.map(r => r.V);
-  const colors = results.map(r => Z_COLOR[r.tap.zone] + 'CC');
-  charts.vel = new Chart(document.getElementById('velChart').getContext('2d'), {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [{
-        label: 'Velocity (m/s)',
-        data: vels,
-        backgroundColor: colors,
-        borderColor: results.map(r => Z_COLOR[r.tap.zone]),
-        borderWidth: 1.5
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: { display: false },
-        title: { display: true, text: `Throat velocity: ${vels[4]?.toFixed(2) ?? '—'} m/s`, color: '#4a5568', font: { size: 13, family: 'Inter' } }
-      },
-      scales: {
-        y: { beginAtZero: true, title: { display: true, text: 'Velocity (m/s)', font: { size: 12, family: 'Inter' } }, grid: { color: '#e2e8f0' } },
-        x: { grid: { color: '#e2e8f0' } }
-      }
-    }
-  });
-}
-
-function buildPresChart(results) {
-  if (charts.pres) { try { charts.pres.destroy(); } catch(e){} }
-  const labels = results.map(r => 'P' + r.tap.id);
-  const pVals  = results.map(r => r.P);
-  const cpVals = results.map(r => r.Cp);
-  charts.pres = new Chart(document.getElementById('presChart').getContext('2d'), {
-    type: 'bar',
+function buildPressureChart(results) {
+  if (charts.main) { try { charts.main.destroy(); } catch(e){} }
+  const labels  = results.map(r => 'P' + r.tap.id);
+  // Static pressures: negate (manometer reads magnitude; pressures are below atm in contraction/throat)
+  const pStatic = results.map(r => r.P !== null ? parseFloat((-r.P).toFixed(2)) : null);
+  const pDyn    = results.map(r => parseFloat(r.q.toFixed(2)));
+  charts.main = new Chart(document.getElementById('pressureChart').getContext('2d'), {
+    type: 'line',
     data: {
       labels,
       datasets: [
         {
-          type: 'bar',
           label: 'Static pressure (Pa)',
-          data: pVals,
-          backgroundColor: '#334155BB',
-          borderColor: '#1e293b',
-          borderWidth: 1.2,
-          yAxisID: 'yP'
+          data: pStatic,
+          borderColor: '#1a56a0',
+          backgroundColor: '#1a56a0',
+          borderWidth: 2.5,
+          pointRadius: 6,
+          pointHoverRadius: 8,
+          pointBackgroundColor: '#fff',
+          pointBorderColor: '#1a56a0',
+          pointBorderWidth: 2.5,
+          tension: 0.35,
+          fill: false,
         },
         {
-          type: 'line',
-          label: 'Cp',
-          data: cpVals,
-          borderColor: '#94a3b8',
-          borderWidth: 2,
-          borderDash: [5, 3],
-          pointRadius: 5,
+          label: 'Dynamic pressure (Pa)',
+          data: pDyn,
+          borderColor: '#bf360c',
+          backgroundColor: '#bf360c',
+          borderWidth: 2.5,
+          pointRadius: 6,
+          pointHoverRadius: 8,
           pointBackgroundColor: '#fff',
-          pointBorderColor: '#64748b',
-          pointBorderWidth: 2,
+          pointBorderColor: '#bf360c',
+          pointBorderWidth: 2.5,
+          tension: 0.35,
           fill: false,
-          yAxisID: 'yCp'
         }
       ]
     },
     options: {
       responsive: true,
       plugins: {
-        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 12, family: 'Inter' } } }
+        legend: { position: 'bottom', labels: { boxWidth: 14, font: { size: 13, family: 'Inter' }, padding: 20 } },
+        tooltip: { mode: 'index', intersect: false }
       },
       scales: {
-        yP: { type: 'linear', position: 'left', title: { display: true, text: 'P static (Pa)', font: { size: 12, family: 'Inter' } }, grid: { color: '#e2e8f0' } },
-        yCp: { type: 'linear', position: 'right', title: { display: true, text: 'Cp', font: { size: 12, family: 'Inter' } }, grid: { drawOnChartArea: false } },
-        x: { grid: { color: '#e2e8f0' } }
+        y: {
+          title: { display: true, text: 'Pressure (Pa)', font: { size: 13, family: 'Inter' } },
+          grid: { color: '#e2e8f0' }
+        },
+        x: {
+          title: { display: true, text: 'Tapping point', font: { size: 13, family: 'Inter' } },
+          grid: { color: '#e2e8f0' }
+        }
       }
     }
   });
 }
 
-function buildTraverseTable(data) {
-  document.getElementById('trav-tbody').innerHTML = data.map((d, i) => `
-    <tr>
-      <td>${i+1}</td>
-      <td>${d.pos !== null ? d.pos.toFixed(1) : '—'}</td>
-      <td>${fmtNum(d.p0,2)}</td>
-      <td>${fmtNum(d.ps,2)}</td>
-      <td>${fmtNum(d.dP,2)}</td>
-      <td>${fmtNum(d.V,3)}</td>
-      <td>${fmtNum(d.Cp,4)}</td>
-    </tr>`).join('');
+function tryNextImgSrc(img) {
+  // Try alternative raw URL formats if the first fails
+  const srcs = [
+    'https://raw.githubusercontent.com/Nidiana/LabsDiscussion/main/FlowEnergyConversion/tappings.PNG',
+    'https://cdn.jsdelivr.net/gh/Nidiana/LabsDiscussion@main/FlowEnergyConversion/tappings.PNG',
+    'https://raw.githubusercontent.com/Nidiana/LabsDiscussion/HEAD/FlowEnergyConversion/tappings.PNG',
+  ];
+  const tried = img.dataset.tried ? parseInt(img.dataset.tried) : 0;
+  if (tried < srcs.length) {
+    img.dataset.tried = tried + 1;
+    img.src = srcs[tried];
+  } else {
+    img.style.display = 'none';
+    document.getElementById('tappings-fallback').style.display = 'block';
+  }
 }
 
-function buildTraverseChart(data, Vt) {
-  if (charts.trav) { try { charts.trav.destroy(); } catch(e){} }
-  const sorted = [...data].filter(d => d.pos !== null).sort((a,b) => a.pos - b.pos);
-  charts.trav = new Chart(document.getElementById('traverseChart').getContext('2d'), {
-    type: 'line',
-    data: {
-      labels: sorted.map(d => d.pos.toFixed(0) + ' mm'),
-      datasets: [
-        { label: 'Pitot velocity (m/s)', data: sorted.map(d => d.V), borderColor: '#1a56a0', backgroundColor: '#1a56a020', borderWidth: 2, pointRadius: 6, fill: true },
-        { label: 'Continuity estimate (m/s)', data: sorted.map(() => Vt * (15000/16395)), borderColor: '#b45309', borderWidth: 1.8, borderDash: [5,3], pointRadius: 0 }
-      ]
-    },
-    options: {
-      responsive: true,
-      plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 12, family: 'Inter' } } } },
-      scales: {
-        y: { title: { display: true, text: 'Velocity (m/s)', font: { size: 12, family: 'Inter' } }, grid: { color: '#e2e8f0' } },
-        x: { title: { display: true, text: 'Position from P7 (mm)', font: { size: 12, family: 'Inter' } }, grid: { color: '#e2e8f0' } }
-      }
-    }
-  });
+function toggleDynInfo() {
+  const panel = document.getElementById('dyn-info-panel');
+  const btn   = document.getElementById('btn-dyn-info');
+  const open  = panel.style.display === 'none';
+  panel.style.display = open ? 'block' : 'none';
+  btn.classList.toggle('open', open);
+  btn.textContent = open ? 'Hide explanation ▲' : 'How is dynamic pressure calculated?';
 }
 
 /* ─── QUIZ — UNDERSTANDING ────────────────────────────── */
@@ -1349,9 +1273,5 @@ function goTo(n) {
   }
 }
 </script>
- <div class="copyright">
-            <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" /></a><br />
-            &copy; 2025 Nidiana Rosado Hau, University of Sheffield
-        </div>
 </body>
 </html>
