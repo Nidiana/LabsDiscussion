@@ -656,7 +656,7 @@ table.res-table tbody tr:hover td { background: #f8fafc; }
               <div class="tap-fld f-throat"><label>Static pressure Pₛ</label>
                 <input type="number" id="pitot-ps" step="0.1" placeholder="—" inputmode="decimal" oninput="checkReady()">
               </div>
-              <div class="tap-fld f-throat"><label>Direct velocity (m/s) <span style="font-weight:400;color:var(--text-lt);">optional</span></label>
+              <div class="tap-fld f-throat"><label>Direct velocity (m/s) <span style="font-weight:400;color:var(--text-lt);"></span></label>
                 <input type="number" id="pitot-v" step="0.01" placeholder="—" inputmode="decimal" oninput="checkReady()">
               </div>
             </div>
@@ -677,7 +677,7 @@ table.res-table tbody tr:hover td { background: #f8fafc; }
               <div class="tap-fld f-diff"><label>Static pressure Pₛ</label>
                 <input type="number" id="diff-ps" step="0.1" placeholder="—" inputmode="decimal">
               </div>
-              <div class="tap-fld f-diff"><label>Direct velocity (m/s) <span style="font-weight:400;color:var(--text-lt);">optional</span></label>
+              <div class="tap-fld f-diff"><label>Direct velocity (m/s) <span style="font-weight:400;color:var(--text-lt);"></span></label>
                 <input type="number" id="diff-v" step="0.01" placeholder="—" inputmode="decimal">
               </div>
             </div>
@@ -1338,10 +1338,10 @@ function buildDqCharts() {
   const diffP0_raw   = parseFloat(document.getElementById('diff-p0')?.value);
 
   // Throat pitot is at ~P4-P6 region, place at index 4 (P5 = centre throat)
-  // Diffuser pitot is between P7-P8, place at index 7 (P8)
+  // Diffuser pitot is between P7-P8, place at index 6 (P7)
   const pitotTotalMmH2O = results.map((r, i) => null); // sparse
   if (!isNaN(throatP0_raw)) pitotTotalMmH2O[4] = parseFloat(throatP0_raw.toFixed(2));  // P5
-  if (!isNaN(diffP0_raw))   pitotTotalMmH2O[7] = parseFloat(diffP0_raw.toFixed(2));    // P8
+  if (!isNaN(diffP0_raw))   pitotTotalMmH2O[6] = parseFloat(diffP0_raw.toFixed(2));    // P7
 
   // Predicted velocity m/s
   const predVel = results.map(r => parseFloat(r.V.toFixed(3)));
@@ -1368,7 +1368,7 @@ function buildDqCharts() {
     const p0d = getPa('diff-p0'), psd = getPa('diff-ps');
     if (p0d !== null && psd !== null && p0d > psd) Vd = Math.sqrt(2*(p0d-psd)/rho);
   }
-  if (Vd) pitotVel[7] = parseFloat(Vd.toFixed(3));  // P8
+  if (Vd) pitotVel[6] = parseFloat(Vd.toFixed(3));  // P7
 
   // ── CHART 1: Total pressure ──
   if (charts.dqTot) { try { charts.dqTot.destroy(); } catch(e){} }
