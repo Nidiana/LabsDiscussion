@@ -279,6 +279,24 @@ table.res-table tbody tr:hover td{background:#f8fafc;}
   margin-top: 3px;
   line-height: 1.5;
 }
+.dynq-instruction {
+  font-family: var(--ff);
+  font-size: 0.88rem;
+  color: var(--text);
+  line-height: 1.65;
+  margin-top: 6px;
+}
+.dynq-pitot-detail {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--text-md);
+  margin-top: 6px;
+  padding: 5px 10px;
+  background: var(--surface2);
+  border-radius: 5px;
+  border: 1px solid var(--border-lt);
+  display: inline-block;
+}
 .dynq-table-wrap { overflow-x: auto; }
 table.dynq-table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 0.85rem; }
 table.dynq-table thead th {
@@ -597,15 +615,14 @@ table.dynq-table tbody tr:hover td { background: #f8fafc; }
         <div class="calc-card" id="calc-card">
           <div class="calc-head">
             <span class="q-badge q-prd" style="margin-bottom:0;">Calculate</span>
-            <h3 class="calc-title">Apply the theory at P1</h3>
           </div>
           <div class="calc-body">
-            <p class="calc-premise">Since total pressure P&#8320; &#x2248; 0 (gauge) everywhere in this tunnel, use Bernoulli&#8217;s principle to calculate the velocity at P1 from its static pressure reading.</p>
+            <p class="calc-premise">The total pressure P&#8320; at every tapping in this tunnel is <strong>0 mmH&#8322;O</strong> (gauge). The static pressure at P1 is shown below. Using Bernoulli&#8217;s principle, estimate the velocity the pitot tube would read at position P1.</p>
             <div class="calc-known" id="calc-known">
-              Static pressure at P1: <span id="calc-p1-display" style="font-family:var(--mono);font-weight:700;color:var(--c-cont);">&#8212; (enter P1 in Step 1 first)</span>
+              Static pressure at P1 (from your readings): <span id="calc-p1-display" style="font-family:var(--mono);font-weight:700;color:var(--c-cont);">&#8212; (enter P1 in Step 1 first)</span>
             </div>
             <div class="calc-input-row">
-              <label class="calc-label" for="calc-v-input">Your calculated velocity at P1</label>
+              <label class="calc-label" for="calc-v-input">Estimated velocity at P1 (m/s)</label>
               <div class="calc-input-wrap">
                 <input type="number" id="calc-v-input" step="0.01" placeholder="m/s" inputmode="decimal" oninput="checkCalcAnswer()">
                 <span class="calc-unit">m/s</span>
@@ -626,8 +643,8 @@ table.dynq-table tbody tr:hover td { background: #f8fafc; }
     <!-- SLIDE 3: ANALYSIS -->
     <div class="slide" id="s3">
       <div class="slide-body">
-        <div class="slide-h">Calculate &#8212; Apply the Theory</div>
-        <div class="slide-lead">Using the measured velocity at the throat with the pitot tube and applying the continuity equation, calculate the dynamic pressure at each tapping position.</div>
+        <div class="slide-h">Step 3 &#8212; Estimate the Dynamic Pressure</div>
+        <div class="slide-lead">You know the throat velocity from the pitot tube. Using the continuity equation and the cross-sectional area at each tapping, estimate the dynamic pressure at every position along the duct.</div>
 
         <!-- tappings image with dimensions -->
         <div class="diagram-card" style="margin-bottom:16px;">
@@ -644,21 +661,21 @@ table.dynq-table tbody tr:hover td { background: #f8fafc; }
           <div class="diagram-note">Cross-sectional dimensions at each tapping point. Use these areas together with the throat velocity to calculate velocity and dynamic pressure at each position via continuity.</div>
         </div>
 
-        <!-- pitot throat reading display -->
-        <div class="info-box" id="s3-pitot-info" style="margin-bottom:18px;">
-          Pitot tube reading at the throat &#8212;
-          Total pressure P&#8320;: <strong id="s3-p0-display">&#8212;</strong> &nbsp;|&nbsp;
-          Static pressure Ps: <strong id="s3-ps-display">&#8212;</strong> &nbsp;|&nbsp;
-          Throat velocity: <strong id="s3-vt-display">&#8212;</strong>
-        </div>
 
         <!-- dynamic pressure table -->
         <div class="dynq-card">
           <div class="dynq-head">
             <span class="q-badge q-prd" style="margin-bottom:0;">Calculate</span>
             <div>
-              <div class="dynq-title">Dynamic pressure at each tapping (Pa)</div>
-              <div class="dynq-sub">Calculate the dynamic pressure at P1 manually. Once correct, the remaining values fill automatically.</div>
+              <div class="dynq-title">Estimate the dynamic pressure at each tapping (Pa)</div>
+              <div class="dynq-instruction">
+                The velocity at the throat measured by the pitot tube is <strong id="s3-vt-display">&#8212;</strong>.
+                Using the continuity equation and the dimensions in the figure above, calculate the dynamic pressure in Pascal at each position along the duct.
+                Once the first value (P1) is calculated correctly, the remaining 10 will fill in automatically.
+              </div>
+              <div class="dynq-pitot-detail" id="s3-pitot-info">
+                Pitot at throat &#8212; P&#8320;: <strong id="s3-p0-display">&#8212;</strong> &nbsp;&middot;&nbsp; Ps: <strong id="s3-ps-display">&#8212;</strong>
+              </div>
             </div>
           </div>
           <div class="dynq-table-wrap">
@@ -731,18 +748,19 @@ table.dynq-table tbody tr:hover td { background: #f8fafc; }
           </div>
         </div>
 
-<!-- Q2: pitot tube at inlet -->
-<div class="u-unit">
-  <div class="u-unit-body">
-    <span class="q-badge q-exp">Explain</span>
-    <div class="u-stem">Q2 &#8212; Pitot Tube at the Inlet</div>
-    <div class="u-desc">What velocity would the pitot tube measure if moved to the very inlet of the wind tunnel?</div>
-    <label class="mc-opt"><input type="radio" name="r2" value="A" onchange="checkR(2,'A')"> A &nbsp; The same velocity as at the throat</label>
-    <label class="mc-opt"><input type="radio" name="r2" value="B" onchange="checkR(2,'B')"> B &nbsp; 0 m/s</label>
-    <label class="mc-opt"><input type="radio" name="r2" value="C" onchange="checkR(2,'C')"> C &nbsp; Half the throat velocity</label>
-    <div id="rFb2" class="q-feedback"></div>
-  </div>
-</div>
+        <!-- Q2: pitot tube at inlet -->
+        <div class="u-unit">
+          <div class="u-unit-body">
+            <span class="q-badge q-exp">Explain</span>
+            <div class="u-stem">Q2 &#8212; Velocity at the Wind Tunnel Inlet</div>
+            <div class="u-desc">If the pitot tube is placed at the inlet of the wind tunnel, what velocity will it read?</div>
+            <div class="q-context" style="margin-bottom:14px;">Hint: outside the tunnel the air is still. Think about what the static pressure equals when there is no flow, and what the total pressure equals in still air.</div>
+            <label class="mc-opt"><input type="radio" name="r2" value="A" onchange="checkR(2,'A')"> A &nbsp; The same velocity as at the throat &#8212; the fan drives the same speed everywhere</label>
+            <label class="mc-opt"><input type="radio" name="r2" value="B" onchange="checkR(2,'B')"> B &nbsp; 0 m/s &#8212; the static pressure equals atmospheric pressure so the dynamic pressure (&Delta;P = P&#8320; &#8722; Ps) is zero, giving zero velocity</label>
+            <label class="mc-opt"><input type="radio" name="r2" value="C" onchange="checkR(2,'C')"> C &nbsp; Half the throat velocity &#8212; the inlet area is about twice the throat area</label>
+            <div id="rFb2" class="q-feedback"></div>
+          </div>
+        </div>
 
         <!-- Discussion prompt -->
         <div class="discuss-card">
@@ -777,7 +795,7 @@ table.dynq-table tbody tr:hover td { background: #f8fafc; }
               </div>
             </div>
 
-  
+            
 
           </div>
         </div>
@@ -878,7 +896,8 @@ function addTraverse(){
   traverseCount++;const id=traverseCount;
   const card=document.createElement('div');card.className='pitot-card';card.id='trav-'+id;
   card.innerHTML=`<div class="pitot-card-head"><span class="pitot-label" id="trav-lbl-${id}">Traverse ${id}</span>${id>1?`<button class="btn-rm" onclick="removeTraverse(${id})">Remove</button>`:''}</div><div class="pitot-fields"><div class="tap-fld f-diff"><label>Position from P7 (mm)</label><input type="number" id="trav-pos-${id}" step="1" placeholder="e.g. 50" inputmode="decimal" oninput="watchTraverse(${id})"></div><div class="tap-fld f-diff"><label>Total pressure P&#8320;</label><input type="number" id="trav-p0-${id}" step="0.1" placeholder="&#8212;" inputmode="decimal" oninput="watchTraverse(${id})"></div><div class="tap-fld f-diff"><label>Static pressure P&#8323;</label><input type="number" id="trav-ps-${id}" step="0.1" placeholder="&#8212;" inputmode="decimal" oninput="watchTraverse(${id})"></div></div>`;
-  document.getElementById('traverse-wrap').appendChild(card);
+  const tw = document.getElementById('traverse-wrap');
+  if(tw) tw.appendChild(card);
 }
 function removeTraverse(id){document.getElementById('trav-'+id)?.remove();}
 function watchTraverse(id){
@@ -1045,7 +1064,7 @@ let answeredRs = new Set();
 const R_CORRECT = {1:'B', 2:'B'};
 const R_FB = {
   2: {
-    B: `<strong>&#10003; Correct.</strong> At the very inlet, before the air enters and accelerates, the flow is essentially still. Static pressure = atmospheric pressure, and total pressure also = atmospheric pressure. Therefore dynamic pressure &Delta;P = P&#8320; &#8722; Ps = 0, and the pitot tube reads V = &radic;(2&#215;0/&rho;) = <strong>0 m/s</strong>. This is exactly why the pitot tube must be placed <em>inside</em> the flowing region &#8212; it can only measure velocity where there is actually flow.`,
+    B: `<strong>&#10003; Correct &#8212; 0 m/s.</strong> The pitot tube measures velocity from the <em>dynamic pressure</em> &#8212; the difference between total pressure and static pressure (&Delta;P = P&#8320; &#8722; Ps). At the inlet the air is at rest: static pressure equals atmospheric pressure, and total pressure also equals atmospheric pressure, so &Delta;P = 0. Applying Bernoulli, V = &radic;(2&Delta;P/&rho;) = 0 m/s. This confirms Bernoulli&#8217;s principle: only when the flow is moving &#8212; and static pressure has dropped below atmospheric &#8212; does the pitot tube register a velocity.`,
     A: `<strong>&#10007; Incorrect &#8212; correct answer: B.</strong> The fan creates a pressure difference that drives flow through the duct, but the air outside the inlet is still at rest. A pitot tube there would measure equal stagnation and static pressures, giving zero dynamic pressure and therefore zero velocity.`,
     C: `<strong>&#10007; Incorrect &#8212; correct answer: B.</strong> The continuity equation (A&#215;V = constant) applies <em>inside</em> the duct where flow is established. The inlet of the tunnel is the boundary between still air outside and accelerating air inside &#8212; right at the entrance the velocity is effectively zero.`
   },
