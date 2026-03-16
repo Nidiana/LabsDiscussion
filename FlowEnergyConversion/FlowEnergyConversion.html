@@ -97,6 +97,12 @@ body{font-family:var(--serif);background:var(--bg);color:var(--text);line-height
 .q-feedback.show{display:block;}
 .fb-ok{background:var(--ok-bg);border-left:5px solid var(--ok);color:#133e28;}
 .fb-err{background:var(--err-bg);border-left:5px solid var(--err);color:#5c0a0a;}
+/* SIGN BUTTONS — new for slide 1 Q1 */
+.sign-btn-row{display:flex;gap:14px;margin-top:4px;}
+.sign-btn{flex:1;padding:14px 10px;font-family:var(--ff);font-size:1.05rem;font-weight:700;border:2px solid var(--border);border-radius:var(--r);background:var(--surface2);color:var(--text-md);cursor:pointer;transition:border-color 0.15s,background 0.15s,color 0.15s;min-height:52px;}
+.sign-btn:hover:not(:disabled){border-color:var(--accent);background:var(--accent-bg);color:var(--accent);}
+.sign-btn.sign-correct{border-color:var(--ok);background:var(--ok-bg);color:var(--ok);}
+.sign-btn.sign-wrong{border-color:var(--err);background:var(--err-bg);color:var(--err);}
 /* PITOT CARDS */
 .pitot-card{background:var(--surface);border:1px solid var(--border);border-left:5px solid #7c3aed;border-radius:var(--r);padding:16px 18px;margin-bottom:10px;transition:border-left-color 0.2s;}
 .pitot-card.complete{border-left-color:var(--ok);}
@@ -500,15 +506,17 @@ table.dynq-table tbody tr:hover td { background: #f8fafc; }
     <div class="slide active" id="s1">
       <div class="slide-body">
         <div class="slide-h">Step 1 &#8212; Record static pressure readings</div>
-        <div class="slide-lead">Read the gauge static pressure (mmH&#8322;O) at each wall tapping point and enter the values below. The chart updates live so you can see the pressure distribution take shape.</div>
+        <div class="slide-lead">Read the gauge static pressure (mmH&#8322;O) at each wall tapping point and enter the values below. The chart will appear once you have worked through the reflection questions.</div>
+
         <div class="diagram-card">
           <svg id="diag-svg" viewBox="0 0 820 170" xmlns="http://www.w3.org/2000/svg"></svg>
           <div class="diagram-note">Tapping points P1&#8211;P3: contraction &nbsp;&middot;&nbsp; P4&#8211;P6: constant throat section &nbsp;&middot;&nbsp; P7&#8211;P11: diffuser.</div>
         </div>
+
         <div class="tap-entry-card">
           <div class="tap-entry-head">
             Static pressure readings
-            <span style="font-family:var(--mono);font-size:0.72rem;font-weight:400;color:var(--text-lt);">mmH&#8322;O gauge</span>
+            <span style="font-family:var(--mono);font-size:0.72rem;font-weight:400;color:var(--text-lt);">mmH&#8322;O &#8212; as displayed by the manometer</span>
           </div>
           <div class="tap-strip-wrap">
             <div class="tap-strip">
@@ -525,27 +533,49 @@ table.dynq-table tbody tr:hover td { background: #f8fafc; }
               <div class="tap-cell f-diff">  <label>P11</label> <input type="number" id="p11" step="0.1" placeholder="&#8212;" inputmode="decimal" oninput="onTapInput()"></div>
             </div>
           </div>
-          <div class="tap-chart-area">
-            <div style="font-family:var(--ff);font-size:0.82rem;font-weight:700;color:#1a2e44;margin-bottom:4px;">Energy distribution &#8212; live</div>
-            <div class="live-chart-hint">Chart updates as you type. More negative = lower energy = faster flow.</div>
-            <div id="live-chart-empty" class="live-chart-empty">Enter a reading above to see the chart.</div>
-            <canvas id="livePresChart" style="display:none;"></canvas>
+
+          <!-- Chart: hidden until Q1 answered correctly -->
+          <div class="tap-chart-area" id="s1-chart-area" style="display:none;">
+            <div style="font-family:var(--ff);font-size:0.82rem;font-weight:700;color:#1a2e44;margin-bottom:4px;">Static pressure distribution &#8212; gauge (mmH&#8322;O)</div>
+            <div class="live-chart-hint">Pressures are shown with their correct sign. More negative = lower static pressure = faster flow.</div>
+            <canvas id="livePresChart"></canvas>
           </div>
         </div>
 
-        <!-- Q: WHY NEGATIVE? -->
-        <div class="inline-q" id="iq-neg">
-          <div class="inline-q-head"><span class="iq-badge">Reflect</span><h3>Make sense of what you see</h3></div>
+        <!-- Q1: What is the sign? — appears once all 11 values entered -->
+        <div class="inline-q" id="iq-sign" style="display:none;">
+          <div class="inline-q-head"><span class="iq-badge">Reflect</span><h3>What is the sign of the static pressure?</h3></div>
           <div class="inline-q-body">
-            <p class="iq-stem">Your gauge pressures are <strong>negative</strong> at the throat and most tapping points. What is the correct physical explanation for this?</p>
-            <label class="mc-opt"><input type="radio" name="iq0" value="A" onchange="checkIQ('A')"> A &nbsp; The manometer is connected the wrong way round &#8212; the readings should be positive</label>
-            <label class="mc-opt"><input type="radio" name="iq0" value="B" onchange="checkIQ('B')"> B &nbsp; Gauge pressure is measured relative to atmospheric pressure. The moving air inside the tunnel has lower static pressure than the still atmosphere outside, so gauge readings are negative</label>
-            <label class="mc-opt"><input type="radio" name="iq0" value="C" onchange="checkIQ('C')"> C &nbsp; The air inside the tunnel is colder than outside, which causes a drop in absolute pressure</label>
-            <label class="mc-opt"><input type="radio" name="iq0" value="D" onchange="checkIQ('D')"> D &nbsp; Negative pressure means the air is being sucked upward against gravity inside the duct</label>
-            <div id="iq-feedback" class="q-feedback"></div>
+            <p class="iq-stem">
+              The electronic manometer reports only <strong>magnitudes</strong> &#8212; it always displays a positive number.
+              <br><br>
+              Think about <strong>Bernoulli&#8217;s principle</strong> and recall the velocity you observed at the pitot tube in the throat.
+              The air inside the tunnel is moving; the atmosphere outside is still.
+              <br><br>
+              What must be the <strong>sign</strong> of the static pressure inside the tunnel, measured as a gauge pressure relative to the atmosphere?
+            </p>
+            <div class="sign-btn-row">
+              <button class="sign-btn" id="sign-btn-pos" onclick="checkSign('positive')">&#43;&nbsp; Positive</button>
+              <button class="sign-btn" id="sign-btn-neg" onclick="checkSign('negative')">&minus;&nbsp; Negative</button>
+            </div>
+            <div class="q-feedback" id="sign-feedback"></div>
           </div>
         </div>
-        <button class="btn-proceed" onclick="goTo(2)">Move to pitot readings <span class="arr">&#8594;</span></button>
+
+        <!-- Q2: Interpret distribution — appears after Q1 correct + chart shown -->
+        <div class="inline-q" id="iq-dist" style="display:none;">
+          <div class="inline-q-head"><span class="iq-badge">Reflect</span><h3>Interpret the pressure distribution</h3></div>
+          <div class="inline-q-body">
+            <p class="iq-stem">Now look at the chart above. What does the static pressure distribution along the test section tell you?</p>
+            <label class="mc-opt"><input type="radio" name="iq-dist" value="A" onchange="checkDist('A')"> A &nbsp; The static pressure decreases through the contraction, reaches its minimum at the throat, then recovers progressively through the diffuser &#8212; consistent with Bernoulli&#8217;s principle and continuity.</label>
+            <label class="mc-opt"><input type="radio" name="iq-dist" value="B" onchange="checkDist('B')"> B &nbsp; The static pressure decreases through the contraction and continues to decrease through the diffuser, because the fan is continuously doing work on the flow.</label>
+            <label class="mc-opt"><input type="radio" name="iq-dist" value="C" onchange="checkDist('C')"> C &nbsp; The static pressure is constant everywhere in the throat section and only changes where the cross-sectional area changes abruptly.</label>
+            <label class="mc-opt"><input type="radio" name="iq-dist" value="D" onchange="checkDist('D')"> D &nbsp; The static pressure follows the same trend as velocity &#8212; it is highest at the throat and lowest at the wide inlet and outlet sections.</label>
+            <div class="q-feedback" id="dist-feedback"></div>
+          </div>
+        </div>
+
+        <button class="btn-proceed" id="s1-proceed" style="display:none;" onclick="goTo(2)">Move to pitot readings <span class="arr">&#8594;</span></button>
       </div>
     </div>
 
@@ -773,16 +803,6 @@ table.dynq-table tbody tr:hover td { background: #f8fafc; }
           </div>
           <div class="discuss-body">
 
-            <div class="discuss-q">
-              <span class="discuss-num">1</span>
-              <div class="discuss-q-inner">
-                <p>Looking at the total pressure line on the chart &#8212; is it perfectly flat, or does it slope slightly? What does any downward trend tell you about energy losses in the duct?</p>
-                <button class="btn-guidance" onclick="toggleGuidance(this)" aria-expanded="false">&#128161; Show guidance</button>
-                <div class="guidance-panel" hidden>
-                  Bernoulli&#8217;s equation tells us that for an <em>ideal</em> flow with no friction, total pressure (static + dynamic) stays constant along any streamline. In our real wind tunnel, the air rubs against the duct walls as it moves &#8212; this friction converts some of the flow&#8217;s mechanical energy into heat. That energy is permanently lost, so the total pressure gradually decreases from inlet to exit. A perfectly flat total pressure line would mean zero friction; a downward slope is evidence of real viscous losses. This is why we always need a fan to keep the flow going &#8212; it continuously replaces the energy that friction takes away.
-                </div>
-              </div>
-            </div>
 
             <div class="discuss-q">
               <span class="discuss-num">2</span>
@@ -795,12 +815,10 @@ table.dynq-table tbody tr:hover td { background: #f8fafc; }
               </div>
             </div>
 
-            
-
           </div>
         </div>
 
-                <div class="completion-banner" id="completion-banner">
+        <div class="completion-banner" id="completion-banner">
           <div class="completion-icon">&#127881;</div>
           <div class="completion-title">Activity complete!</div>
           <div class="completion-msg">Well done &#8212; you have recorded your measurements, calculated dynamic pressures, analysed the three energy components, and discussed the results with your colleagues. Use the numbered steps above to revisit any section.</div>
@@ -826,7 +844,11 @@ const TAPS=[
 const ZC={c:'#b45309',t:'#1a7a4a',d:'#1a56a0'};
 let charts={},traverseCount=0;
 let answeredQs=new Set(),answeredUs=new Set();
-let iqAnswered=false,iq2Answered=false;
+let iq2Answered=false;
+
+// ── SLIDE 1 STATE ──────────────────────────────────────────────────
+let s1SignAnswered = false;
+let s1DistAnswered = false;
 
 function toPa(v,u){return u==='mmH2O'?v*9.80665:u==='mbar'?v*100:u==='mmHg'?v*133.322:v;}
 
@@ -855,27 +877,134 @@ function toPa(v,u){return u==='mmH2O'?v*9.80665:u==='mbar'?v*100:u==='mmHg'?v*13
   svg.innerHTML=h;
 })();
 
-// LIVE CHART
-function onTapInput(){updateLiveChart();updateCalcDisplay();}
-function updateLiveChart(){
-  const vals=TAPS.map(t=>{const el=document.getElementById('p'+t.id);return(!el||el.value==='')?null:-toPa(parseFloat(el.value),'mmH2O');});
-  const hasAny=vals.some(v=>v!==null);
-  const empty=document.getElementById('live-chart-empty'),canvas=document.getElementById('livePresChart');
-  if(!hasAny){empty.style.display='block';canvas.style.display='none';if(charts.live){try{charts.live.destroy();}catch(e){}charts.live=null;}return;}
-  empty.style.display='none';canvas.style.display='block';
-  const ptC=TAPS.map(t=>ZC[t.zone]);
-  if(charts.live){charts.live.data.datasets[0].data=vals;charts.live.update('none');return;}
-  charts.live=new Chart(canvas.getContext('2d'),{type:'line',data:{labels:TAPS.map(t=>'P'+t.id),datasets:[{label:'Energy (Pa)',data:vals,borderColor:'#1a56a0',backgroundColor:'rgba(26,86,160,0.07)',borderWidth:2.5,pointBackgroundColor:ptC,pointBorderColor:ptC,pointRadius:6,pointHoverRadius:8,fill:true,tension:0.35}]},options:{responsive:true,animation:{duration:200},plugins:{legend:{display:false},title:{display:true,text:'Static pressure energy at each tapping point (Pa gauge)',color:'#4a5568',font:{size:12,family:'Inter'}}},scales:{y:{title:{display:true,text:'Energy (Pa)',font:{size:11,family:'Inter'}},grid:{color:'#e2e8f0'}},x:{grid:{color:'#e2e8f0'}}}}});
+// ── SLIDE 1: INPUT HANDLER ─────────────────────────────────────────
+function onTapInput(){
+  updateCalcDisplay();
+  // Show Q1 only once all 11 values are filled
+  if(s1SignAnswered) return;
+  const allFilled = TAPS.every(t => {
+    const el = document.getElementById('p'+t.id);
+    return el && el.value !== '' && !isNaN(parseFloat(el.value));
+  });
+  if(allFilled){
+    const q = document.getElementById('iq-sign');
+    q.style.display = 'block';
+    q.scrollIntoView({behavior:'smooth', block:'nearest'});
+  }
 }
 
-// IQ1: negative pressure
-function checkIQ(a){
-  if(iqAnswered)return;iqAnswered=true;
-  document.querySelectorAll('input[name="iq0"]').forEach(r=>{r.disabled=true;r.closest('.mc-opt').classList.add('locked');});
-  const ok=a==='B',fb=document.getElementById('iq-feedback'),c=document.getElementById('iq-neg');
-  const m={B:`<strong>&#10003; Correct.</strong> Gauge pressure is always measured relative to atmospheric pressure. Inside the tunnel, accelerating air has lower static pressure than the still atmosphere outside &#8212; exactly what Bernoulli predicts. A negative gauge reading means the static pressure at that tapping is <em>below</em> the atmospheric reference. The more negative, the faster the air is moving at that point.`,A:`<strong>&#10007; Incorrect &#8212; correct answer: B.</strong> The manometer is connected correctly. Negative gauge pressure means the static pressure inside the tunnel is lower than atmospheric. As air accelerates through the contraction and throat, its static pressure drops (Bernoulli's principle).`,C:`<strong>&#10007; Incorrect &#8212; correct answer: B.</strong> Temperature differences are negligible in a low-speed wind tunnel. The negative readings arise because gauge pressure is referenced to the still atmosphere. Accelerating air inside has lower static pressure than stationary air outside.`,D:`<strong>&#10007; Incorrect &#8212; correct answer: B.</strong> Negative gauge pressure does not imply upward suction against gravity. It simply means the static pressure inside the duct is below atmospheric. Bernoulli's principle predicts this drop when air accelerates.`};
-  fb.innerHTML=m[a]||m['A'];fb.className='q-feedback '+(ok?'fb-ok':'fb-err')+' show';
-  c.classList.add(ok?'answered-ok':'answered-err');fb.scrollIntoView({behavior:'smooth',block:'nearest'});
+// ── SLIDE 1: Q1 — Sign of static pressure ─────────────────────────
+function checkSign(choice){
+  if(s1SignAnswered) return;
+  const fb = document.getElementById('sign-feedback');
+  const btnPos = document.getElementById('sign-btn-pos');
+  const btnNeg = document.getElementById('sign-btn-neg');
+  btnPos.disabled = true;
+  btnNeg.disabled = true;
+
+  if(choice === 'negative'){
+    s1SignAnswered = true;
+    btnNeg.classList.add('sign-correct');
+    fb.innerHTML = '&#10003; <strong>Correct.</strong> Gauge pressure is measured relative to atmospheric pressure. '
+      + 'The air inside the tunnel is moving — by Bernoulli\'s principle, higher velocity means lower static pressure. '
+      + 'Since the static pressure inside is <em>below</em> atmospheric, the gauge pressure is <strong>negative</strong>. '
+      + 'The manometer displayed only the magnitude. The chart below now shows the corrected sign.';
+    fb.className = 'q-feedback fb-ok show';
+    document.getElementById('iq-sign').classList.add('answered-ok');
+    s1ShowChart();
+  } else {
+    btnNeg.disabled = false; // allow retry on negative
+    btnPos.classList.add('sign-wrong');
+    fb.innerHTML = '&#10007; <strong>Not quite.</strong> Gauge pressure is the difference between local static pressure and atmospheric. '
+      + 'The moving air inside the tunnel has higher velocity than the still atmosphere outside — '
+      + 'Bernoulli tells us its static pressure must therefore be <em>lower</em> than atmospheric. '
+      + 'A pressure below the reference is <strong>negative</strong> in gauge terms. Try the other option.';
+    fb.className = 'q-feedback fb-err show';
+    document.getElementById('iq-sign').classList.add('answered-err');
+  }
+  fb.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+// ── SLIDE 1: Reveal chart with corrected (negative) values ─────────
+function s1ShowChart(){
+  const vals = TAPS.map(t => {
+    const el = document.getElementById('p'+t.id);
+    return (el && el.value !== '') ? -Math.abs(parseFloat(el.value)) : null;
+  });
+  const colors = TAPS.map(t => ZC[t.zone]);
+
+  document.getElementById('s1-chart-area').style.display = 'block';
+
+  if(charts.live){ try{charts.live.destroy();}catch(e){} charts.live=null; }
+  charts.live = new Chart(document.getElementById('livePresChart').getContext('2d'),{
+    type:'bar',
+    data:{
+      labels: TAPS.map(t=>'P'+t.id),
+      datasets:[{
+        label:'Gauge static pressure (mmH\u2082O)',
+        data: vals,
+        backgroundColor: colors.map(c=>c+'55'),
+        borderColor: colors,
+        borderWidth: 2,
+        borderRadius: 4
+      }]
+    },
+    options:{
+      responsive:true,
+      animation:{duration:700, easing:'easeInOutQuart'},
+      plugins:{legend:{display:false}},
+      scales:{
+        y:{title:{display:true, text:'Gauge pressure (mmH\u2082O)', font:{size:11,family:'Inter'}}, grid:{color:'#e2e8f0'}},
+        x:{grid:{display:false}}
+      }
+    }
+  });
+
+  // Show Q2 after chart animates in
+  setTimeout(function(){
+    const q2 = document.getElementById('iq-dist');
+    q2.style.display = 'block';
+    q2.scrollIntoView({behavior:'smooth', block:'nearest'});
+  }, 900);
+}
+
+// ── SLIDE 1: Q2 — Distribution interpretation ─────────────────────
+function checkDist(choice){
+  if(s1DistAnswered) return;
+  const fb = document.getElementById('dist-feedback');
+  fb.style.display = 'block';
+  document.querySelectorAll('input[name="iq-dist"]').forEach(r=>{r.disabled=true; r.closest('.mc-opt').classList.add('locked');});
+
+  const msgs = {
+    B: '&#10007; <strong>Not quite.</strong> The fan drives the flow globally, but locally Bernoulli governs the exchange between velocity and static pressure. '
+     + 'In the diffuser the cross-section widens, velocity decreases, and static pressure <em>recovers</em> &#8212; it becomes less negative, not more.',
+    C: '&#10007; <strong>Not quite.</strong> Look carefully at your P4&#8211;P6 readings &#8212; are they truly identical? '
+     + 'Even in a constant-area throat, small geometry variations mean pressure is rarely perfectly uniform. '
+     + 'Focus on the overall trend across all three sections.',
+    D: '&#10007; <strong>That reverses the Bernoulli relationship.</strong> Static pressure and velocity vary <em>inversely</em> along a streamline. '
+     + 'Where velocity is highest &#8212; at the throat &#8212; static pressure is at its <em>lowest</em>, not its highest.'
+  };
+
+  if(choice === 'A'){
+    s1DistAnswered = true;
+    fb.className = 'q-feedback fb-ok show';
+    fb.innerHTML = '&#10003; <strong>Correct.</strong> As the cross-section narrows, continuity requires velocity to increase. '
+      + 'Bernoulli then requires static pressure to fall, reaching its minimum at the throat. '
+      + 'In the diffuser the area widens, velocity drops, and static pressure <em>recovers</em> '
+      + '&#8212; though not fully, due to viscous losses. This pressure recovery is the working principle '
+      + 'behind Venturi flowmeters and efficient diffuser design.';
+    document.getElementById('iq-dist').classList.add('answered-ok');
+    const btn = document.getElementById('s1-proceed');
+    btn.style.display = 'inline-flex';
+    btn.scrollIntoView({behavior:'smooth', block:'nearest'});
+  } else {
+    fb.className = 'q-feedback fb-err show';
+    fb.innerHTML = msgs[choice];
+    document.getElementById('iq-dist').classList.add('answered-err');
+    // Re-enable options for retry
+    document.querySelectorAll('input[name="iq-dist"]').forEach(r=>{r.disabled=false; r.closest('.mc-opt').classList.remove('locked');});
+  }
+  fb.scrollIntoView({behavior:'smooth', block:'nearest'});
 }
 
 // IQ2: Bernoulli valid?
@@ -931,11 +1060,9 @@ function runAnalysis(){
     trData.push({pos:isNaN(d2pos)?null:d2pos,p0:d2p0,ps:d2ps,dP,V,Cp});
   }
   buildDynQTable(res,Vt);
-  // store results for energy chart (built when slide 4 is shown)
   window._lastRes = res;
   window._lastTrData = trData;
   window._lastVt = Vt;
-  // update slide 3 pitot info
   const p0_mmhw=parseFloat(document.getElementById('pitot-p0')?.value);
   const ps_mmhw=parseFloat(document.getElementById('pitot-ps')?.value);
   const el_p0=document.getElementById('s3-p0-display');
@@ -973,7 +1100,7 @@ function buildTraverseChart(data,Vt){
 }
 
 // DYNAMIC PRESSURE TABLE
-let dynqData = []; // {tap, V, q_expected}
+let dynqData = [];
 
 function buildDynQTable(res, Vt){
   dynqData = res.map(r => ({tap: r.tap, V: r.V, q: r.q}));
@@ -994,7 +1121,6 @@ function buildDynQTable(res, Vt){
       <td>${qCell}</td>
     </tr>`;
   }).join('');
-  // hint row
   const hintRow = document.createElement('tr');
   hintRow.innerHTML = `<td colspan="3"><div class="dynq-hint" id="dynq-hint">&#10007; Not quite &#8212; check all values are in SI units and that you are calculating dynamic pressure correctly.</div></td>`;
   tbody.appendChild(hintRow);
@@ -1017,46 +1143,18 @@ function checkDynQ(){
   icon.textContent = ok ? '\u2705' : '\u274C';
   hint.classList.toggle('show', !ok);
   if(ok){
-    // auto-fill the rest
     dynqData.forEach((d, i) => {
       if(i === 0) return;
       const cell = document.getElementById('dynq-auto-' + d.tap.id);
-      if(cell){
-        cell.textContent = d.q.toFixed(2) + ' Pa';
-        cell.classList.add('filled');
-      }
+      if(cell){ cell.textContent = d.q.toFixed(2) + ' Pa'; cell.classList.add('filled'); }
     });
   } else {
-    // clear auto-fills if student corrects wrong answer
     dynqData.forEach((d, i) => {
       if(i === 0) return;
       const cell = document.getElementById('dynq-auto-' + d.tap.id);
       if(cell){ cell.textContent = '\u2014'; cell.classList.remove('filled'); }
     });
   }
-}
-
-function buildDiagram2(){
-  const svg = document.getElementById('diag-svg2');
-  if(!svg) return;
-  const W=820,CY=85,SC=0.4,xs=W/12;
-  const xp=TAPS.map((_,i)=>xs+i*xs);
-  const tp=xp.map((x,i)=>[x,CY-TAPS[i].w*SC/2]);
-  const bp=xp.map((x,i)=>[x,CY+TAPS[i].w*SC/2]);
-  let h=`<path d="M 0,${tp[0][1]} ${tp.map(p=>`L ${p[0]},${p[1]}`).join(' ')} L ${W},${tp[10][1]}" stroke="#1a2e44" stroke-width="2.2" fill="none" stroke-linejoin="round"/>`;
-  h+=`<path d="M 0,${bp[0][1]} ${bp.map(p=>`L ${p[0]},${p[1]}`).join(' ')} L ${W},${bp[10][1]}" stroke="#1a2e44" stroke-width="2.2" fill="none" stroke-linejoin="round"/>`;
-  [{x1:xp[0]-xs*.5,x2:(xp[2]+xp[3])/2,c:'rgba(180,83,9,0.06)'},{x1:(xp[2]+xp[3])/2,x2:(xp[5]+xp[6])/2,c:'rgba(26,122,74,0.07)'},{x1:(xp[5]+xp[6])/2,x2:xp[10]+xs*.5,c:'rgba(26,86,160,0.06)'}]
-    .forEach(z=>h+=`<rect x="${z.x1}" y="${CY-50}" width="${z.x2-z.x1}" height="100" fill="${z.c}"/>`);
-  xp.forEach((x,i)=>{
-    const c=ZC[TAPS[i].zone],[ty,by]=[tp[i][1],bp[i][1]];
-    h+=`<line x1="${x}" y1="${ty}" x2="${x}" y2="${ty-14}" stroke="${c}" stroke-width="1.4" stroke-dasharray="3,2"/>`;
-    h+=`<circle cx="${x}" cy="${ty}" r="3.5" fill="${c}"/>`;
-    h+=`<text x="${x}" y="${ty-18}" text-anchor="middle" fill="${c}" font-size="10" font-weight="700" font-family="monospace">P${TAPS[i].id}</text>`;
-  });
-  h+=`<text x="${(xp[0]+xp[2])/2}" y="163" text-anchor="middle" fill="#92400e" font-size="9" font-family="monospace">CONTRACTION</text>`;
-  h+=`<text x="${(xp[3]+xp[5])/2}" y="163" text-anchor="middle" fill="#134e35" font-size="9" font-family="monospace">THROAT</text>`;
-  h+=`<text x="${(xp[6]+xp[10])/2}" y="163" text-anchor="middle" fill="#0f3675" font-size="9" font-family="monospace">DIFFUSER</text>`;
-  svg.innerHTML=h;
 }
 
 // RESULTS SLIDE
@@ -1095,18 +1193,15 @@ function checkR(n, a){
 function buildEnergyChart(res){
   if(charts.energy){try{charts.energy.destroy();}catch(e){}}
   const labels = res.map(r=>'P'+r.tap.id);
-  // Static pressure: sensor reads positive magnitude (mmH2O) → convert to Pa and negate
   const ps = res.map(r => {
     const el = document.getElementById('p'+r.tap.id);
     if(!el||el.value==='') return null;
     return -Math.abs(parseFloat(el.value) * 9.80665);
   });
-  // Dynamic pressure: use dynqData (student-verified) if populated, else fall back to res.q
   const q = res.map((r,i) => {
     if(dynqData && dynqData[i] && dynqData[i].q != null) return dynqData[i].q;
     return r.q != null ? r.q : null;
   });
-  // Total pressure = static (negative) + dynamic (positive)
   const tot = ps.map((s,i) => (s!==null && q[i]!==null) ? s + q[i] : null);
   charts.energy = new Chart(document.getElementById('energyChart').getContext('2d'), {
     type: 'line',
@@ -1120,9 +1215,7 @@ function buildEnergyChart(res){
     },
     options: {
       responsive: true,
-      plugins: {
-        legend: { position:'bottom', labels:{ boxWidth:14, font:{size:12,family:'Inter'} } }
-      },
+      plugins: { legend: { position:'bottom', labels:{ boxWidth:14, font:{size:12,family:'Inter'} } } },
       scales: {
         y: { title:{ display:true, text:'Pressure (Pa)', font:{size:12,family:'Inter'} }, grid:{ color:'#e2e8f0' } },
         x: { grid:{ color:'#e2e8f0' } }
@@ -1192,7 +1285,6 @@ function goTo(n){
   document.getElementById('s'+n).classList.add('active');
   document.getElementById('s'+n).scrollTop=0;
   for(let i=1;i<=4;i++){const p=document.getElementById('sp'+i);p.classList.remove('active','done');if(i<n)p.classList.add('done');else if(i===n)p.classList.add('active');}
-  // build energy chart when arriving at results slide
   if(n===4 && window._lastRes) buildEnergyChart(window._lastRes);
 }
 </script>
