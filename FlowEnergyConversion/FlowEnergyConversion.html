@@ -731,19 +731,18 @@ table.dynq-table tbody tr:hover td { background: #f8fafc; }
           </div>
         </div>
 
-        <!-- Q2: pitot tube at inlet -->
-        <div class="u-unit">
-          <div class="u-unit-body">
-            <span class="q-badge q-exp">Explain</span>
-            <div class="u-stem">Q2 &#8212; Velocity at the Wind Tunnel Inlet</div>
-            <div class="u-desc">The pitot tube measures the <strong>stagnation (total) pressure</strong> at its tip and the <strong>static pressure</strong> through its side ports. It computes velocity from the <strong>dynamic pressure</strong> &#8212; the difference between the two. If the pitot tube were placed at the very inlet of the wind tunnel, before the flow enters the duct, what velocity would it read?</div>
-            <div class="q-context" style="margin-bottom:14px;">Hint: outside the tunnel the air is still. Think about what the static pressure equals when there is no flow, and what the total pressure equals in still air.</div>
-            <label class="mc-opt"><input type="radio" name="r2" value="A" onchange="checkR(2,'A')"> A &nbsp; The same velocity as at the throat &#8212; the fan drives the same speed everywhere</label>
-            <label class="mc-opt"><input type="radio" name="r2" value="B" onchange="checkR(2,'B')"> B &nbsp; 0 m/s &#8212; the static pressure equals atmospheric pressure so the dynamic pressure (&Delta;P = P&#8320; &#8722; Ps) is zero, giving zero velocity</label>
-            <label class="mc-opt"><input type="radio" name="r2" value="C" onchange="checkR(2,'C')"> C &nbsp; Half the throat velocity &#8212; the inlet area is about twice the throat area</label>
-            <div id="rFb2" class="q-feedback"></div>
-          </div>
-        </div>
+<!-- Q2: pitot tube at inlet -->
+<div class="u-unit">
+  <div class="u-unit-body">
+    <span class="q-badge q-exp">Explain</span>
+    <div class="u-stem">Q2 &#8212; Pitot Tube at the Inlet</div>
+    <div class="u-desc">What velocity would the pitot tube measure if moved to the very inlet of the wind tunnel?</div>
+    <label class="mc-opt"><input type="radio" name="r2" value="A" onchange="checkR(2,'A')"> A &nbsp; The same velocity as at the throat</label>
+    <label class="mc-opt"><input type="radio" name="r2" value="B" onchange="checkR(2,'B')"> B &nbsp; 0 m/s</label>
+    <label class="mc-opt"><input type="radio" name="r2" value="C" onchange="checkR(2,'C')"> C &nbsp; Half the throat velocity</label>
+    <div id="rFb2" class="q-feedback"></div>
+  </div>
+</div>
 
         <!-- Discussion prompt -->
         <div class="discuss-card">
@@ -778,16 +777,7 @@ table.dynq-table tbody tr:hover td { background: #f8fafc; }
               </div>
             </div>
 
-            <div class="discuss-q">
-              <span class="discuss-num">3</span>
-              <div class="discuss-q-inner">
-                <p>The diffuser is designed to recover pressure. Based on your data, how efficient is it? What physical factors limit the pressure recovery in a real diffuser?</p>
-                <button class="btn-guidance" onclick="toggleGuidance(this)" aria-expanded="false">&#128161; Show guidance</button>
-                <div class="guidance-panel" hidden>
-                  A diffuser works by gradually widening the duct so the flow slows down &#8212; and by Bernoulli&#8217;s principle, as velocity decreases, static pressure increases. Two things limit how much pressure is actually recovered. First, <strong>wall friction</strong> steals energy all along the diffuser. Second, the widening duct means pressure is rising in the direction of flow. The air right next to the wall moves slowly (because friction has taken its energy), and this slow-moving air cannot push against the rising pressure ahead of it. If the diffuser angle is too steep, this near-wall air stops and reverses direction &#8212; called <em>boundary layer separation</em>. When separation happens, the orderly flow breaks down into turbulent swirling and pressure recovery collapses. Engineers keep diffuser angles gentle (roughly less than 7&#176;) to keep the boundary layer attached to the wall and recover as much pressure as possible.
-                </div>
-              </div>
-            </div>
+  
 
           </div>
         </div>
