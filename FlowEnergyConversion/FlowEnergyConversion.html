@@ -534,6 +534,12 @@ table.dynq-table tbody tr:hover td { background: #f8fafc; }
             </div>
           </div>
 
+          <!-- Sample data loader -->
+          <div style="padding:8px 16px 10px;border-bottom:1px solid var(--border-lt);display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <button id="sample-btn" onclick="loadSampleData()" style="font-family:var(--ff);font-size:0.78rem;font-weight:600;padding:7px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;color:var(--text-md);cursor:pointer;transition:border-color 0.15s,color 0.15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)';" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-md)';">&#128203; Load sample data</button>
+            <span style="font-family:var(--serif);font-size:0.78rem;color:var(--text-lt);font-style:italic;">Fills P1&#8211;P11 with example readings for demonstration</span>
+          </div>
+
           <!-- Chart: hidden until Q1 answered correctly -->
           <div class="tap-chart-area" id="s1-chart-area" style="display:none;">
             <div style="font-family:var(--ff);font-size:0.82rem;font-weight:700;color:#1a2e44;margin-bottom:4px;">Static pressure distribution &#8212; gauge (mmH&#8322;O)</div>
@@ -850,6 +856,124 @@ let iq2Answered=false;
 let s1SignAnswered = false;
 let s1DistAnswered = false;
 
+// ── LOCAL STORAGE PERSISTENCE ──────────────────────────────────────
+const LS_KEY = 'windtunnel_lab_v1';
+
+function saveState() {
+  const state = {};
+  // All numeric inputs with IDs
+  const inputIds = [
+    'p1','p2','p3','p4','p5','p6','p7','p8','p9','p10','p11',
+    'pitot-p0','pitot-ps','pitot-v',
+    'd2-p0','d2-ps','d2-pos',
+    'calc-v-input'
+  ];
+  inputIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && el.value !== '') state[id] = el.value;
+  });
+  // Quiz answers / progress flags
+  state.s1SignAnswered = s1SignAnswered;
+  state.s1DistAnswered = s1DistAnswered;
+  state.iq2Answered    = iq2Answered;
+  state.answeredRs     = [...answeredRs];
+  try { sessionStorage.setItem(LS_KEY, JSON.stringify(state)); } catch(e) {}
+}
+
+function loadState() {
+  let state;
+  try { state = JSON.parse(sessionStorage.getItem(LS_KEY)); } catch(e) {}
+  if (!state) return;
+
+  // Restore numeric inputs
+  const inputIds = [
+    'p1','p2','p3','p4','p5','p6','p7','p8','p9','p10','p11',
+    'pitot-p0','pitot-ps','pitot-v',
+    'd2-p0','d2-ps','d2-pos',
+    'calc-v-input'
+  ];
+  inputIds.forEach(id => {
+    if (state[id] != null) {
+      const el = document.getElementById(id);
+      if (el) el.value = state[id];
+    }
+  });
+
+  // Restore Bernoulli question
+  if (state.iq2Answered) {
+    // We can't know which radio was chosen, so just silently mark as answered
+    iq2Answered = true;
+  }
+
+  // Restore results-slide answers
+  if (state.answeredRs && state.answeredRs.length) {
+    state.answeredRs.forEach(n => answeredRs.add(n));
+    if (answeredRs.size === 2) {
+      document.getElementById('completion-banner').classList.add('show');
+    }
+  }
+
+  // Restore Step 1 question flow
+  if (state.s1SignAnswered) {
+    s1SignAnswered = true;
+    // Show the sign question visually answered
+    const q = document.getElementById('iq-sign');
+    q.style.display = 'block';
+    q.classList.add('answered-ok');
+    const btnNeg = document.getElementById('sign-btn-neg');
+    const btnPos = document.getElementById('sign-btn-pos');
+    btnNeg.classList.add('sign-correct');
+    btnPos.disabled = true; btnNeg.disabled = true;
+    const fb = document.getElementById('sign-feedback');
+    fb.innerHTML = '&#10003; <strong>Correct.</strong> Gauge pressure is measured relative to atmospheric pressure. '
+      + 'The air inside the tunnel is moving — by Bernoulli\'s principle, higher velocity means lower static pressure. '
+      + 'Since the static pressure inside is <em>below</em> atmospheric, the gauge pressure is <strong>negative</strong>. '
+      + 'The manometer displayed only the magnitude. The chart below now shows the corrected sign.';
+    fb.className = 'q-feedback fb-ok show';
+    // Rebuild the chart
+    s1ShowChart();
+  }
+
+  if (state.s1DistAnswered) {
+    s1DistAnswered = true;
+    const q2 = document.getElementById('iq-dist');
+    q2.style.display = 'block';
+    q2.classList.add('answered-ok');
+    // Lock all options and show correct feedback
+    document.querySelectorAll('input[name="iq-dist"]').forEach(r => {
+      r.disabled = true; r.closest('.mc-opt').classList.add('locked');
+      if (r.value === 'A') r.checked = true;
+    });
+    const fb = document.getElementById('dist-feedback');
+    fb.innerHTML = '&#10003; <strong>Correct.</strong> As the cross-section narrows, continuity requires velocity to increase. '
+      + 'Bernoulli then requires static pressure to fall, reaching its minimum at the throat. '
+      + 'In the diffuser the area widens, velocity drops, and static pressure <em>recovers</em> '
+      + '&#8212; though not fully, due to viscous losses.';
+    fb.className = 'q-feedback fb-ok show';
+    // Show proceed button
+    document.getElementById('s1-proceed').style.display = 'inline-flex';
+  }
+
+  // Trigger derived UI updates
+  updateCalcDisplay();
+  checkPitotReady();
+  onTapInput();
+}
+
+// Attach saveState to all inputs that should be persisted
+function attachPersistence() {
+  const inputIds = [
+    'p1','p2','p3','p4','p5','p6','p7','p8','p9','p10','p11',
+    'pitot-p0','pitot-ps','pitot-v',
+    'd2-p0','d2-ps','d2-pos',
+    'calc-v-input'
+  ];
+  inputIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', saveState);
+  });
+}
+
 function toPa(v,u){return u==='mmH2O'?v*9.80665:u==='mbar'?v*100:u==='mmHg'?v*133.322:v;}
 
 // DIAGRAM
@@ -912,6 +1036,7 @@ function checkSign(choice){
     fb.className = 'q-feedback fb-ok show';
     document.getElementById('iq-sign').classList.add('answered-ok');
     s1ShowChart();
+    saveState();
   } else {
     btnNeg.disabled = false; // allow retry on negative
     btnPos.classList.add('sign-wrong');
@@ -960,12 +1085,13 @@ function s1ShowChart(){
     }
   });
 
-  // Show Q2 after chart animates in
+  // Show Q2 after chart animates in (skip delay on restore)
+  const delay = s1DistAnswered ? 0 : 900;
   setTimeout(function(){
     const q2 = document.getElementById('iq-dist');
     q2.style.display = 'block';
-    q2.scrollIntoView({behavior:'smooth', block:'nearest'});
-  }, 900);
+    if (!s1DistAnswered) q2.scrollIntoView({behavior:'smooth', block:'nearest'});
+  }, delay);
 }
 
 // ── SLIDE 1: Q2 — Distribution interpretation ─────────────────────
@@ -997,6 +1123,7 @@ function checkDist(choice){
     const btn = document.getElementById('s1-proceed');
     btn.style.display = 'inline-flex';
     btn.scrollIntoView({behavior:'smooth', block:'nearest'});
+    saveState();
   } else {
     fb.className = 'q-feedback fb-err show';
     fb.innerHTML = msgs[choice];
@@ -1018,6 +1145,7 @@ function checkIQ2(a){
   };
   fb.innerHTML=m[a]||m['B'];fb.className='q-feedback '+(ok?'fb-ok':'fb-err')+' show';
   c.classList.add(ok?'answered-ok':'answered-err');fb.scrollIntoView({behavior:'smooth',block:'nearest'});
+  saveState();
 }
 
 // TRAVERSES
@@ -1188,6 +1316,7 @@ function checkR(n, a){
     banner.scrollIntoView({behavior:'smooth', block:'nearest'});
   }
   fb.scrollIntoView({behavior:'smooth', block:'nearest'});
+  saveState();
 }
 
 function buildEnergyChart(res){
@@ -1287,6 +1416,33 @@ function goTo(n){
   for(let i=1;i<=4;i++){const p=document.getElementById('sp'+i);p.classList.remove('active','done');if(i<n)p.classList.add('done');else if(i===n)p.classList.add('active');}
   if(n===4 && window._lastRes) buildEnergyChart(window._lastRes);
 }
+
+// ── SAMPLE DATA ────────────────────────────────────────────────────
+function loadSampleData(){
+  const sample = [12, 14.7, 18.2, 23.1, 25.4, 25.2, 22.4, 19.6, 17.5, 15.9, 14.7];
+  TAPS.forEach((t, i) => {
+    const el = document.getElementById('p' + t.id);
+    if (el) el.value = sample[i];
+  });
+  saveState();
+  onTapInput();
+  // Flash the button to confirm
+  const btn = document.getElementById('sample-btn');
+  if (btn) {
+    btn.textContent = '✓ Sample data loaded';
+    btn.style.borderColor = 'var(--ok)';
+    btn.style.color = 'var(--ok)';
+    setTimeout(() => {
+      btn.textContent = '📋 Load sample data';
+      btn.style.borderColor = 'var(--border)';
+      btn.style.color = 'var(--text-md)';
+    }, 2000);
+  }
+}
+
+// ── INIT ───────────────────────────────────────────────────────────
+attachPersistence();
+loadState();
 </script>
 </body>
 </html>
