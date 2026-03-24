@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vacuum Solar Collector Performance — Interactive Learning</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --sky:       #dbeeff;
+    --sky-mid:   #b6d9f7;
+    --sky-deep:  #6aaed6;
+    --sun:       #f5a623;
+    --sun-light: #fde8b8;
+    --sun-pale:  #fff8ec;
+    --warm:      #e07b39;
+    --teal:      #2e8b7a;
+    --teal-light:#d4f0eb;
+    --slate:     #3a4a5c;
+    --slate-mid: #5a6a7c;
+    --slate-light:#e8ecf1;
+    --white:     #ffffff;
+    --red-soft:  #fde8e8;
+    --red:       #c94040;
+    --green-soft:#e3f5ec;
+    --green:     #2e7d52;
+    --radius:    14px;
+    --shadow:    0 4px 24px rgba(58,74,92,0.10);
+    --shadow-md: 0 8px 32px rgba(58,74,92,0.14);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: linear-gradient(160deg, var(--sky) 0%, var(--sun-pale) 60%, var(--teal-light) 100%);
+    min-height: 100vh;
+    color: var(--slate);
+    padding: 0 0 60px;
+  }
+
+  /* ─── HEADER ─── */
+  .site-header {
+    background: linear-gradient(135deg, var(--slate) 0%, #1e3a52 100%);
+    color: white;
+    padding: 28px 40px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .site-header::before {
+    content:'';
+    position:absolute; top:-40px; right:-60px;
+    width:260px; height:260px;
+    background: radial-gradient(circle, rgba(245,166,35,0.22) 0%, transparent 70%);
+    border-radius:50%;
+  }
+  .site-header::after {
+    content:'';
+    position:absolute; bottom:-30px; left:30%;
+    width:180px; height:180px;
+    background: radial-gradient(circle, rgba(106,174,214,0.18) 0%, transparent 70%);
+    border-radius:50%;
+  }
+  .header-inner { max-width:860px; margin:0 auto; position:relative; z-index:1; }
+  .header-tag {
+    font-family:'DM Mono', monospace;
+    font-size:11px; letter-spacing:0.12em;
+    color: var(--sky-mid); text-transform:uppercase;
+    margin-bottom:8px;
+  }
+  .header-title {
+    font-family:'DM Serif Display', serif;
+    font-size:clamp(24px, 4vw, 36px);
+    line-height:1.15;
+    margin-bottom:6px;
+  }
+  .header-subtitle {
+    font-size:14px; color: rgba(255,255,255,0.65);
+    font-weight:300;
+  }
+
+  /* ─── PROGRESS BAR ─── */
+  .progress-wrap {
+    max-width:860px; margin:28px auto 0; padding:0 20px;
+  }
+  .progress-meta {
+    display:flex; justify-content:space-between; align-items:center;
+    margin-bottom:8px;
+  }
+  .progress-label { font-size:13px; color:var(--slate-mid); font-weight:500; }
+  .step-counter {
+    font-family:'DM Mono', monospace;
+    font-size:12px; color:var(--teal);
+    background:var(--teal-light); padding:3px 10px; border-radius:20px;
+  }
+  .progress-track {
+    height:8px; background:rgba(58,74,92,0.12); border-radius:8px; overflow:hidden;
+  }
+  .progress-fill {
+    height:100%;
+    background: linear-gradient(90deg, var(--teal) 0%, var(--sky-deep) 100%);
+    border-radius:8px;
+    transition: width 0.5s cubic-bezier(.4,0,.2,1);
+    width: 0%;
+  }
+  .step-dots {
+    display:flex; gap:6px; margin-top:10px; justify-content:center;
+  }
+  .step-dot {
+    width:8px; height:8px; border-radius:50%;
+    background:rgba(58,74,92,0.18);
+    transition: background 0.3s, transform 0.3s;
+    cursor:default;
+  }
+  .step-dot.done   { background: var(--teal); }
+  .step-dot.active { background: var(--sun); transform:scale(1.4); }
+
+  /* ─── MAIN CARD ─── */
+  .main { max-width:860px; margin:20px auto 0; padding:0 20px; }
+
+  .step-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    padding: 36px 40px 32px;
+    display:none;
+    animation: slideIn 0.4s cubic-bezier(.4,0,.2,1);
+    position:relative;
+    overflow:hidden;
+  }
+  .step-card.active { display:block; }
+  .step-card::before {
+    content:'';
+    position:absolute; top:0; left:0; right:0; height:4px;
+    background: linear-gradient(90deg, var(--teal), var(--sky-deep), var(--sun));
+  }
+
+  @keyframes slideIn {
+    from { opacity:0; transform:translateY(18px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+
+  /* ─── STEP HEADER ─── */
+  .step-num {
+    font-family:'DM Mono', monospace;
+    font-size:11px; letter-spacing:0.1em;
+    color:var(--teal); text-transform:uppercase;
+    margin-bottom:6px;
+  }
+  .step-title {
+    font-family:'DM Serif Display', serif;
+    font-size:clamp(20px,3vw,26px);
+    color:var(--slate);
+    margin-bottom:18px;
+    line-height:1.2;
+  }
+
+  /* ─── THEORY BOX ─── */
+  .theory-box {
+    background: linear-gradient(135deg, var(--sky) 0%, var(--sun-pale) 100%);
+    border-left: 4px solid var(--sky-deep);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 18px 20px;
+    margin-bottom: 24px;
+  }
+  .theory-label {
+    font-family:'DM Mono', monospace;
+    font-size:10px; letter-spacing:0.12em; color:var(--sky-deep);
+    text-transform:uppercase; margin-bottom:6px;
+    display:flex; align-items:center; gap:6px;
+  }
+  .theory-label::before { content:'⚡'; font-size:12px; }
+  .theory-text { font-size:14px; line-height:1.7; color:var(--slate); }
+  .theory-text strong { color:var(--slate); font-weight:600; }
+
+  /* ─── FORMULA ─── */
+  .formula-box {
+    background: var(--slate);
+    color:white;
+    border-radius: var(--radius);
+    padding:16px 20px;
+    margin: 14px 0;
+    font-family:'DM Mono', monospace;
+    font-size:15px;
+    letter-spacing:0.02em;
+    text-align:center;
+  }
+  .formula-box .formula-label {
+    font-size:10px; color:rgba(255,255,255,0.5);
+    letter-spacing:0.15em; margin-bottom:6px; text-transform:uppercase;
+  }
+  .formula-box .formula-main { color:var(--sun); font-size:17px; }
+  .formula-box .formula-desc { font-size:11px; color:rgba(255,255,255,0.55); margin-top:8px; line-height:1.5; }
+
+  /* ─── DIAGRAM ─── */
+  .diagram-wrap {
+    background: var(--slate-light);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin: 18px 0;
+    text-align:center;
+  }
+  .collector-svg { width:100%; max-width:500px; height:auto; }
+
+  /* ─── QUIZ ─── */
+  .quiz-section { margin-top:22px; }
+  .quiz-q {
+    font-size:15px; font-weight:600; color:var(--slate);
+    margin-bottom:14px; line-height:1.5;
+  }
+  .quiz-q::before { content:'❓ '; }
+  .quiz-options { display:flex; flex-direction:column; gap:10px; }
+  .quiz-opt {
+    background: var(--slate-light);
+    border: 2px solid transparent;
+    border-radius: 10px;
+    padding:13px 18px;
+    font-size:14px;
+    cursor:pointer;
+    transition: all 0.2s;
+    display:flex; align-items:center; gap:12px;
+    text-align:left;
+  }
+  .quiz-opt:hover:not(.locked) { border-color:var(--sky-deep); background:var(--sky); }
+  .quiz-opt .opt-letter {
+    width:26px; height:26px; border-radius:50%;
+    background:rgba(58,74,92,0.15);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'DM Mono', monospace; font-size:12px; font-weight:500;
+    flex-shrink:0;
+  }
+  .quiz-opt.correct { background:var(--green-soft); border-color:var(--green); }
+  .quiz-opt.correct .opt-letter { background:var(--green); color:white; }
+  .quiz-opt.wrong   { background:var(--red-soft);   border-color:var(--red);   }
+  .quiz-opt.wrong .opt-letter   { background:var(--red);   color:white; }
+  .quiz-opt.locked { cursor:default; }
+
+  .quiz-feedback {
+    margin-top:14px; padding:14px 18px;
+    border-radius:10px; font-size:14px; line-height:1.6;
+    display:none;
+  }
+  .quiz-feedback.correct {
+    background:var(--green-soft); color:var(--green);
+    border:1px solid rgba(46,125,82,0.25);
+    display:block;
+  }
+  .quiz-feedback.wrong {
+    background:var(--red-soft); color:var(--red);
+    border:1px solid rgba(201,64,64,0.25);
+    display:block;
+  }
+  .quiz-feedback .fb-icon { font-size:16px; margin-right:6px; }
+
+  /* ─── DATA TABLE ─── */
+  .data-section { margin-top:22px; }
+  .data-table-wrap { overflow-x:auto; }
+  table {
+    width:100%; border-collapse:collapse;
+    font-size:14px;
+  }
+  thead th {
+    background:var(--slate);
+    color:white;
+    padding:12px 14px;
+    text-align:left;
+    font-weight:500;
+    font-size:13px;
+  }
+  thead th:first-child { border-radius:8px 0 0 0; }
+  thead th:last-child  { border-radius:0 8px 0 0; }
+  tbody tr:nth-child(even) { background:var(--slate-light); }
+  tbody tr:nth-child(odd)  { background:white; }
+  tbody td { padding:10px 14px; }
+  tbody td input {
+    width:100%; border:1.5px solid rgba(58,74,92,0.18);
+    border-radius:6px; padding:6px 10px;
+    font-family:'DM Mono', monospace; font-size:13px;
+    color:var(--slate); background:white;
+    transition: border-color 0.2s;
+  }
+  tbody td input:focus { outline:none; border-color:var(--teal); }
+  .calc-cell {
+    font-family:'DM Mono', monospace; font-size:13px;
+    color:var(--teal); font-weight:600;
+    min-width:70px;
+  }
+  .table-note {
+    font-size:12px; color:var(--slate-mid);
+    margin-top:8px; font-style:italic;
+  }
+
+  /* ─── CHART ─── */
+  .chart-wrap {
+    background:var(--slate-light);
+    border-radius:var(--radius);
+    padding:20px;
+    margin-top:22px;
+  }
+  .chart-title {
+    font-family:'DM Serif Display', serif;
+    font-size:16px; color:var(--slate);
+    margin-bottom:14px; text-align:center;
+  }
+  canvas { width:100% !important; }
+
+  /* ─── BUTTONS ─── */
+  .btn-row {
+    display:flex; gap:12px; margin-top:28px; flex-wrap:wrap;
+  }
+  .btn {
+    padding:12px 28px; border-radius:40px;
+    font-family:'DM Sans', sans-serif; font-size:14px; font-weight:600;
+    cursor:pointer; border:none; transition: all 0.2s;
+    display:inline-flex; align-items:center; gap:8px;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--teal) 0%, var(--sky-deep) 100%);
+    color:white; box-shadow: 0 4px 14px rgba(46,139,122,0.32);
+  }
+  .btn-primary:hover { transform:translateY(-2px); box-shadow: 0 6px 20px rgba(46,139,122,0.42); }
+  .btn-secondary {
+    background:var(--slate-light); color:var(--slate);
+  }
+  .btn-secondary:hover { background: var(--sky-mid); }
+  .btn:disabled { opacity:0.4; cursor:not-allowed; transform:none !important; }
+
+  /* ─── KEY METRICS ─── */
+  .metrics-grid {
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr));
+    gap:14px; margin:22px 0;
+  }
+  .metric-card {
+    background: var(--slate-light);
+    border-radius:var(--radius); padding:16px;
+    text-align:center;
+  }
+  .metric-val {
+    font-family:'DM Serif Display', serif;
+    font-size:28px; color:var(--teal);
+    margin-bottom:4px;
+  }
+  .metric-unit { font-size:11px; color:var(--teal); }
+  .metric-label { font-size:12px; color:var(--slate-mid); }
+
+  /* ─── COMPLETION CARD ─── */
+  .completion-card {
+    background: linear-gradient(135deg, var(--slate) 0%, #1e3a52 100%);
+    border-radius: var(--radius);
+    padding:40px 36px;
+    color:white;
+    text-align:center;
+    position:relative;
+    overflow:hidden;
+    display:none;
+    animation: slideIn 0.5s ease;
+  }
+  .completion-card.active { display:block; }
+  .completion-card::before {
+    content:'';
+    position:absolute; top:-60px; right:-60px;
+    width:220px; height:220px;
+    background:radial-gradient(circle, rgba(245,166,35,0.25) 0%, transparent 70%);
+    border-radius:50%;
+  }
+  .completion-card::after {
+    content:'';
+    position:absolute; bottom:-40px; left:-40px;
+    width:160px; height:160px;
+    background:radial-gradient(circle, rgba(106,174,214,0.2) 0%, transparent 70%);
+    border-radius:50%;
+  }
+  .completion-inner { position:relative; z-index:1; }
+  .completion-icon { font-size:52px; margin-bottom:12px; }
+  .completion-title {
+    font-family:'DM Serif Display', serif;
+    font-size:28px; color:var(--sun);
+    margin-bottom:10px;
+  }
+  .completion-text { font-size:15px; color:rgba(255,255,255,0.75); line-height:1.7; margin-bottom:24px; }
+  .completion-score {
+    display:inline-block;
+    background:rgba(255,255,255,0.12);
+    border:1px solid rgba(255,255,255,0.2);
+    border-radius:50px;
+    padding:10px 28px;
+    font-family:'DM Mono', monospace;
+    font-size:14px; color:var(--sky-mid);
+    margin-bottom:24px;
+  }
+  .key-points {
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(200px,1fr));
+    gap:12px; margin-top:20px;
+  }
+  .key-point {
+    background:rgba(255,255,255,0.08);
+    border-radius:10px; padding:14px 16px;
+    text-align:left; font-size:13px;
+    color:rgba(255,255,255,0.8); line-height:1.6;
+  }
+  .key-point strong { color:var(--sun); display:block; margin-bottom:4px; }
+
+  /* ─── INLINE HIGHLIGHT ─── */
+  .hl { background:var(--sun-light); color:var(--warm); padding:2px 6px; border-radius:4px; font-weight:600; }
+  .hl-teal { background:var(--teal-light); color:var(--teal); padding:2px 6px; border-radius:4px; font-weight:600; }
+
+  /* ─── RESPONSIVE ─── */
+  @media(max-width:600px) {
+    .site-header { padding:20px; }
+    .step-card { padding:22px 18px; }
+    .btn-row { flex-direction:column; }
+    .btn { width:100%; justify-content:center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════ HEADER ══════════════ -->
+<header class="site-header">
+  <div class="header-inner">
+    <div class="header-tag">Interactive Learning Module · Thermal Engineering</div>
+    <h1 class="header-title">Vacuum Solar Collector<br>Performance Analysis</h1>
+    <p class="header-subtitle">Six guided steps · Theory · Quizzes · Live calculations</p>
+  </div>
+</header>
+
+<!-- ══════════════ PROGRESS ══════════════ -->
+<div class="progress-wrap">
+  <div class="progress-meta">
+    <span class="progress-label" id="progressLabel">Step 1 of 6 — Getting Started</span>
+    <span class="step-counter" id="stepCounter">1 / 6</span>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="step-dots" id="stepDots"></div>
+</div>
+
+<!-- ══════════════ STEPS ══════════════ -->
+<main class="main">
+
+  <!-- ██ STEP 1 — What is a Vacuum Solar Collector? ██ -->
+  <section class="step-card active" id="step1">
+    <div class="step-num">Step 01</div>
+    <h2 class="step-title">What Is a Vacuum Tube Solar Collector?</h2>
+
+    <div class="theory-box">
+      <div class="theory-label">Just-In-Time Theory</div>
+      <p class="theory-text">
+        A <strong>vacuum solar collector</strong> (or evacuated-tube collector) is a high-efficiency device that captures solar radiation and converts it to useful heat. Each tube contains an inner absorber coated with a <strong>selective surface</strong>, surrounded by an outer glass tube from which air has been removed to create a vacuum.
+        <br><br>
+        The vacuum is key: it <strong>eliminates convective heat loss</strong> between the absorber and the environment, dramatically improving performance — especially in cold or windy climates. Most residential vacuum collectors achieve optical efficiencies of <span class="hl">70–80 %</span> and can reach stagnation temperatures above <span class="hl-teal">200 °C</span>.
+      </p>
+    </div>
+
+    <!-- SVG cross-section diagram -->
+    <div class="diagram-wrap">
+      <svg class="collector-svg" viewBox="0 0 520 220" xmlns="http://www.w3.org/2000/svg">
+        <!-- Outer glass tube -->
+        <ellipse cx="260" cy="110" rx="200" ry="80" fill="none" stroke="#6aaed6" stroke-width="3" stroke-dasharray="8 4" opacity="0.7"/>
+        <rect x="60" y="30" width="400" height="160" rx="80" fill="none" stroke="#6aaed6" stroke-width="2.5" opacity="0.5"/>
+        <!-- Vacuum label -->
+        <text x="420" y="55" font-family="DM Sans" font-size="11" fill="#6aaed6" text-anchor="middle">Vacuum</text>
+        <line x1="400" y1="60" x2="380" y2="80" stroke="#6aaed6" stroke-width="1" opacity="0.7"/>
+        <!-- Inner absorber tube -->
+        <rect x="100" y="72" width="320" height="76" rx="38" fill="#2e8b7a" opacity="0.85"/>
+        <text x="260" y="115" font-family="DM Sans" font-size="12" fill="white" text-anchor="middle" font-weight="600">Selective Absorber Surface</text>
+        <!-- Heat pipe indicator -->
+        <rect x="230" y="85" width="60" height="50" rx="8" fill="#f5a623" opacity="0.8"/>
+        <text x="260" y="116" font-family="DM Sans" font-size="10" fill="#3a4a5c" text-anchor="middle" font-weight="600">Heat</text>
+        <text x="260" y="128" font-family="DM Sans" font-size="10" fill="#3a4a5c" text-anchor="middle" font-weight="600">Pipe</text>
+        <!-- Sun rays -->
+        <g stroke="#f5a623" stroke-width="2.5" opacity="0.8">
+          <line x1="260" y1="5" x2="260" y2="28"/>
+          <line x1="210" y1="8" x2="220" y2="30"/>
+          <line x1="310" y1="8" x2="300" y2="30"/>
+          <line x1="165" y1="18" x2="180" y2="38"/>
+          <line x1="355" y1="18" x2="340" y2="38"/>
+        </g>
+        <text x="260" y="195" font-family="DM Sans" font-size="11" fill="#5a6a7c" text-anchor="middle">Cross-section: Evacuated Tube Collector</text>
+        <!-- Outer glass label -->
+        <text x="88" y="80" font-family="DM Sans" font-size="10" fill="#6aaed6" text-anchor="middle">Outer</text>
+        <text x="88" y="92" font-family="DM Sans" font-size="10" fill="#6aaed6" text-anchor="middle">Glass</text>
+        <!-- arrows -->
+        <defs><marker id="arr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#f5a623"/></marker></defs>
+        <line x1="260" y1="28" x2="260" y2="72" stroke="#f5a623" stroke-width="1.5" marker-end="url(#arr)"/>
+      </svg>
+    </div>
+
+    <!-- QUIZ -->
+    <div class="quiz-section">
+      <div class="quiz-q">Why does the vacuum inside the tube improve collector efficiency?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="checkQuiz(1,'A',true)" data-step="1"><span class="opt-letter">A</span> It eliminates convective heat loss between the absorber and outside air</button>
+        <button class="quiz-opt" onclick="checkQuiz(1,'B',false)" data-step="1"><span class="opt-letter">B</span> It increases the amount of solar radiation reaching the absorber</button>
+        <button class="quiz-opt" onclick="checkQuiz(1,'C',false)" data-step="1"><span class="opt-letter">C</span> It reflects infra-red radiation back from the collector</button>
+        <button class="quiz-opt" onclick="checkQuiz(1,'D',false)" data-step="1"><span class="opt-letter">D</span> It lowers the pressure, increasing fluid flow rate</button>
+      </div>
+      <div class="quiz-feedback" id="qfb1"></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="next1" onclick="goStep(2)" disabled>Next Step →</button>
+    </div>
+  </section>
+
+  <!-- ██ STEP 2 — Collector Efficiency Equation ██ -->
+  <section class="step-card" id="step2">
+    <div class="step-num">Step 02</div>
+    <h2 class="step-title">The Collector Efficiency Equation</h2>
+
+    <div class="theory-box">
+      <div class="theory-label">Just-In-Time Theory</div>
+      <p class="theory-text">
+        Collector efficiency <strong>η</strong> describes how much of the incident solar energy is actually delivered as useful heat. The <strong>Hottel–Whillier–Bliss (HWB)</strong> equation, used in EN ISO 9806, expresses this as a function of two loss coefficients:
+      </p>
+      <div class="formula-box">
+        <div class="formula-label">Hottel–Whillier–Bliss Model</div>
+        <div class="formula-main">η = η₀ − a₁ · (ΔT / G) − a₂ · (ΔT² / G)</div>
+        <div class="formula-desc">
+          η₀ = zero-loss efficiency (optical efficiency) &nbsp;|&nbsp;
+          a₁ = first-order heat-loss coefficient (W/m²K) &nbsp;|&nbsp;
+          a₂ = second-order heat-loss coefficient (W/m²K²) &nbsp;|&nbsp;
+          ΔT = T<sub>m</sub> − T<sub>amb</sub> (K) &nbsp;|&nbsp;
+          G = solar irradiance (W/m²)
+        </div>
+      </div>
+      <p class="theory-text">
+        <span class="hl">ΔT/G</span> is the <em>reduced temperature difference</em> — the fundamental x-axis of any collector performance curve. At ΔT = 0 (fluid inlet = ambient), η equals η₀. As the collector runs hotter relative to ambient, losses grow and η falls.
+        <br><br>
+        Typical vacuum collector values: <span class="hl-teal">η₀ ≈ 0.72</span>, <span class="hl-teal">a₁ ≈ 1.0 W/m²K</span>, <span class="hl-teal">a₂ ≈ 0.005 W/m²K²</span>.
+        Compare this with a flat-plate: a₁ ≈ 3–4 W/m²K — much higher losses!
+      </p>
+    </div>
+
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-val">η₀</div>
+        <div class="metric-label">Optical Efficiency<br><span class="metric-unit">~0.70–0.80</span></div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-val">a₁</div>
+        <div class="metric-label">1st-order Loss<br><span class="metric-unit">~0.8–1.5 W/m²K</span></div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-val">a₂</div>
+        <div class="metric-label">2nd-order Loss<br><span class="metric-unit">~0.003–0.008 W/m²K²</span></div>
+      </div>
+    </div>
+
+    <div class="quiz-section">
+      <div class="quiz-q">A vacuum collector operates at ΔT/G = 0.04 m²K/W with η₀ = 0.72, a₁ = 1.0 W/m²K, a₂ = 0.005 W/m²K². Which loss term is dominant at this operating point?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="checkQuiz(2,'A',false)" data-step="2"><span class="opt-letter">A</span> The a₂ second-order term (a₂·ΔT²/G)</button>
+        <button class="quiz-opt" onclick="checkQuiz(2,'B',true)" data-step="2"><span class="opt-letter">B</span> The a₁ first-order term (a₁·ΔT/G)</button>
+        <button class="quiz-opt" onclick="checkQuiz(2,'C',false)" data-step="2"><span class="opt-letter">C</span> Both terms are exactly equal</button>
+        <button class="quiz-opt" onclick="checkQuiz(2,'D',false)" data-step="2"><span class="opt-letter">D</span> Neither term contributes at this reduced temperature</button>
+      </div>
+      <div class="quiz-feedback" id="qfb2"></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="goStep(1)">← Back</button>
+      <button class="btn btn-primary" id="next2" onclick="goStep(3)" disabled>Next Step →</button>
+    </div>
+  </section>
+
+  <!-- ██ STEP 3 — Data Entry & Auto-Calculation ██ -->
+  <section class="step-card" id="step3">
+    <div class="step-num">Step 03</div>
+    <h2 class="step-title">Calculate Efficiency at Operating Points</h2>
+
+    <div class="theory-box">
+      <div class="theory-label">Just-In-Time Theory</div>
+      <p class="theory-text">
+        You will now compute collector efficiency at <strong>five different operating points</strong>. Each row represents a different mean fluid temperature T<sub>m</sub> under fixed irradiance. Enter T<sub>m</sub> (°C) and irradiance G (W/m²) — the table auto-calculates ΔT, ΔT/G, and η using the HWB equation.
+        <br><br>
+        Use these collector parameters: <span class="hl">η₀ = 0.72</span>, <span class="hl">a₁ = 1.00 W/m²K</span>, <span class="hl">a₂ = 0.005 W/m²K²</span>, <span class="hl">T<sub>amb</sub> = 10 °C</span>.
+      </p>
+    </div>
+
+    <div class="data-section">
+      <div class="data-table-wrap">
+        <table id="dataTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>T<sub>m</sub> (°C)</th>
+              <th>G (W/m²)</th>
+              <th>ΔT (K)</th>
+              <th>ΔT/G (m²K/W)</th>
+              <th>η (−)</th>
+              <th>Q̇<sub>u</sub> (W/m²)</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+      <p class="table-note">* η = η₀ − a₁·(ΔT/G) − a₂·(ΔT/G)·ΔT &nbsp;|&nbsp; Q̇ᵤ = η · G &nbsp;|&nbsp; Values shown in red are negative (collector losing heat)</p>
+    </div>
+
+    <div class="quiz-section">
+      <div class="quiz-q">At very high mean fluid temperatures (large ΔT), what happens to collector efficiency and why?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="checkQuiz(3,'A',false)" data-step="3"><span class="opt-letter">A</span> Efficiency increases because more heat is stored in the fluid</button>
+        <button class="quiz-opt" onclick="checkQuiz(3,'B',false)" data-step="3"><span class="opt-letter">B</span> Efficiency stays constant — the vacuum prevents all heat loss</button>
+        <button class="quiz-opt" onclick="checkQuiz(3,'C',true)" data-step="3"><span class="opt-letter">C</span> Efficiency decreases; even vacuum tubes have residual radiation losses that grow with ΔT</button>
+        <button class="quiz-opt" onclick="checkQuiz(3,'D',false)" data-step="3"><span class="opt-letter">D</span> Efficiency drops only if irradiance G also increases</button>
+      </div>
+      <div class="quiz-feedback" id="qfb3"></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="goStep(2)">← Back</button>
+      <button class="btn btn-primary" id="next3" onclick="goStep(4)" disabled>Next Step →</button>
+    </div>
+  </section>
+
+  <!-- ██ STEP 4 — Live Performance Chart ██ -->
+  <section class="step-card" id="step4">
+    <div class="step-num">Step 04</div>
+    <h2 class="step-title">Live Performance Curve</h2>
+
+    <div class="theory-box">
+      <div class="theory-label">Just-In-Time Theory</div>
+      <p class="theory-text">
+        The <strong>collector performance curve</strong> plots η vs ΔT/G. Its shape tells you everything about the collector's thermal behaviour. A steep negative slope means high losses (poor insulation). Vacuum collectors have a <strong>near-flat curve</strong> even at elevated temperatures — that is their defining advantage over flat-plates.
+        <br><br>
+        The <strong>stagnation temperature</strong> (where η = 0) is the maximum temperature the collector can reach when no heat is extracted. For vacuum collectors this can exceed 200 °C, which creates important safety design considerations.
+      </p>
+    </div>
+
+    <div class="chart-wrap">
+      <div class="chart-title">Efficiency vs Reduced Temperature Difference (η–curve)</div>
+      <canvas id="perfChart" height="320"></canvas>
+    </div>
+
+    <div style="margin-top:18px; padding:14px 18px; background:var(--teal-light); border-radius:10px; font-size:13px; color:var(--teal);">
+      <strong>Reading your chart:</strong> The data points (●) come from your Step 3 entries. The curves show theoretical HWB models for your vacuum collector and a reference flat-plate (η₀=0.78, a₁=3.8, a₂=0.016). Notice how the vacuum collector curve is much flatter — especially at high ΔT/G.
+    </div>
+
+    <div class="quiz-section">
+      <div class="quiz-q">On the η–curve, what does the x-intercept (where η = 0) represent physically?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="checkQuiz(4,'A',false)" data-step="4"><span class="opt-letter">A</span> The point where solar irradiance equals zero (night-time)</button>
+        <button class="quiz-opt" onclick="checkQuiz(4,'B',false)" data-step="4"><span class="opt-letter">B</span> The optimal operating temperature for maximum energy delivery</button>
+        <button class="quiz-opt" onclick="checkQuiz(4,'C',true)" data-step="4"><span class="opt-letter">C</span> The stagnation point — all absorbed energy is lost as heat, none delivered to the fluid</button>
+        <button class="quiz-opt" onclick="checkQuiz(4,'D',false)" data-step="4"><span class="opt-letter">D</span> The temperature at which the selective coating fails</button>
+      </div>
+      <div class="quiz-feedback" id="qfb4"></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="goStep(3)">← Back</button>
+      <button class="btn btn-primary" id="next4" onclick="goStep(5)" disabled>Next Step →</button>
+    </div>
+  </section>
+
+  <!-- ██ STEP 5 — System Sizing & Useful Heat ██ -->
+  <section class="step-card" id="step5">
+    <div class="step-num">Step 05</div>
+    <h2 class="step-title">System Sizing & Annual Useful Heat</h2>
+
+    <div class="theory-box">
+      <div class="theory-label">Just-In-Time Theory</div>
+      <p class="theory-text">
+        The annual useful heat delivered by a collector field depends on three factors: <strong>collector area A</strong>, <strong>mean annual irradiation H</strong>, and the <strong>system efficiency η<sub>sys</sub></strong> (accounting for real operating temperatures, piping losses, and storage losses).
+      </p>
+      <div class="formula-box">
+        <div class="formula-label">Annual Useful Heat Yield</div>
+        <div class="formula-main">Q<sub>annual</sub> = η<sub>sys</sub> · H · A</div>
+        <div class="formula-desc">
+          Q<sub>annual</sub> in kWh/yr &nbsp;|&nbsp; η<sub>sys</sub> dimensionless (typically 0.35–0.55 for DHW systems) &nbsp;|&nbsp;
+          H in kWh/(m²·yr) — annual global horizontal irradiation &nbsp;|&nbsp;
+          A in m² — gross collector area
+        </div>
+      </div>
+      <p class="theory-text">
+        A typical UK location receives <span class="hl">H ≈ 1 000 kWh/(m²·yr)</span>. A 4 m² vacuum collector with η<sub>sys</sub> = 0.45 delivers about <span class="hl-teal">1 800 kWh/yr</span> — covering ~60 % of a household's hot water demand. Southern European locations (H ≈ 1 700 kWh/m²·yr) would deliver ~3 000 kWh/yr.
+      </p>
+    </div>
+
+    <div class="data-section">
+      <div class="data-table-wrap">
+        <table id="sizingTable">
+          <thead>
+            <tr>
+              <th>Location</th>
+              <th>H (kWh/m²yr)</th>
+              <th>Area A (m²)</th>
+              <th>η<sub>sys</sub></th>
+              <th>Q<sub>annual</sub> (kWh/yr)</th>
+              <th>CO₂ Saved (kg/yr)*</th>
+            </tr>
+          </thead>
+          <tbody id="sizingBody"></tbody>
+        </table>
+      </div>
+      <p class="table-note">* CO₂ saving assumes displacement of gas heating at 0.21 kg CO₂/kWh</p>
+    </div>
+
+    <div class="chart-wrap" style="margin-top:22px;">
+      <div class="chart-title">Annual Yield & CO₂ Savings by Location</div>
+      <canvas id="yieldChart" height="260"></canvas>
+    </div>
+
+    <div class="quiz-section">
+      <div class="quiz-q">A homeowner in Madrid (H = 1 700 kWh/m²yr) installs 3 m² of vacuum collectors with η<sub>sys</sub> = 0.48. What is the approximate annual heat yield?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="checkQuiz(5,'A',false)" data-step="5"><span class="opt-letter">A</span> 1 224 kWh/yr</button>
+        <button class="quiz-opt" onclick="checkQuiz(5,'B',false)" data-step="5"><span class="opt-letter">B</span> 2 040 kWh/yr</button>
+        <button class="quiz-opt" onclick="checkQuiz(5,'C',true)" data-step="5"><span class="opt-letter">C</span> 2 448 kWh/yr</button>
+        <button class="quiz-opt" onclick="checkQuiz(5,'D',false)" data-step="5"><span class="opt-letter">D</span> 5 100 kWh/yr</button>
+      </div>
+      <div class="quiz-feedback" id="qfb5"></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="goStep(4)">← Back</button>
+      <button class="btn btn-primary" id="next5" onclick="goStep(6)" disabled>Next Step →</button>
+    </div>
+  </section>
+
+  <!-- ██ STEP 6 — Completion ██ -->
+  <section class="step-card" id="step6">
+    <div class="step-num">Step 06</div>
+    <h2 class="step-title">Module Complete</h2>
+
+    <div class="completion-card active">
+      <div class="completion-inner">
+        <div class="completion-icon">🌞</div>
+        <div class="completion-title">Excellent Work!</div>
+        <p class="completion-text">
+          You have completed the <em>Vacuum Solar Collector Performance</em> module.<br>
+          Here is a summary of the key knowledge you have gained:
+        </p>
+        <div class="completion-score" id="finalScore">Quiz Score: calculating…</div>
+
+        <div class="key-points">
+          <div class="key-point"><strong>🔬 Principle</strong>The vacuum eliminates convective heat loss, allowing operation at high temperatures with low thermal losses.</div>
+          <div class="key-point"><strong>📐 HWB Equation</strong>η = η₀ − a₁·(ΔT/G) − a₂·(ΔT²/G) models collector performance as a function of reduced temperature.</div>
+          <div class="key-point"><strong>📉 Performance Curve</strong>Vacuum collectors have near-flat η–curves; their advantage over flat-plates grows with operating temperature.</div>
+          <div class="key-point"><strong>♨️ Stagnation</strong>The x-intercept of the η–curve is the stagnation temperature — a key safety design parameter.</div>
+          <div class="key-point"><strong>🏠 Sizing</strong>Q = η<sub>sys</sub>·H·A. A 4 m² UK system typically delivers ~1 800 kWh/yr, covering ~60 % of DHW demand.</div>
+          <div class="key-point"><strong>🌍 Climate</strong>Solar yield scales strongly with irradiation H — southern climates deliver up to 3× more energy per unit area than northern ones.</div>
+        </div>
+
+        <div class="btn-row" style="justify-content:center; margin-top:28px;">
+          <button class="btn btn-primary" onclick="restartModule()">↺ Restart Module</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="goStep(5)">← Back</button>
+    </div>
+  </section>
+
+</main>
+
+<!-- ══════════════ JAVASCRIPT ══════════════ -->
+<script>
+/* ── State ── */
+let currentStep = 1;
+const TOTAL_STEPS = 6;
+const quizState = {}; // quizState[stepNum] = true/false
+let perfChart, yieldChart;
+
+const STEP_NAMES = [
+  '', // 0 unused
+  'Vacuum Collector Principles',
+  'Efficiency Equation',
+  'Data Entry & Calculation',
+  'Live Performance Curve',
+  'System Sizing',
+  'Module Complete'
+];
+
+/* ── Collector parameters ── */
+const ETA0 = 0.72, A1 = 1.00, A2 = 0.005, T_AMB = 10;
+
+/* ── Init ── */
+window.addEventListener('DOMContentLoaded', () => {
+  buildStepDots();
+  buildDataTable();
+  buildSizingTable();
+  updateProgress();
+});
+
+/* ── Progress & Navigation ── */
+function buildStepDots() {
+  const c = document.getElementById('stepDots');
+  c.innerHTML = '';
+  for (let i = 1; i <= TOTAL_STEPS; i++) {
+    const d = document.createElement('div');
+    d.className = 'step-dot' + (i === 1 ? ' active' : '');
+    d.id = `dot${i}`;
+    c.appendChild(d);
+  }
+}
+
+function updateProgress() {
+  const pct = ((currentStep - 1) / (TOTAL_STEPS - 1)) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent =
+    `Step ${currentStep} of ${TOTAL_STEPS} — ${STEP_NAMES[currentStep]}`;
+  document.getElementById('stepCounter').textContent = `${currentStep} / ${TOTAL_STEPS}`;
+  for (let i = 1; i <= TOTAL_STEPS; i++) {
+    const d = document.getElementById(`dot${i}`);
+    d.className = 'step-dot' + (i < currentStep ? ' done' : i === currentStep ? ' active' : '');
+  }
+}
+
+function goStep(n) {
+  document.getElementById(`step${currentStep}`).classList.remove('active');
+  currentStep = n;
+  document.getElementById(`step${currentStep}`).classList.add('active');
+  updateProgress();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (n === 4) setTimeout(buildPerfChart, 200);
+  if (n === 5) setTimeout(buildYieldChart, 200);
+  if (n === 6) computeFinalScore();
+}
+
+/* ── Quiz Logic ── */
+const QUIZ_FEEDBACK = {
+  1: {
+    correct: '✅ Correct! The vacuum prevents air molecules from conducting or convecting heat away from the absorber. This is why vacuum collectors outperform flat-plates, especially in cold climates.',
+    wrong: '❌ Not quite. The vacuum\'s primary role is to suppress <em>convective and conductive</em> heat transfer between the hot absorber tube and the cooler outer glass — dramatically reducing thermal losses.'
+  },
+  2: {
+    correct: '✅ Correct! At ΔT/G = 0.04, the first-order term = 1.0 × 0.04 = 0.040. The second-order term = 0.005 × 0.04 × (10°C rise implied) ≈ 0.002. The linear term dominates at typical operating conditions.',
+    wrong: '❌ Calculate each term: a₁·(ΔT/G) = 1.0 × 0.04 = 0.040. For a₂ at ΔT/G = 0.04 with ΔT ≈ 40 K: a₂·ΔT²/G = 0.005 × 0.04 × 40 ≈ 0.008. The <strong>first-order term</strong> is still larger.'
+  },
+  3: {
+    correct: '✅ Correct! Even in vacuum tubes, radiation loss (proportional to T⁴ differences) still occurs. The selective absorber coating minimises emittance, but at very high ΔT these losses grow significantly, causing η to decline.',
+    wrong: '❌ Think about heat transfer modes. A vacuum eliminates <em>convection</em>, but <strong>radiation</strong> still operates (it needs no medium). At high temperatures, radiative losses grow steeply (∝ T⁴), causing efficiency to fall.'
+  },
+  4: {
+    correct: '✅ Exactly right! At the x-intercept, η = 0 means the collector absorbs as much solar energy as it loses to the environment. No useful heat reaches the fluid. This stagnation temperature can exceed 200°C and must be considered in system design.',
+    wrong: '❌ At η = 0, useful heat output is zero — all absorbed solar radiation is immediately lost as thermal emission. This is the <strong>stagnation point</strong>, a critical design safety temperature for the HTF and collector materials.'
+  },
+  5: {
+    correct: '✅ Correct! Q = 0.48 × 1700 × 3 = 2 448 kWh/yr. This would cover roughly 80–90% of a typical Spanish household\'s domestic hot water demand — excellent solar fraction!',
+    wrong: '❌ Apply the formula: Q = η<sub>sys</sub> × H × A = 0.48 × 1 700 × 3 = <strong>2 448 kWh/yr</strong>. Remember all three factors multiply together.'
+  }
+};
+
+function checkQuiz(step, chosen, isCorrect) {
+  if (quizState[step] !== undefined) return; // already answered
+  quizState[step] = isCorrect;
+
+  const btns = document.querySelectorAll(`[data-step="${step}"]`);
+  btns.forEach(b => {
+    b.classList.add('locked');
+    if (b.textContent.trim().startsWith(chosen)) {
+      b.classList.add(isCorrect ? 'correct' : 'wrong');
+    }
+    if (!isCorrect && b.getAttribute('onclick').includes('true')) {
+      b.classList.add('correct'); // show correct answer
+    }
+  });
+
+  const fb = document.getElementById(`qfb${step}`);
+  fb.className = `quiz-feedback ${isCorrect ? 'correct' : 'wrong'}`;
+  fb.innerHTML = QUIZ_FEEDBACK[step][isCorrect ? 'correct' : 'wrong'];
+
+  // Unlock next button (always, even if wrong)
+  const nextBtn = document.getElementById(`next${step}`);
+  if (nextBtn) nextBtn.disabled = false;
+}
+
+/* ── Data Table (Step 3) ── */
+const DEFAULT_TM = [30, 50, 70, 90, 120];
+const DEFAULT_G  = [800, 800, 800, 800, 800];
+
+function buildDataTable() {
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = '';
+  for (let i = 0; i < 5; i++) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${i+1}</td>
+      <td><input type="number" id="tm${i}" value="${DEFAULT_TM[i]}" min="0" max="250" step="1" oninput="recalcRow(${i})"></td>
+      <td><input type="number" id="g${i}"  value="${DEFAULT_G[i]}"  min="100" max="1400" step="10" oninput="recalcRow(${i})"></td>
+      <td class="calc-cell" id="dT${i}">—</td>
+      <td class="calc-cell" id="dtg${i}">—</td>
+      <td class="calc-cell" id="eta${i}">—</td>
+      <td class="calc-cell" id="qu${i}">—</td>
+    `;
+    tbody.appendChild(tr);
+    recalcRow(i);
+  }
+}
+
+function recalcRow(i) {
+  const tm  = parseFloat(document.getElementById(`tm${i}`).value);
+  const g   = parseFloat(document.getElementById(`g${i}`).value);
+  if (isNaN(tm) || isNaN(g) || g <= 0) return;
+  const dT  = tm - T_AMB;
+  const dtg = dT / g;
+  let eta   = ETA0 - A1 * dtg - A2 * dT * dtg;
+  const qu  = Math.max(0, eta * g);
+  if (eta < 0) eta = 0;
+
+  document.getElementById(`dT${i}`).textContent  = dT.toFixed(1);
+  document.getElementById(`dtg${i}`).textContent = dtg.toFixed(4);
+  const etaEl = document.getElementById(`eta${i}`);
+  etaEl.textContent = eta.toFixed(3);
+  etaEl.style.color = eta < 0.1 ? 'var(--red)' : 'var(--teal)';
+  document.getElementById(`qu${i}`).textContent  = qu.toFixed(0);
+}
+
+/* ── Sizing Table (Step 5) ── */
+const LOCATIONS = [
+  { name:'Edinburgh, UK',   H:900,  A:4, sys:0.42 },
+  { name:'London, UK',      H:1020, A:4, sys:0.45 },
+  { name:'Paris, France',   H:1150, A:3, sys:0.47 },
+  { name:'Barcelona, Spain',H:1680, A:3, sys:0.50 },
+  { name:'Cairo, Egypt',    H:2100, A:2, sys:0.52 },
+];
+
+function buildSizingTable() {
+  const tbody = document.getElementById('sizingBody');
+  tbody.innerHTML = '';
+  LOCATIONS.forEach((loc, i) => {
+    const Q = (loc.sys * loc.H * loc.A).toFixed(0);
+    const co2 = (Q * 0.21).toFixed(0);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${loc.name}</td>
+      <td><input type="number" id="sh${i}" value="${loc.H}"   min="500" max="3000" step="50" oninput="recalcSizing(${i})"></td>
+      <td><input type="number" id="sa${i}" value="${loc.A}"   min="1" max="30" step="0.5" oninput="recalcSizing(${i})"></td>
+      <td><input type="number" id="ss${i}" value="${loc.sys}" min="0.1" max="0.9" step="0.01" oninput="recalcSizing(${i})"></td>
+      <td class="calc-cell" id="sq${i}">${Q}</td>
+      <td class="calc-cell" id="sco2${i}">${co2}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function recalcSizing(i) {
+  const H  = parseFloat(document.getElementById(`sh${i}`).value);
+  const A  = parseFloat(document.getElementById(`sa${i}`).value);
+  const s  = parseFloat(document.getElementById(`ss${i}`).value);
+  if (isNaN(H)||isNaN(A)||isNaN(s)) return;
+  const Q   = (s * H * A).toFixed(0);
+  const co2 = (Q * 0.21).toFixed(0);
+  document.getElementById(`sq${i}`).textContent   = Q;
+  document.getElementById(`sco2${i}`).textContent = co2;
+  if (yieldChart) rebuildYieldChart();
+}
+
+/* ── Performance Chart (Step 4) ── */
+function buildPerfChart() {
+  const ctx = document.getElementById('perfChart').getContext('2d');
+  if (perfChart) perfChart.destroy();
+
+  // Generate theory curves
+  const xs = [];
+  for (let x = 0; x <= 0.12; x += 0.002) xs.push(x);
+
+  // Vacuum collector curve
+  const vacCurve = xs.map(x => {
+    const eta = ETA0 - A1 * x - A2 * x * x * 1000; // approx, treat ΔT≈G·x
+    return { x, y: Math.max(0, eta) };
+  });
+
+  // Flat-plate reference
+  const fpCurve = xs.map(x => {
+    const eta = 0.78 - 3.8 * x - 0.016 * x * x * 1000;
+    return { x, y: Math.max(0, eta) };
+  });
+
+  // Student data points
+  const studentPts = [];
+  for (let i = 0; i < 5; i++) {
+    const tm  = parseFloat(document.getElementById(`tm${i}`)?.value ?? DEFAULT_TM[i]);
+    const g   = parseFloat(document.getElementById(`g${i}`)?.value  ?? DEFAULT_G[i]);
+    if (isNaN(tm)||isNaN(g)||g<=0) continue;
+    const dT  = tm - T_AMB;
+    const dtg = dT / g;
+    let eta   = ETA0 - A1 * dtg - A2 * dT * dtg;
+    if (eta < 0) eta = 0;
+    studentPts.push({ x: dtg, y: eta });
+  }
+
+  perfChart = new Chart(ctx, {
+    type: 'scatter',
+    data: {
+      datasets: [
+        {
+          label: 'Vacuum Collector (theoretical)',
+          data: vacCurve,
+          type: 'line',
+          borderColor: '#2e8b7a',
+          backgroundColor: 'rgba(46,139,122,0.08)',
+          borderWidth: 2.5,
+          fill: true,
+          pointRadius: 0,
+          tension: 0.3
+        },
+        {
+          label: 'Flat-plate reference',
+          data: fpCurve,
+          type: 'line',
+          borderColor: '#e07b39',
+          backgroundColor: 'rgba(224,123,57,0.05)',
+          borderWidth: 2,
+          borderDash: [6, 4],
+          fill: false,
+          pointRadius: 0,
+          tension: 0.3
+        },
+        {
+          label: 'Your data points',
+          data: studentPts,
+          backgroundColor: '#f5a623',
+          borderColor: '#3a4a5c',
+          borderWidth: 1.5,
+          pointRadius: 7,
+          pointHoverRadius: 9,
+          type: 'scatter'
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      interaction: { mode: 'nearest', intersect: false },
+      plugins: {
+        legend: { position: 'top', labels: { font: { family: 'DM Sans', size: 12 }, padding: 16 } },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              if (ctx.datasetIndex === 2) return `Your point: ΔT/G = ${ctx.parsed.x.toFixed(4)} m²K/W, η = ${ctx.parsed.y.toFixed(3)}`;
+              return `η = ${ctx.parsed.y.toFixed(3)} at ΔT/G = ${ctx.parsed.x.toFixed(4)}`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          title: { display: true, text: 'Reduced Temperature Difference ΔT/G (m²K/W)', font: { family: 'DM Sans', size: 12 } },
+          min: 0, max: 0.12,
+          grid: { color: 'rgba(0,0,0,0.07)' }
+        },
+        y: {
+          title: { display: true, text: 'Collector Efficiency η (−)', font: { family: 'DM Sans', size: 12 } },
+          min: 0, max: 1.0,
+          grid: { color: 'rgba(0,0,0,0.07)' }
+        }
+      }
+    }
+  });
+}
+
+/* ── Yield Chart (Step 5) ── */
+function buildYieldChart() {
+  const ctx = document.getElementById('yieldChart').getContext('2d');
+  if (yieldChart) yieldChart.destroy();
+  renderYieldChart(ctx);
+}
+
+function rebuildYieldChart() {
+  const ctx = document.getElementById('yieldChart').getContext('2d');
+  if (yieldChart) { yieldChart.destroy(); yieldChart = null; }
+  renderYieldChart(ctx);
+}
+
+function renderYieldChart(ctx) {
+  const labels = [], Q = [], CO2 = [];
+  LOCATIONS.forEach((loc, i) => {
+    const H  = parseFloat(document.getElementById(`sh${i}`)?.value ?? loc.H);
+    const A  = parseFloat(document.getElementById(`sa${i}`)?.value ?? loc.A);
+    const s  = parseFloat(document.getElementById(`ss${i}`)?.value ?? loc.sys);
+    const q  = s * H * A;
+    labels.push(loc.name.split(',')[0]);
+    Q.push(Math.round(q));
+    CO2.push(Math.round(q * 0.21));
+  });
+
+  yieldChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Annual Heat Yield (kWh/yr)',
+          data: Q,
+          backgroundColor: 'rgba(46,139,122,0.75)',
+          borderColor: '#2e8b7a',
+          borderWidth: 1.5,
+          borderRadius: 6,
+          yAxisID: 'y'
+        },
+        {
+          label: 'CO₂ Saved (kg/yr)',
+          data: CO2,
+          backgroundColor: 'rgba(106,174,214,0.75)',
+          borderColor: '#6aaed6',
+          borderWidth: 1.5,
+          borderRadius: 6,
+          yAxisID: 'y2'
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'top', labels: { font: { family: 'DM Sans', size: 12 }, padding: 16 } }
+      },
+      scales: {
+        y:  { title: { display: true, text: 'Heat Yield (kWh/yr)',  font: { family: 'DM Sans' } }, grid: { color: 'rgba(0,0,0,0.07)' } },
+        y2: { title: { display: true, text: 'CO₂ Saved (kg/yr)',   font: { family: 'DM Sans' } }, position: 'right', grid: { drawOnChartArea: false } }
+      }
+    }
+  });
+}
+
+/* ── Final Score ── */
+function computeFinalScore() {
+  const total = 5;
+  let correct = 0;
+  for (let i = 1; i <= total; i++) if (quizState[i] === true) correct++;
+  document.getElementById('finalScore').textContent = `Quiz Score: ${correct} / ${total} correct`;
+}
+
+/* ── Restart ── */
+function restartModule() {
+  Object.keys(quizState).forEach(k => delete quizState[k]);
+  for (let i = 1; i <= 5; i++) {
+    document.querySelectorAll(`[data-step="${i}"]`).forEach(b => {
+      b.classList.remove('correct','wrong','locked');
+    });
+    const fb = document.getElementById(`qfb${i}`);
+    if (fb) { fb.className = 'quiz-feedback'; fb.innerHTML = ''; }
+    const nb = document.getElementById(`next${i}`);
+    if (nb) nb.disabled = true;
+  }
+  buildDataTable();
+  buildSizingTable();
+  if (perfChart) { perfChart.destroy(); perfChart = null; }
+  if (yieldChart) { yieldChart.destroy(); yieldChart = null; }
+  goStep(1);
+}
+</script>
+</body>
+</html>
