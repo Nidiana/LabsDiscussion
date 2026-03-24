@@ -1,0 +1,2202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hydrostatics Carousel - Interactive Lab Experience</title>
+    
+    <!-- MathJax Configuration and Loading -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true,
+                processEnvironments: true
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
+    <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header .subtitle {
+            color: #7f8c8d;
+            font-size: 1.1em;
+            margin-bottom: 20px;
+        }
+
+        .learning-outcomes {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .outcome-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #3498db;
+        }
+
+        .outcome-card h4 {
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .activity-selector {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+		.activity-grid {
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		gap: 30px;
+		max-width: 900px;
+		margin: 30px auto;
+		padding: 20px;
+		}
+
+        .activity-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .activity-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+        }
+
+        .activity-card.completed {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+        }
+
+        .activity-card.disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .activity-image {
+		max-width: 80%;
+		height: auto;
+		border-radius: 8px;
+		margin-bottom: 15px;
+		display: block;
+		margin-left: auto;
+		margin-right: auto;
+		object-fit: contain;
+		max-height: 150px;
+		}
+		
+		/* Responsive design */
+		@media (max-width: 768px) {
+			.activity-grid {
+				grid-template-columns: 1fr;
+				gap: 20px;
+				padding: 10px;
+			}
+    
+			.activity-card {
+				min-height: auto;
+			}
+		}
+		
+
+        .activity-card h3 {
+            font-size: 1.3em;
+            margin-bottom: 10px;
+        }
+
+        .activity-card p {
+            font-size: 0.95em;
+            opacity: 0.9;
+            flex-grow: 1;
+        }
+
+        .step-container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            display: none;
+        }
+
+        .step-container.active {
+            display: block;
+        }
+
+        .progress-bar {
+            background: #ecf0f1;
+            height: 12px;
+            border-radius: 6px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #3498db, #2ecc71);
+            height: 100%;
+            border-radius: 6px;
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .step-number {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-right: 20px;
+        }
+
+        .step-title {
+            flex: 1;
+        }
+
+        .step-title h2 {
+            color: #2c3e50;
+            font-size: 1.8em;
+            margin-bottom: 5px;
+        }
+
+        .learning-objective {
+            background: #e8f6ff;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .learning-objective h4 {
+            color: #2980b9;
+            margin-bottom: 8px;
+        }
+
+        .why-matters {
+            background: #fff3cd;
+            border-left: 4px solid #f39c12;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .why-matters h4 {
+            color: #e67e22;
+            margin-bottom: 8px;
+        }
+
+        .safety-warning {
+            background: #fff5f5;
+            border: 2px solid #e74c3c;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .safety-warning h4 {
+            color: #c0392b;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .safety-warning h4::before {
+            content: "⚠️";
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: flex-start;
+            margin: 15px 0;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-item:hover {
+            background: #e9ecef;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            margin-right: 12px;
+            margin-top: 2px;
+            transform: scale(1.2);
+            cursor: pointer;
+        }
+
+        .checkbox-item.completed {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+        }
+
+        .text-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-size: 1em;
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .quiz-container {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .quiz-question {
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        .quiz-options {
+            list-style: none;
+        }
+
+        .quiz-options li {
+            margin: 10px 0;
+        }
+
+        .quiz-options input[type="radio"] {
+            margin-right: 10px;
+            transform: scale(1.1);
+        }
+
+        .quiz-feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .quiz-feedback.correct {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .quiz-feedback.incorrect {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .data-table th {
+            background: #3498db;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        .data-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .data-table input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: linear-gradient(135deg, #2980b9, #1f4e79);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .completion-card {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .completion-card.show {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .image-placeholder {
+            background: #f8f9fa;
+            border: 2px dashed #dee2e6;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            margin: 20px 0;
+            color: #6c757d;
+        }
+
+        .equipment-diagram {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .equipment-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #dee2e6;
+        }
+
+        /* Enhanced styling for mathematical equations */
+        .equation-block {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .equation-inline {
+            background: #e8f4f8;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin: 0 2px;
+        }
+
+        .formula-section {
+            background: #f0f8ff;
+            border-left: 4px solid #0066cc;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .formula-section h4 {
+            color: #0066cc;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .activity-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .navigation-buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+ 
+
+</head>
+<body>
+    <div class="container">
+        <!-- Main Objective -->
+        <div class="activity-selector">
+            <h1>Hydrostatics Lab</h1>
+            <h2 style="margin-top: 20px;">🎯 Main Objective</h2>
+            <p style="font-size: 1.1em; margin: 15px 0; color: #2c3e50;">
+                <strong>To investigate the fundamental principles of hydrostatic pressure and fluid properties by experimentally validating theoretical models and applying them to common measurement devices.</strong>
+            </p>
+
+            <h3 style="margin-top: 25px;">Select any Activity to Begin (Lab Rotation):</h3>
+            <div class="activity-grid"> 
+                <button class="activity-card" onclick="startActivity(1)" id="activity1">
+                    <img src="https://drive.google.com/thumbnail?id=1Ami4Pi5t_cc0XdaSVlkWdLo3TNo9Kysj&sz=w300" alt="Density measurement setup" class="activity-image" style="max-width: 80%; height: auto;" onerror="this.onerror=null; this.src='https://drive.google.com/uc?export=view&id=1Ami4Pi5t_cc0XdaSVlkWdLo3TNo9Kysj';">
+                    <h3>Activity 1: Density and Specific Gravity</h3>
+                    <p>Using hydrometers to measure fluid density and identify different fluids through their specific gravity measurements.</p>
+                </button>
+                <button class="activity-card" onclick="startActivity(2)" id="activity2">
+                    <img src="https://drive.google.com/thumbnail?id=16zUdktuXMLnjYH8eWZi8l3d5MpCqg6Ai&sz=w300" alt="Hydrostatic pressure setup" class="activity-image" style="max-width: 80%; height: auto;" onerror="this.onerror=null; this.src='https://drive.google.com/uc?export=view&id=16zUdktuXMLnjYH8eWZi8l3d5MpCqg6Ai';">
+                    <h3>Activity 2: Hydrostatic Pressure</h3>
+                    <p>Transfer water between containers using only hydrostatic pressure to understand pressure differences.</p>
+                </button>
+                <button class="activity-card" onclick="startActivity(3)" id="activity3">
+                    <img src="https://drive.google.com/thumbnail?id=1-3_DZ7w6YAO6g-_ygcyj_wVVnKq3gwag&sz=w300" alt="Free surface apparatus" class="activity-image" style="max-width: 80%; height: auto;" onerror="this.onerror=null; this.src='https://drive.google.com/uc?export=view&id=1-3_DZ7w6YAO6g-_ygcyj_wVVnKq3gwag';">
+                    <h3>Activity 3: Free Surface</h3>
+                    <p>Discover how container shape influences fluid height when connected systems reach equilibrium.</p>
+                </button>
+                <button class="activity-card" onclick="startActivity(4)" id="activity4">
+                    <img src="https://drive.google.com/thumbnail?id=1Us6udSDBP3ewvC-hJaSZ6m23ATq2KRRM&sz=w300" alt="Hare's tube setup" class="activity-image" style="max-width: 80%; height: auto;" onerror="this.onerror=null; this.src='https://drive.google.com/uc?export=view&id=1Us6udSDBP3ewvC-hJaSZ6m23ATq2KRRM';">
+					<h3>Activity 4: Hare's Tube</h3>
+                    <p>Compare column heights of different density liquids to determine unknown fluid properties.</p>
+                </button>
+            </div>
+        </div>
+
+        <!-- Progress Bar Container -->
+        <div class="progress-container" style="display: none;">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <p style="text-align: center; margin-bottom: 20px;">
+                <strong>Activity Progress: </strong>
+                <span id="progressText">0%</span> | 
+                <strong>Step: </strong>
+                <span id="stepCounter">0 of 0</span>
+            </p>
+        </div>
+
+        <!-- Activity 1: Density and Specific Gravity -->
+        <div class="step-container" id="activity1-step1">
+            <div class="step-header">
+                <div class="step-number">1</div>
+                <div class="step-title">
+                    <h2>Activity 1: Density and Specific Gravity</h2>
+                </div>
+            </div>
+
+            <div class="learning-objective">
+                <h4> Challenge</h4>
+                <p>Identify the Mystery Fluid by measuring specific gravity carefully. </p>
+            </div>
+
+            <div class="why-matters">
+                <h4>💡 Why this matters</h4>
+                <p>Density measurement is fundamental in engineering for material identification, quality control, and understanding fluid behavior in civil engineering applications like concrete mix design and soil analysis.</p>
+            </div>
+
+			<h3>Background Theory</h3>
+
+			<div class="formula-section">
+			<h4>Key Equations</h4>
+			<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 15px;">
+			<div class="equation-block">
+            <p><strong>Density Definition:</strong></p>
+            $$\rho = \frac{m}{V}$$
+            <p style="margin-top: 10px;">where $\rho$ is density, $m$ is mass, and $V$ is volume</p>
+			</div>
+        
+			<div class="equation-block">
+            <p><strong>Specific Gravity:</strong></p>
+            $$s = \frac{\rho_{\text{fluid}}}{\rho_{\text{water}}}$$
+            <p style="margin-top: 10px;">where $s$ is specific gravity (dimensionless)</p>
+			</div>
+			</div>
+			<p>Hydrometers use Archimedes' principle: "Any object wholly or partially immersed in a fluid is buoyed up by a force equal to the weight of the fluid displaced by the object."</p>
+			</div>
+
+			<h3>Equipment</h3>
+			<p style="text-align: center; margin-top: 10px; font-weight: bold;">Identify the hydrometer and complete the safety box</p>
+			<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: start; margin: 20px 0;">
+				<div>
+					<img src="https://drive.google.com/thumbnail?id=1Ami4Pi5t_cc0XdaSVlkWdLo3TNo9Kysj&sz=w600" alt="Laboratory equipment for density measurement" style="width: 100%; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" onerror="this.onerror=null; this.src='https://drive.google.com/uc?export=view&id=1Ami4Pi5t_cc0XdaSVlkWdLo3TNo9Kysj';">
+
+				</div>
+    
+				<div class="safety-warning" style="margin: 0; height: fit-content;">
+					<h4>Critical Safety Information</h4>
+					<p><strong>The hydrometers are made of glass and break easily. Ensure they are handled extremely carefully.</strong></p>
+					<div class="checkbox-item">
+						<input type="checkbox" id="safety1-1">
+						<label for="safety1-1">I understand that hydrometers are fragile glass instruments</label>
+					</div>
+					<div class="checkbox-item">
+						<input type="checkbox" id="safety1-2">
+						<label for="safety1-2">I will handle the hydrometer with extreme care during all measurements</label>
+					</div>
+					<div class="checkbox-item">
+						<input type="checkbox" id="safety1-3">
+						<label for="safety1-3">I will immediately report any breakage to the instructor</label>
+					</div>
+				</div>
+			</div>
+
+            <div class="navigation-buttons">
+                <button class="btn btn-secondary" onclick="returnToMain()">← Return to Activities</button>
+                <button class="btn btn-primary" id="nextBtn1-1" onclick="nextStep()" disabled>Continue to Procedure →</button>
+            </div>
+        </div>
+
+<div class="step-container" id="activity1-step2">
+    <div class="step-header">
+        <div class="step-number">2</div>
+        <div class="step-title">
+            <h2>Experimental Procedure</h2>
+            <p>Learn proper hydrometer technique</p>
+        </div>
+    </div>
+
+    <h3>Hydrometer Reading Technique</h3>
+    <p>Learn the correct procedure for accurate hydrometer measurements.</p>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: start; margin: 20px 0;">
+        <div>
+            <img src="https://drive.google.com/thumbnail?id=1OC_kCsONzu78om08_9Gj20GeKhPEwDIp&sz=w600" alt="Hydrometer reading technique" style="width: 100%; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" onerror="this.onerror=null; this.src='https://drive.google.com/uc?export=view&id=1OC_kCsONzu78om08_9Gj20GeKhPEwDIp';">
+        </div>
+        
+        <div>
+            <h4>Follow each step carefully:</h4>
+            
+            <div class="checkbox-item">
+                <input type="checkbox" id="proc1-1">
+                <label for="proc1-1">Carefully take the hydrometer and release carefully into Fluid 1 by inserting the bulb first</label>
+            </div>
+            
+            <div class="checkbox-item">
+                <input type="checkbox" id="proc1-2">
+                <label for="proc1-2">Allow the hydrometer to stabilize (stop bobbing)</label>
+            </div>
+            
+            <div class="checkbox-item">
+                <input type="checkbox" id="proc1-3">
+                <label for="proc1-3">Read the specific gravity at the fluid meniscus level at eye height as shown in the picture</label>
+            </div>
+            
+            <div style="background: #e8f6ff; padding: 15px; border-radius: 8px; margin: 15px 0;">
+				<h4>✓ Tick box here:</h4>
+				<div class="checkbox-item">
+					<input type="checkbox" id="proc1-4">
+					<label for="proc1-4">I have understood how to read the hydrometer and I should wipe clean the hydrometer with the paper supplied before submerging in other liquid to avoid contamination</label>
+				</div>
+				<div style="margin-top: 10px; padding: 10px; background: #fff3cd; border-left: 4px solid #f39c12; border-radius: 4px;">
+					<p style="margin: 0; color: #856404; font-weight: bold;">⚠️ Remember to clean the hydrometer before using with another fluid</p>
+				</div>
+			</div>
+        </div>
+    </div>
+
+    <div style="margin-top: 30px;">
+        <h4>Quick check here:</h4>
+        <div class="quiz-container">
+            <div class="quiz-question">Why do we float the hydrometer bulb-end first?</div>
+            <ul class="quiz-options">
+                <li><input type="radio" name="quiz1" value="a" id="q1a"> <label for="q1a">To make it easier to read the scale</label></li>
+                <li><input type="radio" name="quiz1" value="b" id="q1b"> <label for="q1b">Because the weighted bulb provides buoyancy for measurement</label></li>
+                <li><input type="radio" name="quiz1" value="c" id="q1c"> <label for="q1c">To prevent the hydrometer from sinking completely</label></li>
+                <li><input type="radio" name="quiz1" value="d" id="q1d"> <label for="q1d">It doesn't matter which end goes first</label></li>
+            </ul>
+            <div class="quiz-feedback" id="quiz1-feedback"></div>
+        </div>
+    </div>
+
+    <div class="navigation-buttons">
+        <button class="btn btn-secondary" onclick="previousStep()">← Previous Step</button>
+        <button class="btn btn-primary" id="nextBtn1-2" onclick="nextStep()" disabled>Continue to Data Collection →</button>
+    </div>
+</div>
+
+        <div class="step-container" id="activity1-step3">
+            <div class="step-header">
+                <div class="step-number">3</div>
+                <div class="step-title">
+                    <h2>Data Collection and Analysis</h2>
+                </div>
+            </div>
+
+            <h3>Data Recording Table</h3>
+            <p>Complete the following table with your measurements. 
+			
+			<div style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+				<label for="uncertainty-input" style="font-weight: bold; margin-right: 10px;">Uncertainty ±</label>
+				<input type="number" step="0.001" id="uncertainty-input" placeholder="e.g., 0.001" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; width: 120px;">
+				<button type="button" id="check-uncertainty-btn" style="margin-left: 10px; padding: 8px 15px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">Check</button>
+				<span id="uncertainty-feedback" style="margin-left: 10px; font-weight: bold;"></span>
+				<p style="margin-top: 10px; color: #6c757d; font-style: italic;">Apply uncertainty knowledge or ask a staff member</p>
+				<div id="uncertainty-explanation" style="display: none; margin-top: 10px; padding: 10px; background: #fff3cd; border-left: 4px solid #f39c12; border-radius: 4px;">
+					<p style="margin: 0; color: #856404;">The minimum scale reading is 0.01, hence the uncertainty is ± 0.005</p>
+				</div>
+			</div>
+
+            <div class="equation-block" style="margin: 20px 0;">
+    <p><strong>Density Calculation Formula:</strong></p>
+    $\rho = s \times \rho_{\text{water}} = s \times 1000 \text{ kg/m}^3$
+    <p style="margin-top: 10px;">where $s$ is the measured specific gravity</p>
+</div>
+
+<table class="data-table">
+    <thead>
+        <tr>
+            <th style="width: 10%;">Fluid</th>
+            <th style="width: 20%;">Appearance of Fluid</th>
+            <th style="width: 15%;">Hydrometer Reading (specific gravity)</th>
+            <th style="width: 15%;">Density (kg/m³)</th>
+            <th style="width: 15%;">Identified Fluid</th>
+            <th style="width: 25%;">Verification</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+			<td><strong>Fluid 1</strong></td>
+			<td><input type="text" id="appearance1" placeholder="e.g., clear, colorless"></td>
+			<td><input type="number" step="0.001" id="reading1" placeholder="e.g., 0.870"></td>
+			<td><input type="number" id="density1" placeholder="Auto-calculated"></td>
+			<td>
+				<select id="fluid-id1">
+					<option value="">Select fluid...</option>
+					<option value="petrol">Petrol (700 kg/m³)</option>
+					<option value="alcohol">Alcohol (870 kg/m³)</option>
+					<option value="vegetable-oil">Vegetable Oil (910 kg/m³)</option>
+					<option value="linseed-oil">Linseed oil (942 kg/m³)</option>
+					<option value="water">Water (1000 kg/m³)</option>
+					<option value="beer">Beer (1010 kg/m³)</option>
+					<option value="acetic-acid">Acetic Acid (1049 kg/m³)</option>
+					<option value="salt-water">Salt Water (1100 kg/m³)</option>
+					<option value="glycerine">Glycerine (1259 kg/m³)</option>
+					<option value="honey">Honey (1360 kg/m³)</option>
+					<option value="corn-syrup">Corn Syrup (1380 kg/m³)</option>
+				</select>
+			</td>
+			<td><span id="verification1" style="font-weight: bold; padding: 5px;"></span></td>
+		</tr>
+
+        <tr>
+			<td><strong>Fluid 2</strong></td>
+			<td><input type="text" id="appearance2" placeholder="e.g., light yellow"></td>
+			<td><input type="number" step="0.001" id="reading2" placeholder="e.g., 1.259"></td>
+			<td><input type="number" id="density2" placeholder="Auto-calculated"></td>
+			<td>
+				<select id="fluid-id2">
+					<option value="">Select fluid...</option>
+					<option value="petrol">Petrol (700 kg/m³)</option>
+					<option value="alcohol">Alcohol (870 kg/m³)</option>
+					<option value="vegetable-oil">Vegetable Oil (910 kg/m³)</option>
+					<option value="linseed-oil">Linseed oil (942 kg/m³)</option>
+					<option value="water">Water (1000 kg/m³)</option>
+					<option value="beer">Beer (1010 kg/m³)</option>
+					<option value="acetic-acid">Acetic Acid (1049 kg/m³)</option>
+					<option value="salt-water">Salt Water (1100 kg/m³)</option>
+					<option value="glycerine">Glycerine (1259 kg/m³)</option>
+					<option value="honey">Honey (1360 kg/m³)</option>
+					<option value="corn-syrup">Corn Syrup (1380 kg/m³)</option>
+				</select>
+			</td>
+			<td><span id="verification2" style="font-weight: bold; padding: 5px;"></span></td>
+		</tr>
+	
+	<tr>
+    <td><strong>Fluid 3</strong></td>
+    <td><input type="text" id="appearance3" placeholder="e.g., clear, slightly viscous"></td>
+    <td><input type="number" step="0.001" id="reading3" placeholder="e.g., 0.910"></td>
+    <td><input type="number" id="density3" placeholder="Auto-calculated"></td>
+    <td>
+        <select id="fluid-id3">
+            <option value="">Select fluid...</option>
+            <option value="petrol">Petrol (700 kg/m³)</option>
+            <option value="alcohol">Alcohol (870 kg/m³)</option>
+            <option value="vegetable-oil">Vegetable Oil (910 kg/m³)</option>
+            <option value="linseed-oil">Linseed oil (942 kg/m³)</option>
+            <option value="water">Water (1000 kg/m³)</option>
+            <option value="beer">Beer (1010 kg/m³)</option>
+            <option value="acetic-acid">Acetic Acid (1049 kg/m³)</option>
+            <option value="salt-water">Salt Water (1100 kg/m³)</option>
+            <option value="glycerine">Glycerine (1259 kg/m³)</option>
+            <option value="honey">Honey (1360 kg/m³)</option>
+            <option value="corn-syrup">Corn Syrup (1380 kg/m³)</option>
+        </select>
+    </td>
+    <td><span id="verification3" style="font-weight: bold; padding: 5px;"></span></td>
+	</tr>
+   
+   
+   
+		<tr>
+			<td><strong>Fluid 4</strong></td>
+			<td><input type="text" id="appearance4" placeholder="e.g., dark, thick"></td>
+			<td><input type="number" step="0.001" id="reading4" placeholder="e.g., 1.380"></td>
+			<td><input type="number" id="density4" placeholder="Auto-calculated"></td>
+			<td>
+				<select id="fluid-id4">
+					<option value="">Select fluid...</option>
+					<option value="petrol">Petrol (700 kg/m³)</option>
+					<option value="alcohol">Alcohol (870 kg/m³)</option>
+					<option value="vegetable-oil">Vegetable Oil (910 kg/m³)</option>
+					<option value="linseed-oil">Linseed oil (942 kg/m³)</option>
+					<option value="water">Water (1000 kg/m³)</option>
+					<option value="beer">Beer (1010 kg/m³)</option>
+					<option value="acetic-acid">Acetic Acid (1049 kg/m³)</option>
+					<option value="salt-water">Salt Water (1100 kg/m³)</option>
+					<option value="glycerine">Glycerine (1259 kg/m³)</option>
+					<option value="honey">Honey (1360 kg/m³)</option>
+					<option value="corn-syrup">Corn Syrup (1380 kg/m³)</option>
+				</select>
+			</td>
+			<td><span id="verification4" style="font-weight: bold; padding: 5px;"></span></td>
+		</tr>
+		
+    </tbody>
+</table>
+
+		<div class="quiz-container">
+			<div class="quiz-question">Analysis Question: What sources of measurement variation might occur when different team members take measurements?</div>
+			<ul class="quiz-options">
+				<li><input type="radio" name="variation" value="a" id="var-a"> <label for="var-a">Random errors due to human reading errors at the meniscus and differences in how the hydrometer is inserted and stabilized</label></li>
+				<li><input type="radio" name="variation" value="b" id="var-b"> <label for="var-b">Temperature changes</label></li>
+				<li><input type="radio" name="variation" value="c" id="var-c"> <label for="var-c">Hydrometer calibration errors</label></li>
+				<li><input type="radio" name="variation" value="d" id="var-d"> <label for="var-d">No variation should occur with proper technique</label></li>
+			</ul>
+			<div class="quiz-feedback" id="variation-feedback"></div>
+		</div>
+
+          
+            <div class="navigation-buttons">
+                <button class="btn btn-secondary" onclick="previousStep()">← Previous Step</button>
+                <button class="btn btn-primary" id="nextBtn1-3" onclick="completeActivity(1)" disabled>Complete Activity 1 →</button>
+            </div>
+        </div>
+
+        
+
+        <!-- Activity 2: Hydrostatic Pressure -->
+        <div class="step-container" id="activity2-step1">
+            <div class="step-header">
+                <div class="step-number">1</div>
+                <div class="step-title">
+                    <h2>Activity 2: Hydrostatic Pressure</h2>
+                </div>
+            </div>
+
+            <div class="learning-objective">
+                <h4>Challenge</h4>
+                <p>Transfer water from one jug to another using only the supplied pipework. You cannot pick up either jug once placed on the bench!. Answer the questions when you complete this.</p>
+            </div>
+			
+			<h4>Equipment </h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: start; margin: 20px 0;">
+                <div style="display: flex; flex-direction: column; align-items: center;">
+                    <img src="https://drive.google.com/thumbnail?id=16zUdktuXMLnjYH8eWZi8l3d5MpCqg6Ai&sz=w600" alt="Hydrostatic pressure setup" style="width: 50%; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" onerror="this.onerror=null; this.src='https://drive.google.com/uc?export=view&id=16zUdktuXMLnjYH8eWZi8l3d5MpCqg6Ai';">
+                    <p style="margin-top: 10px; text-align: center; font-style: italic;">Items to complete the challenge</p>
+                </div>
+                
+                <div class="safety-warning" style="margin: 0; height: fit-content;">
+                    <h4>Laboratory Safety</h4>
+                    <p><strong>DO NOT put anything in your mouth while in a laboratory!</strong></p>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="safety2-1">
+                        <label for="safety2-1">I understand that no laboratory equipment should contact my mouth</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="safety2-2">
+                        <label for="safety2-2">I will use only the provided equipment to create pressure differences</label>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="margin: 20px 0; padding: 15px; background: #f0f8ff; border-left: 4px solid #3498db; border-radius: 5px;">
+                <p style="margin: 0; font-weight: bold; color: #2c3e50;">💡 See next step for hints on how to complete this challenge</p>
+            </div>
+
+
+            <h3>Background Theory</h3>
+            <div class="formula-section">
+                <h4>Pascal's Law</h4>
+                <div class="equation-block">
+                    <p><strong>Hydrostatic Pressure:</strong></p>
+                    $\Delta p = \rho g h$
+                    <p style="margin-top: 10px;">where $\Delta p$ is pressure change, $\rho$ is fluid density, $g$ is gravitational acceleration, and $h$ is height difference</p>
+                </div>
+            </div>
+            
+            <p>The greater the height difference, the greater the pressure difference, resulting in higher flow rates.</p>
+
+
+            <div class="navigation-buttons">
+                <button class="btn btn-secondary" onclick="returnToMain()">← Return to Activities</button>
+                <button class="btn btn-primary" id="nextBtn2-1" onclick="nextStep()" disabled>Continue to Procedure →</button>
+            </div>
+        </div>
+
+        <div class="step-container" id="activity2-step2">
+            <div class="step-header">
+                <div class="step-number">2</div>
+                <div class="step-title">
+                    <h2>Experimental Procedure</h2>
+                    <p>Creating a siphon system</p>
+                </div>
+            </div>
+
+
+
+			<h4>Siphon Setup Procedure</h4>
+			<div style="background: #f8f9fa; border: 2px solid #3498db; border-radius: 10px; padding: 20px; margin: 20px 0;">
+				<ol style="margin: 0; padding-left: 20px;">
+					<li><strong>Prime the tube:</strong> Submerge the entire tube in the full bucket to fill it completely. Ensure there are <strong>no air bubbles</strong> inside.</li>
+					<li><strong>Seal and position:</strong> Keeping both ends under water, place one end on the bucket's bottom. Seal the other end with your finger and lift it out.</li>
+					<li><strong>Transfer:</strong> Carefully move the sealed end to the bottom of the empty bucket.</li>
+					<li><strong>Release and observe:</strong> Release your finger. Observe the water discharge.</li>
+				</ol>
+			</div>
+
+            <h3>Observations</h3>
+            <div class="checkbox-item">
+                <input type="checkbox" id="obs2-1">
+                <label for="obs2-1">I successfully transferred water from one jug to the other</label>
+            </div>
+            
+
+            <div class="quiz-container">
+				<div class="quiz-question">Critical Understanding: Why does an air bubble stop or prevent the transfer of water in a siphon?</div>
+				<ul class="quiz-options">
+				<li><input type="radio" name="quiz2" value="a" id="q2a"> <label for="q2a">The air bubble creates turbulence that blocks water flow</label></li>
+				<li><input type="radio" name="quiz2" value="b" id="q2b"> <label for="q2b">Air breaks the fluid continuity and prevents pressure transmission between water molecules</label></li>
+				<li><input type="radio" name="quiz2" value="c" id="q2c"> <label for="q2c">The air bubble is lighter than water and floats to the top</label></li>
+				<li><input type="radio" name="quiz2" value="d" id="q2d"> <label for="q2d">Air bubbles create surface tension that stops flow</label></li>
+				</ul>
+				<div class="quiz-feedback" id="quiz2-feedback"></div>
+			</div>
+
+            <div class="navigation-buttons">
+                <button class="btn btn-secondary" onclick="previousStep()">← Previous Step</button>
+                <button class="btn btn-primary" id="nextBtn2-2" onclick="nextStep()" disabled>Continue to Results →</button>
+            </div>
+        </div>
+
+        <div class="step-container" id="activity2-step3">
+            <div class="step-header">
+                <div class="step-number">3</div>
+                <div class="step-title">
+                    <h2>Results and Analysis</h2>
+                </div>
+            </div>
+        
+
+            <h4>Answer the following questions:</h4>
+			
+            <div class="quiz-container">
+                <div class="quiz-question">How does the siphon work, and what is the primary driving force?</div>
+                <ul class="quiz-options">
+                    <li><input type="radio" name="process" value="a" id="proc-a"> <label for="proc-a">Vacuum suction pulls water through the tube</label></li>
+                    <li><input type="radio" name="process" value="b" id="proc-b"> <label for="proc-b">Flow is driven by a pressure difference caused by the weight of the fluid column (ρgh) on the outlet side. Atmospheric pressure provides the necessary push.</label></li>
+                    <li><input type="radio" name="process" value="c" id="proc-c"> <label for="proc-c">Surface tension draws water through the tube</label></li>
+                    <li><input type="radio" name="process" value="d" id="proc-d"> <label for="proc-d">Capillary action causes the water to flow</label></li>
+                </ul>
+                <div class="quiz-feedback" id="process-feedback"></div>
+            </div>
+
+           
+            <div class="quiz-container">
+                <div class="quiz-question">Why does the flow rate change as water transfers from one jug to the other?</div>
+                <ul class="quiz-options">
+                    <li><input type="radio" name="flowrate" value="a" id="flow-a"> <label for="flow-a">The tube gets clogged over time</label></li>
+                    <li><input type="radio" name="flowrate" value="b" id="flow-b"> <label for="flow-b">As height difference decreases, pressure difference decreases, reducing flow rate</label></li>
+                    <li><input type="radio" name="flowrate" value="c" id="flow-c"> <label for="flow-c">Water temperature changes during transfer</label></li>
+                    <li><input type="radio" name="flowrate" value="d" id="flow-d"> <label for="flow-d">Air bubbles enter the system</label></li>
+                </ul>
+                <div class="quiz-feedback" id="flowrate-feedback"></div>
+            </div>
+
+            <div class="quiz-container">
+                <div class="quiz-question">Critical Thinking: What happens to the siphon when both water levels become equal?</div>
+                <ul class="quiz-options">
+                    <li><input type="radio" name="quiz2b" value="a" id="q2ba"> <label for="q2ba">Flow continues at the same rate</label></li>
+                    <li><input type="radio" name="quiz2b" value="b" id="q2bb"> <label for="q2bb">Flow stops because pressure difference becomes zero</label></li>
+                    <li><input type="radio" name="quiz2b" value="c" id="q2bc"> <label for="q2bc">Flow reverses direction</label></li>
+                    <li><input type="radio" name="quiz2b" value="d" id="q2bd"> <label for="q2bd">Flow becomes turbulent</label></li>
+                </ul>
+                <div class="quiz-feedback" id="quiz2b-feedback"></div>
+            </div>
+			
+            <div class="why-matters" style="margin-top: 30px;">
+			<h4>🧹 Laboratory Cleanup Protocol</h4>
+				<p>Proper cleanup ensures the next team has the same optimal conditions for their learning experience.</p>
+				<div class="checkbox-item" style="margin-top: 15px; background: #fff3cd; border: 1px solid #f39c12; border-radius: 8px;">
+				<input type="checkbox" id="analysis2-1">
+				<label for="analysis2-1"><strong>Laboratory Cleanup Complete:</strong> I have wiped the work area clean, returned all equipment to its original position, and ensured the setup is ready for the next team</label>
+				</div>
+			</div>
+
+            <div class="completion-card" id="activity2-complete">
+                <h3>🎉 Activity 2 Complete!</h3>
+                <p>You have successfully demonstrated hydrostatic pressure transfer. You can now proceed to Activity 3.</p>
+            </div>
+
+            <div class="navigation-buttons">
+                <button class="btn btn-secondary" onclick="previousStep()">← Previous Step</button>
+                <button class="btn btn-primary" id="nextBtn2-3" onclick="completeActivity(2)" disabled>Complete Activity 2 →</button>
+            </div>
+        </div>
+
+        <!-- Activity 3: Free Surface -->
+        <div class="step-container" id="activity3-step1">
+            <div class="step-header">
+                <div class="step-number">1</div>
+                <div class="step-title">
+                    <h2>Activity 3: Free Surface</h2>
+                </div>
+            </div>
+
+            <div class="learning-objective">
+                <h4> Challenge</h4>
+                <p>In this activity you need to guess which column reaches the maximum level of water under two conditions.</p>
+            </div>
+			
+            
+			<div style="display: flex; flex-direction: column; align-items: center; margin: 20px 0;">
+			<h4 style="margin-bottom: 15px; color: #2c3e50;">1)Observe the equipment and identify the columns (shapes), scale and valves</h4>
+			<img src="https://drive.google.com/thumbnail?id=1-3_DZ7w6YAO6g-_ygcyj_wVVnKq3gwag&sz=w600" alt="Free surface apparatus" style="width: 80%; max-width: 500px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin-bottom: 30px;" onerror="this.onerror=null; this.src='https://drive.google.com/uc?export=view&id=1-3_DZ7w6YAO6g-_ygcyj_wVVnKq3gwag';">
+			</div>
+
+<h4>2) Make your prediction: what will happen when water flows through the connected system and Shape 3 is covered and outlet valve is close? Which shape will have the largest vertical height of water after 1 minute? See picture below  </h4>
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: start; margin: 20px 0;">
+    <div style="display: flex; flex-direction: column; align-items: center;">
+
+        <img src="https://drive.google.com/thumbnail?id=1SUIOkLW-tkuQAAVTqlD05BScZJht4LqH&sz=w600" alt="Valve operation diagram" style="width: 60%; max-width: 500px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" onerror="this.onerror=null; this.src='https://drive.google.com/uc?export=view&id=1SUIOkLW-tkuQAAVTqlD05BScZJht4LqH';">
+    </div>
+    
+    <div>
+            
+        <div class="quiz-container">
+            <div class="quiz-question">Select your prediction</div>
+            <ul class="quiz-options">
+                <li><input type="radio" name="prediction" value="a" id="pred-a"> <label for="pred-a">Shape 1</label></li>
+                <li><input type="radio" name="prediction" value="b" id="pred-b"> <label for="pred-b">Shape 2</label></li>
+                <li><input type="radio" name="prediction" value="c" id="pred-c"> <label for="pred-c">Shape 3</label></li>
+                <li><input type="radio" name="prediction" value="d" id="pred-d"> <label for="pred-d">Shape 1 and Shape 2 will be the same</label></li>
+                <li><input type="radio" name="prediction" value="e" id="pred-e"> <label for="pred-e">Shape 1 and Shape 3 will be the same</label></li>
+                <li><input type="radio" name="prediction" value="f" id="pred-f"> <label for="pred-f">Shape 2 and Shape 3 will be the same</label></li>
+                <li><input type="radio" name="prediction" value="g" id="pred-g"> <label for="pred-g">All will have the same height</label></li>
+            </ul>
+        </div>
+    </div>
+</div>
+			
+
+            <div class="navigation-buttons">
+                <button class="btn btn-secondary" onclick="returnToMain()">← Return to Activities</button>
+                <button class="btn btn-primary" id="nextBtn3-1" onclick="nextStep()" disabled>Continue to Procedure →</button>
+            </div>
+        </div>
+
+        <div class="step-container" id="activity3-step2">
+            <div class="step-header">
+                <div class="step-number">2</div>
+                <div class="step-title">
+                    <h2>Experimental Procedure</h2>
+                </div>
+            </div>
+
+            <div class="learning-objective">
+                <h4>Tests</h4>
+                <p>Check your prediction by following in order the steps below. If you need any clarification talk to staff. </p>
+            </div>
+
+            <h4>Experimental Steps (work as a team!):</h4>
+            
+            <div class="checkbox-item">
+                <input type="checkbox" id="proc3-1">
+                <label for="proc3-1"><strong>Step 1:</strong> Ensure the inlet valve is closed (is in vertical position)</label>
+            </div>
+            
+            <div class="checkbox-item">
+                <input type="checkbox" id="proc3-2">
+                <label for="proc3-2"><strong>Step 2:</strong> Ensure the outlet valve is open (horizontal position)</label>
+            </div>
+            
+            <div class="checkbox-item">
+                <input type="checkbox" id="proc3-3">
+                <label for="proc3-3"><strong>Step 3:</strong> Person 1: Open the inlet valve by turning anticlockwise (you need to hold the pipe as show below)</label>
+            </div>
+			
+			<div style="display: flex; justify-content: center; margin: 20px 0;">
+			<img src="https://drive.google.com/thumbnail?id=1uPMPuq5pfIrLQ3J8XewV7fzfEDwMHeLo&sz=w600" alt="Inlet valve operation demonstration" style="width: 40%; max-width: 250px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" onerror="this.onerror=null; this.src='https://drive.google.com/uc?export=view&id=1uPMPuq5pfIrLQ3J8XewV7fzfEDwMHeLo';">
+			</div>
+            
+            <div class="checkbox-item">
+                <input type="checkbox" id="proc3-4">
+                <label for="proc3-4"><strong>Step 4:</strong> Person 2: Cover Shape 3 with your hand</label>
+            </div>
+            
+            <div class="checkbox-item">
+                <input type="checkbox" id="proc3-5">
+                <label for="proc3-5"><strong>Step 5:</strong> Person 3: Close the outlet valve by turning clockwise  (hold properly the equipment)</label>
+            </div>
+            
+            <div class="checkbox-item">
+                <input type="checkbox" id="proc3-6">
+                <label for="proc3-6"><strong>Step 6:</strong> Wait 1 minute and record heights according to the scale in your notes </label>
+            </div>
+            
+			<div class="checkbox-item">
+			<input type="checkbox" id="proc3-7">
+			<label for="proc3-7"><strong>Step 7:</strong> Verify that Shape 1 and 2 reach the same height (correct answer)</label>
+			</div>
+
+			<div id="prediction-feedback-step7" style="display: none; margin: 15px 0; padding: 15px; background: #d4edda; color: #155724; border: 1px solid #c3e6cb; border-radius: 8px; text-align: center; font-weight: bold;">
+				Your prediction was correct! Well done.
+			</div>
+            
+            <div class="checkbox-item">
+                <input type="checkbox" id="proc3-8">
+                <label for="proc3-8"><strong>Step 8:</strong> Uncover Shape 3 and wait 30 seconds - observe what happens and record heights</label>
+            </div>
+			
+
+            <div class="navigation-buttons">
+                <button class="btn btn-secondary" onclick="previousStep()">← Previous Step</button>
+                <button class="btn btn-primary" id="nextBtn3-2" onclick="nextStep()" disabled>Continue answer questions →</button>
+            </div>
+        </div>
+
+        <div class="step-container" id="activity3-step3">
+            <div class="step-header">
+                <div class="step-number">3</div>
+                <div class="step-title">
+                    <h2>Analysis Questions</h2>
+                </div>
+            </div>
+
+            
+            <div class="quiz-container">
+                <div class="quiz-question">What did you observe when Shape 3 was uncovered ?</div>
+                <ul class="quiz-options">
+                    <li><input type="radio" name="observe" value="a" id="obs-a"> <label for="obs-a">Water levels stayed the same in all shapes</label></li>
+                    <li><input type="radio" name="observe" value="b" id="obs-b"> <label for="obs-b">Water flowed into Shape 3 until all three shapes reached equal height</label></li>
+                    <li><input type="radio" name="observe" value="c" id="obs-c"> <label for="obs-c">Water overflowed from the system</label></li>
+                    <li><input type="radio" name="observe" value="d" id="obs-d"> <label for="obs-d">Water only filled Shape 3 partially</label></li>
+                </ul>
+                <div class="quiz-feedback" id="observe-feedback"></div>
+            </div>
+
+            <div class="quiz-container">
+                <div class="quiz-question">In an apparatus of connected containers of different shapesfilled with a single, uniform liquid at rest, the liquid levels always align to the same horizontal height. What is the fundamental reason for this?</div>
+                <ul class="quiz-options">
+                    <li><input type="radio" name="explain" value="a" id="exp-a"> <label for="exp-a">The hydrostatic pressure at any given depth must be equal throughout the same fluid (Pascal's principle)</label></li>
+                    <li><input type="radio" name="explain" value="b" id="exp-b"> <label for="exp-b">Gravity exerts a greater force on the liquid in the wider containers, pushing the liquid up into the narrower arms</label></li>
+                    <li><input type="radio" name="explain" value="c" id="exp-c"> <label for="exp-c">The weight of the liquid column is the same in all containers, regardless of their shape, requiring the height to be equal.</label></li>
+                    <li><input type="radio" name="explain" value="d" id="exp-d"> <label for="exp-d">Cohesive forces between the liquid molecules are stronger than adhesive forces with the container walls, pulling the surface flat.</label></li>
+                </ul>
+                <div class="quiz-feedback" id="explain-feedback"></div>
+            </div>
+
+            <div class="quiz-container">
+                <div class="quiz-question">In the connected containers apparatus you cover shape 3 with your finger, sealing it off from the atmosphere. What is the fundamental physical reason the water level in Shape 3 remains negligible compared to the other columns?</div>
+                <ul class="quiz-options">
+                    <li><input type="radio" name="quiz3" value="a" id="q3a"> <label for="q3a">The seal from the finger creates a vacuum that pulls the water down, preventing it from rising like the water in the other columns.</label></li>
+                    <li><input type="radio" name="quiz3" value="b" id="q3b"> <label for="q3b">The weight of the water is much greater in the wider Shapes 1 and 2, so the water is forced to rise higher in those columns to balance the pressure</label></li>
+                    <li><input type="radio" name="quiz3" value="c" id="q3c"> <label for="q3c">The pressure at the bottom of all three columns (where they connect) must be equal. In Shape 3, this pressure is provided almost entirely by the high pressure of the trapped air, with a negligible contribution from the water height.</label></li>
+                    <li><input type="radio" name="quiz3" value="d" id="q3d"> <label for="q3d">Surface tension between the water and the glass of Shape 3 is stronger, which holds the water down and prevents it from rising.</label></li>
+                </ul>
+                <div class="quiz-feedback" id="quiz3-feedback"></div>
+            </div>
+
+            <div class="completion-card" id="activity3-complete">
+                <h3>🎉 Activity 3 Complete!</h3>
+                <p>You have successfully demonstrated Pascal's law with free surfaces. You can now proceed to Activity 4.</p>
+            </div>
+
+            <div class="navigation-buttons">
+                <button class="btn btn-secondary" onclick="previousStep()">← Previous Step</button>
+                <button class="btn btn-primary" id="nextBtn3-3" onclick="completeActivity(3)" disabled>Complete Activity 3 →</button>
+            </div>
+        </div>
+
+        <!-- Activity 4: Hare's Tube -->
+        <div class="step-container" id="activity4-step1">
+            <div class="step-header">
+                <div class="step-number">1</div>
+                <div class="step-title">
+                    <h2>Activity 4: Hare's Tube</h2>
+                    <p>Comparing fluid densities using column heights</p>
+                </div>
+            </div>
+
+            <div class="learning-objective">
+                <h4> Challenge </h4>
+                <p>Determine the specific gravity (s) of an unknown fluid by comparing the height of a column of the fluid to the height of a column of control fluid (in this case, water)</p>
+            </div>
+
+
+            <h3>Background Theory</h3>
+            <div class="formula-section">
+                <h4>Understanding the vacuum mechanism in the hare's tube</h4>
+                <p> The aim of the vacuum is to create a lower pressure in the region with air. Since both containers are exposed to the atmospheric pressure, then this create the same pressure difference in both liquids. </p>
+                
+				<div style="display: flex; justify-content: center; margin: 20px 0;">
+				<div style="text-align: center;">
+				<h4 style="margin-bottom: 15px; color: #2c3e50;">Hare's Tube Setup</h4>
+					<img src="https://drive.google.com/thumbnail?id=1GH8puqX0tm6naHE27hXia1SHHgK5sl5D&sz=w600" alt="Hare's tube experimental setup" style="width: 80%; max-width: 500px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" onerror="this.onerror=null; this.src='https://drive.google.com/uc?export=view&id=1GH8puqX0tm6naHE27hXia1SHHgK5sl5D';">
+					<p style="margin-top: 10px; font-style: italic; color: #6c757d;">Two-column system showing control fluid (water) column, measured fluid column, vacuum pump, and height scales</p>
+				</div>
+				</div>
+				
+                <div class="equation-block">
+                    <p><strong>For equal pressure differences:</strong></p>
+                    $\rho_1 g h_1 = \rho_2 g h_2$
+                </div>
+                
+                <div class="equation-block">
+                    <p><strong>Therefore, re-ordering in terms of specific gravity (s) or specific density:</strong></p>
+                    s=$\frac{\rho_2}{\rho_1} = \frac{h_1}{h_2}$
+                    <p style="margin-top: 10px;"> Remember that 1 is for water</p>
+                </div>
+                
+            </div>
+
+
+
+            <div class="safety-warning">
+                <h4>Complete this Vacuum Pump Safety before using the equipment</h4>
+                <p><strong>Do not completely squeeze the vacuum pump on the first attempt. Be extremely cautious until familiar with operation.</strong></p>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="safety4-1">
+                    <label for="safety4-1">I will use the vacuum pump carefully and gradually</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="safety4-2">
+                    <label for="safety4-2">I will not allow fluids to spill over the top of columns</label>
+                </div>
+
+            </div>
+
+
+
+            <div class="navigation-buttons">
+                <button class="btn btn-secondary" onclick="returnToMain()">← Return to Activities</button>
+                <button class="btn btn-primary" id="nextBtn4-1" onclick="nextStep()" disabled>Continue to Procedure →</button>
+            </div>
+        </div>
+
+        <div class="step-container" id="activity4-step2">
+            <div class="step-header">
+                <div class="step-number">2</div>
+                <div class="step-title">
+                    <h2>Experimental Procedure</h2>
+                    <p>Creating vacuum to draw fluid columns</p>
+                </div>
+            </div>
+
+
+
+            <h4>Measurement Procedure:</h4>
+
+<div style="background: #f8f9fa; border: 2px solid #3498db; border-radius: 10px; padding: 20px; margin: 20px 0;">
+    <div style="margin-bottom: 15px; padding: 15px; background: #e8f4f8; border-left: 4px solid #3498db; border-radius: 5px;">
+        <h5 style="color: #2980b9; margin-bottom: 8px;">Step 1: Training to become familiar with the operation of the pump!</h5>
+        <p style="margin: 0;">Gently squeeze the hand vacuum pump to draw the fluids from the containers into the columns. The liquid should not exceed the columns, otherwise you will mix the liquids.</p>
+    </div>
+    
+    <div style="margin-bottom: 15px; padding: 15px; background: #e8f4f8; border-left: 4px solid #3498db; border-radius: 5px;">
+        <h5 style="color: #2980b9; margin-bottom: 8px;">Step 2:</h5>
+        <p style="margin: 0;">Use the pressure release button (usually under the pressure gauge) to return both fluids back to the containers. Repeat until you become familiar or ask a member of staff for help.</p>
+    </div>
+    
+    <div style="margin-bottom: 15px; padding: 15px; background: #e8f4f8; border-left: 4px solid #3498db; border-radius: 5px;">
+        <h5 style="color: #2980b9; margin-bottom: 8px;">Step 3:</h5>
+        <p style="margin: 0;">When you are ready, squeeze the vacuum to a desired difference in the column. You must take your readings (both columns $h_1$, $h_2$) when fluids are more or less stable.</p>
+    </div>
+    
+    <div style="margin-bottom: 0; padding: 15px; background: #e8f4f8; border-left: 4px solid #3498db; border-radius: 5px;">
+        <h5 style="color: #2980b9; margin-bottom: 8px;">Step 4:</h5>
+        <p style="margin: 0;">Release the pressure button, create another pressure difference and record the readings of both columns. Complete 3 readings of $h_1$ and $h_2$ at different pressures and anotate in your notes. </p>
+    </div>
+</div>
+
+            <div class="quiz-container">
+                <div class="quiz-question">In the experiment, why do both columns experience the same pressure difference?</div>
+                <ul class="quiz-options">
+                    <li><input type="radio" name="quiz4" value="a" id="q4a"> <label for="q4a">Because they use the same vacuum pump</label></li>
+                    <li><input type="radio" name="quiz4" value="b" id="q4b"> <label for="q4b">Because atmospheric pressure acts equally on both fluid surfaces</label></li>
+                    <li><input type="radio" name="quiz4" value="c" id="q4c"> <label for="q4c">Because the tubes are the same diameter</label></li>
+                    <li><input type="radio" name="quiz4" value="d" id="q4d"> <label for="q4d">Because both fluids have the same volume</label></li>
+                </ul>
+                <div class="quiz-feedback" id="quiz4-feedback"></div>
+            </div>
+
+            <div class="navigation-buttons">
+                <button class="btn btn-secondary" onclick="previousStep()">← Previous Step</button>
+                <button class="btn btn-primary" id="nextBtn4-2" onclick="nextStep()" disabled>Continue to Data Analysis →</button>
+            </div>
+        </div>
+
+        <div class="step-container" id="activity4-step3">
+            <div class="step-header">
+                <div class="step-number">3</div>
+                <div class="step-title">
+                    <h2>Data Analysis and Fluid Identification</h2>
+                </div>
+            </div>
+
+
+            <h3>Using your data calculate the specific gravity, you can use Previous step button if not reemeber the equations.</h3>
+			
+            <div class="equation-block">
+                <p><strong>Since $\rho_1 h_1 = \rho_2 h_2$ and water density = 1000 kg/m³:</strong></p>
+                $\rho_{\text{measured}} = \rho_{\text{water}} \times \frac{h_{1}}{h_{2}}$
+            </div>
+
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>Test No</th>
+            <th>Height Water (mm)</th>
+            <th>Height Measured Fluid (mm)</th>
+            <th>Ratio ($\frac{h_{\text{water}}}{h_{\text{measured}}}$)</th>
+            <th>Density of the fluid(kg/m³)</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>1</strong></td>
+            <td><input type="number" step="0.1" id="h-water-1" placeholder="e.g., 12.5"></td>
+            <td><input type="number" step="0.1" id="h-measured-1" placeholder="e.g., 14.4"></td>
+            <td><input type="number" step="0.001" id="ratio-1" placeholder="e.g., 0.868"></td>
+            <td><input type="number" id="density-calc-1" placeholder="e.g., 868"></td>
+        </tr>
+        <tr>
+            <td><strong>2</strong></td>
+            <td><input type="number" step="0.1" id="h-water-2" placeholder="e.g., 11.8"></td>
+            <td><input type="number" step="0.1" id="h-measured-2" placeholder="e.g., 13.6"></td>
+            <td><input type="number" step="0.001" id="ratio-2" placeholder="e.g., 0.868"></td>
+            <td><input type="number" id="density-calc-2" placeholder="e.g., 868"></td>
+        </tr>
+        <tr>
+            <td><strong>3</strong></td>
+            <td><input type="number" step="0.1" id="h-water-3" placeholder="e.g., 12.1"></td>
+            <td><input type="number" step="0.1" id="h-measured-3" placeholder="e.g., 13.9"></td>
+            <td><input type="number" step="0.001" id="ratio-3" placeholder="e.g., 0.870"></td>
+            <td><input type="number" id="density-calc-3" placeholder="e.g., 870"></td>
+        </tr>
+    </tbody>
+</table>
+
+<div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0; border: 2px solid #3498db;">
+    <h4 style="color: #2c3e50; margin-bottom: 15px;">Average Density Calculation</h4>
+    <div style="display: flex; align-items: center; margin-bottom: 15px;">
+        <strong>Average Density: </strong>
+        <span id="average-density" style="margin-left: 10px; font-size: 1.2em; color: #e74c3c; font-weight: bold;">-- kg/m³</span>
+    </div>
+    
+    <div style="margin-bottom: 15px;">
+        <label for="mystery-fluid-select" style="font-weight: bold; margin-right: 10px;">Based on your average density, identify the mystery fluid:</label>
+        <select id="mystery-fluid-select" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 1em;">
+            <option value="">Select fluid...</option>
+            <option value="petrol">Petrol (700 kg/m³)</option>
+            <option value="alcohol">Alcohol (870 kg/m³)</option>
+            <option value="vegetable-oil">Vegetable Oil (910 kg/m³)</option>
+            <option value="linseed-oil">Linseed oil (942 kg/m³)</option>
+            <option value="water">Water (1000 kg/m³)</option>
+            <option value="beer">Beer (1010 kg/m³)</option>
+            <option value="acetic-acid">Acetic Acid (1049 kg/m³)</option>
+            <option value="salt-water">Salt Water (1100 kg/m³)</option>
+            <option value="glycerine">Glycerine (1259 kg/m³)</option>
+            <option value="honey">Honey (1360 kg/m³)</option>
+            <option value="corn-syrup">Corn Syrup (1380 kg/m³)</option>
+        </select>
+    </div>
+    
+    <div id="mystery-fluid-feedback" style="margin-top: 15px; padding: 10px; border-radius: 5px; font-weight: bold; display: none;"></div>
+</div>
+
+
+            <div class="quiz-container">
+				<div class="quiz-question">Final Analysis: How consistent were your measurements across the three trials?</div>
+				<ul class="quiz-options">
+					<li><input type="radio" name="consistency" value="a" id="cons-a"> <label for="cons-a">Very consistent (±5 kg/m³ variation) - high confidence in results</label></li>
+					<li><input type="radio" name="consistency" value="b" id="cons-b"> <label for="cons-b">Moderately consistent (±10-20 kg/m³ variation) - reasonable confidence</label></li>
+					<li><input type="radio" name="consistency" value="c" id="cons-c"> <label for="cons-c">Inconsistent (>30 kg/m³ variation) - need to improve technique</label></li>
+					<li><input type="radio" name="consistency" value="d" id="cons-d"> <label for="cons-d">Could not determine consistency due to equipment issues</label></li>
+				</ul>
+				<div class="quiz-feedback" id="consistency-feedback"></div>
+			</div>
+
+            <div class="completion-card" id="activity4-complete">
+                <h3>🎉 Activity 4 Complete!</h3>
+                <p>You have successfully completed all four hydrostatics activities! You now have comprehensive understanding of Pascal's law applications.</p>
+            </div>
+
+            <div class="navigation-buttons">
+                <button class="btn btn-secondary" onclick="previousStep()">← Previous Step</button>
+                <button class="btn btn-primary" id="nextBtn4-3" onclick="completeActivity(4)" disabled>Complete Activity 4 →</button>
+            </div>
+        </div>
+
+      
+
+      <!-- Final Summary -->
+        <div class="step-container" id="final-summary">
+            <div class="step-header">
+                <div class="step-number">✓</div>
+                <div class="step-title">
+                    <h2>Laboratory Session Complete</h2>
+                    <p>Comprehensive understanding of hydrostatics achieved</p>
+                </div>
+            </div>
+
+            <div style="background: linear-gradient(135deg, #27ae60, #2ecc71); color: white; padding: 30px; border-radius: 15px; text-align: center; margin: 20px 0;">
+                <h3>🎓 Congratulations!</h3>
+                <p>You have successfully completed all four hydrostatics activities and demonstrated mastery of Pascal's law applications.</p>
+            </div>
+
+            <h3>Learning Outcomes Achieved</h3>
+            <div class="learning-outcomes">
+                <div class="outcome-card" style="background: #d4edda; border-left: 4px solid #28a745;">
+                    <h4>📝 Record ✓</h4>
+                    <p>Maintained comprehensive experimental records across all activities</p>
+                </div>
+                <div class="outcome-card" style="background: #d4edda; border-left: 4px solid #28a745;">
+                    <h4>🔍 Concept ✓</h4>
+                    <p>Visualized hydrostatic principles through hands-on experimentation</p>
+                </div>
+                <div class="outcome-card" style="background: #d4edda; border-left: 4px solid #28a745;">
+                    <h4>⚗️ Practical ✓</h4>
+                    <p>Mastered density measurement techniques and unit conversions</p>
+                </div>
+                <div class="outcome-card" style="background: #d4edda; border-left: 4px solid #28a745;">
+                    <h4>🧮 Integrate ✓</h4>
+                    <p>Applied Pascal's law across multiple experimental contexts</p>
+                </div>
+            </div>
+
+            <h3>Key Principles Demonstrated</h3>
+            <div class="formula-section">
+                <h4>Fundamental Equations Mastered</h4>
+                <div class="equation-block">
+                    <p><strong>Pascal's Law:</strong></p>
+                    $\Delta p = \rho g h$
+                    <p style="margin-top: 10px;">Pressure changes are transmitted undiminished through fluids</p>
+                </div>
+                
+                <div class="equation-block">
+                    <p><strong>Archimedes' Principle:</strong></p>
+                    $F_b = \rho_{\text{fluid}} \cdot V_{\text{displaced}} \cdot g$
+                    <p style="margin-top: 10px;">Buoyant force equals weight of displaced fluid</p>
+                </div>
+                
+                <div class="equation-block">
+                    <p><strong>Density Relationships:</strong></p>
+                    $\frac{\rho_1}{\rho_2} = \frac{h_2}{h_1}$
+                    <p style="margin-top: 10px;">Height inversely proportional to density in connected systems</p>
+                </div>
+                
+                <div class="equation-block">
+                    <p><strong>Specific Gravity:</strong></p>
+                    $s = \frac{\rho_{\text{fluid}}}{\rho_{\text{water}}}$
+                    <p style="margin-top: 10px;">Dimensionless ratio for fluid identification</p>
+                </div>
+            </div>
+
+            <div class="navigation-buttons">
+                <button class="btn btn-secondary" onclick="returnToMain()">← Return to Activities</button>
+                <button class="btn btn-primary" onclick="window.print()">🖨️ Print Summary</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State management using JavaScript variables (no localStorage)
+        let currentStep = 0;
+        let currentActivity = 0;
+        let completedActivities = [false, false, false, false];
+        let stepData = {};
+        
+        // Step requirements for each activity step
+        const stepRequirements = {
+            '1-1': 3, // Activity 1, Step 1: 3 safety checkboxes
+            '1-2': 4, // Activity 1, Step 2: 8 procedure + 1 quiz
+            '1-3': 0, // Activity 1, Step 3: 2 data checkboxes
+            '2-1': 2, // Activity 2, Step 1: 2 safety + 1 challenge
+            '2-2': 2, // Activity 2, Step 2: 7 procedure + 1 quiz
+            '2-3': 4, // Activity 2, Step 3: 2 obs + 2 quiz + 1 checkbox
+            '3-1': 1, // Activity 3, Step 1: 1 prediction + 1 ready
+            '3-2': 8, // Activity 3, Step 2: 8 procedure steps
+            '3-3': 3, // Activity 3, Step 3: 1 data + 2 quiz + 1 checkbox
+            '4-1': 2, // Activity 4, Step 1: 3 safety + 1 equipment
+            '4-2': 1, // Activity 4, Step 2: 6 procedure + 1 quiz
+            '4-3': 1  // Activity 4, Step 3: 2 calc + 1 quiz
+        };
+
+        console.log('%cHydrostatics Lab Interactive System Initialized', 'color: blue; font-weight: bold; font-size: 14px;');
+        console.log('%cDEBUG MODE: All checkbox and quiz interactions will be logged', 'color: green; font-weight: bold;');
+
+        function startActivity(activityNum) {
+            console.log('%cStarting Activity ' + activityNum, 'color: blue; font-weight: bold;');
+            
+            // Allow any activity to be started (removed restriction)
+            currentActivity = activityNum;
+            currentStep = 1;
+            
+            // Hide activity selector and show progress bar
+            document.querySelector('.activity-selector').style.display = 'none';
+            document.querySelector('.progress-container').style.display = 'block';
+            
+            // Show the first step of the selected activity
+            showStep(`activity${activityNum}-step1`);
+            updateProgress();
+        }
+
+        function showStep(stepId) {
+            console.log('%cShowing step: ' + stepId, 'color: green; font-weight: bold;');
+            
+            // Hide all step containers
+            const allSteps = document.querySelectorAll('.step-container');
+            allSteps.forEach(step => step.classList.remove('active'));
+            
+            // Show the requested step
+            const targetStep = document.getElementById(stepId);
+            if (targetStep) {
+                targetStep.classList.add('active');
+                
+                // Scroll to progress container for consistent positioning
+                const progressContainer = document.querySelector('.progress-container');
+                if (progressContainer) {
+                    progressContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+                
+                // Setup event listeners for this step
+                setupStepListeners(stepId);
+                
+                // Re-render MathJax equations for the active step
+                if (window.MathJax && window.MathJax.typesetPromise) {
+                    window.MathJax.typesetPromise([targetStep]).catch(function (err) {
+                        console.log('MathJax typeset error: ' + err.message);
+                    });
+                }
+            }
+        }
+
+        function setupStepListeners(stepId) {
+            const stepContainer = document.getElementById(stepId);
+            if (!stepContainer) return;
+
+            // Add listeners to all checkboxes in this step
+			const checkboxes = stepContainer.querySelectorAll('input[type="checkbox"]');
+			checkboxes.forEach(checkbox => {
+				checkbox.addEventListener('change', function() {
+					console.log('%cCheckbox changed: ' + this.id + ' = ' + this.checked, 'color: orange; font-weight: bold;');
+					checkStepCompletion(stepId);
+        
+					// Check prediction feedback when Step 7 checkbox changes
+					if (this.id === 'proc3-7') {
+						checkPredictionFeedback();
+					}
+				});
+		});
+
+            // Add listeners to all radio buttons in this step
+            const radioButtons = stepContainer.querySelectorAll('input[type="radio"]');
+            radioButtons.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    console.log('%cRadio selected: ' + this.name + ' = ' + this.value, 'color: orange; font-weight: bold;');
+                    handleQuizSelection(this);
+                    checkStepCompletion(stepId);
+                });
+            });
+			// Add uncertainty validation for Activity 1, Step 3
+			if (stepId === 'activity1-step3') {
+				setupUncertaintyValidation();
+				setupDensityCalculation();
+			}
+	
+		// Add listeners to text inputs for auto-calculation in Activity 4
+			if (stepId.includes('activity4-step3')) {
+				setupAutoCalculation();
+			}
+
+		// Initial check
+		checkStepCompletion(stepId);
+		// Check prediction feedback for Activity 3, Step 2
+		if (stepId === 'activity3-step2') {
+		checkPredictionFeedback();
+		}
+		}
+		
+        function checkStepCompletion(stepId) {
+            const activityNum = stepId.split('-')[0].replace('activity', '');
+            const stepNum = stepId.split('-')[1].replace('step', '');
+            const requirementKey = `${activityNum}-${stepNum}`;
+            
+            console.log('%cChecking completion for step: ' + stepId, 'color: blue; font-weight: bold;');
+            
+            const stepContainer = document.getElementById(stepId);
+            if (!stepContainer) return;
+
+            const totalCheckboxes = stepContainer.querySelectorAll('input[type="checkbox"]').length;
+            const checkedBoxes = stepContainer.querySelectorAll('input[type="checkbox"]:checked').length;
+            const requiredCount = stepRequirements[requirementKey] || totalCheckboxes;
+            
+            console.log(`Step ${stepId}: ${checkedBoxes}/${requiredCount} tasks completed (Total checkboxes: ${totalCheckboxes})`);
+            
+            // Check quiz completions
+            let quizComplete = true;
+            const quizContainers = stepContainer.querySelectorAll('.quiz-container');
+            quizContainers.forEach(container => {
+                const radioName = container.querySelector('input[type="radio"]')?.name;
+                if (radioName) {
+                    const selected = container.querySelector(`input[name="${radioName}"]:checked`);
+                    if (!selected) quizComplete = false;
+                }
+            });
+
+            const isComplete = checkedBoxes >= requiredCount && quizComplete;
+            const nextBtn = stepContainer.querySelector('.btn-primary');
+            
+            if (nextBtn) {
+                nextBtn.disabled = !isComplete;
+                if (isComplete) {
+                    console.log('%cStep ' + stepId + ' COMPLETED - Next button ENABLED', 'color: green; font-weight: bold; background: yellow;');
+                } else {
+                    console.log('%cStep ' + stepId + ' incomplete - Next button DISABLED', 'color: red; font-weight: bold;');
+                }
+            }
+
+            // Visual feedback for completed checkboxes
+            stepContainer.querySelectorAll('input[type="checkbox"]:checked').forEach(checkbox => {
+                checkbox.closest('.checkbox-item').classList.add('completed');
+            });
+        }
+
+    function handleQuizSelection(radio) {
+    const quizContainer = radio.closest('.quiz-container');
+    const feedbackDiv = quizContainer.querySelector('.quiz-feedback');
+    
+    // Define correct answers
+    const correctAnswers = {
+        'quiz1': 'b',
+        'quiz2': 'b', 
+        'quiz2b': 'b',
+        'quiz3': 'c',
+        'quiz4': 'b',
+        'prediction': 'g',
+        'variation': 'a',
+        'process': 'b',
+        'flowrate': 'b',
+        'observe': 'b',
+        'explain': 'a'
+    };
+
+    // Special handling for consistency question - no right/wrong answer
+    if (radio.name === 'consistency') {
+        feedbackDiv.className = 'quiz-feedback correct'; // Use correct styling for neutral feedback
+        feedbackDiv.innerHTML = 'Remember that precision can be improved with careful repetitions.';
+        
+        // Auto-check a hidden quiz completion checkbox
+        let quizCheckbox = quizContainer.querySelector('.quiz-complete-check');
+        if (!quizCheckbox) {
+            quizCheckbox = document.createElement('input');
+            quizCheckbox.type = 'checkbox';
+            quizCheckbox.className = 'quiz-complete-check';
+            quizCheckbox.style.display = 'none';
+            quizCheckbox.checked = true;
+            quizContainer.appendChild(quizCheckbox);
+        }
+        return; // Exit early for consistency question
+    }
+
+    // For prediction quiz, always enable progression (no feedback)
+    if (radio.name === 'prediction') {
+        // Hide feedback div for prediction
+        if (feedbackDiv) {
+            feedbackDiv.style.display = 'none';
+        }
+        
+        // Auto-check a hidden quiz completion checkbox for any prediction selection
+        let quizCheckbox = quizContainer.querySelector('.quiz-complete-check');
+        if (!quizCheckbox) {
+            quizCheckbox = document.createElement('input');
+            quizCheckbox.type = 'checkbox';
+            quizCheckbox.className = 'quiz-complete-check';
+            quizCheckbox.style.display = 'none';
+            quizCheckbox.checked = true;
+            quizContainer.appendChild(quizCheckbox);
+        }
+        return; // Exit early for prediction quiz
+    }
+
+    // Normal feedback logic for other quizzes continues here...
+    const isCorrect = radio.value === correctAnswers[radio.name];
+    
+    if (isCorrect) {
+        feedbackDiv.className = 'quiz-feedback correct';
+        feedbackDiv.innerHTML = '✓ Correct! ' + getExplanation(radio.name, radio.value);
+        
+        // Auto-check a hidden quiz completion checkbox
+        let quizCheckbox = quizContainer.querySelector('.quiz-complete-check');
+        if (!quizCheckbox) {
+            quizCheckbox = document.createElement('input');
+            quizCheckbox.type = 'checkbox';
+            quizCheckbox.className = 'quiz-complete-check';
+            quizCheckbox.style.display = 'none';
+            quizCheckbox.checked = true;
+            quizContainer.appendChild(quizCheckbox);
+        }
+    } else {
+        feedbackDiv.className = 'quiz-feedback incorrect';
+        feedbackDiv.innerHTML = '✗ Incorrect. ' + getExplanation(radio.name, correctAnswers[radio.name]);
+    }
+    }
+
+        function getExplanation(quizName, correctValue) {
+            const explanations = {
+                'quiz1': {
+                    'b': 'The weighted bulb provides the necessary mass for buoyancy calculations according to Archimedes\' principle.'
+                },
+                'quiz2': {
+                    'b': 'Air acts as a compressible medium that absorbs and dampens pressure waves, breaking the continuous liquid column required for siphon operation. Without fluid continuity, pressure cannot be transmitted effectively between water molecules, disrupting the Pascal\'s law mechanism that drives the siphon.'
+                },
+                'quiz2b': {
+                    'b': 'When heights are equal, there is no pressure difference, so flow stops according to Pascal\'s law.'
+                },
+                'quiz3': {
+                    'c': 'The pressure at the bottom is equal for all shapes. For the sealed shape (Shape 3 when covered), this pressure comes from compressed air pushing down, not from water height. When the outlet valve closes with Shape 3 covered, the trapped air gets compressed. According to Boyle\'s Law (P₁V₁ = P₂V₂), smaller volume means higher pressure. The trapped air pressure rises far above atmospheric pressure (P_trapped >> P_atm). Therefore, the full pressure at the bottom is achieved with minimal water height: P_bottom = P_trapped + ρgh₃ ≈ P_trapped'
+				},
+                'quiz4': {
+                    'b': 'Atmospheric pressure acts equally on both fluid surfaces, creating the same pressure difference for both columns.'
+                },
+                'prediction': {
+                    'g': 'According to Pascal\'s law, connected fluids reach the same height regardless of container shape.'
+                },
+				'variation': {
+				'a': 'Correct! Multiple factors affect measurements: random errors due to the human reading, due to time wait and stabilization of the hydrometer. Within the duration of the experiment the temperature changes fluid density can be neglected. Remember there is no perfect measurement and errors always occur.'
+				},
+                'process': {
+                    'b': 'Atmospheric pressure pushes fluid up the tube while gravity creates the pressure difference that drives flow through height differences.'
+                },
+                'flowrate': {
+                    'b': 'Flow rate ∝ pressure difference ∝ height difference. As water levels equalize, Δh decreases, so flow rate decreases.'
+                },
+                'observe': {
+                    'b': 'Pascal\'s law requires pressure equilibrium - when Shape 3 is connected, water redistributes until all heights are equal.'
+                },
+                'explain': {
+                    'a': 'Pascal\'s law: pressure is transmitted equally throughout connected fluids, so equal heights mean equal pressures at the bottom.'
+                },
+                'consistency': {
+                    'a': 'Consistent measurements indicate good experimental technique and reliable equipment operation.'
+                }
+            };
+            
+            return explanations[quizName]?.[correctValue] || 'Check your understanding of the underlying physics principles.';
+        }
+
+    function setupUncertaintyValidation() {
+    const uncertaintyInput = document.getElementById('uncertainty-input');
+    const feedbackSpan = document.getElementById('uncertainty-feedback');
+    const explanationDiv = document.getElementById('uncertainty-explanation');
+    const checkButton = document.getElementById('check-uncertainty-btn');
+
+    function validateUncertainty() {
+        const value = parseFloat(uncertaintyInput.value);
+        const correctValue = 0.005;
+        
+        if (isNaN(value)) {
+            feedbackSpan.textContent = '';
+            explanationDiv.style.display = 'none';
+            return;
+        }
+        
+        if (Math.abs(value - correctValue) < 0.0001) { // Close enough accounting for floating point
+            feedbackSpan.textContent = '✓';
+            feedbackSpan.style.color = '#28a745';
+            explanationDiv.style.display = 'none';
+        } else {
+            feedbackSpan.textContent = '✗';
+            feedbackSpan.style.color = '#dc3545';
+            explanationDiv.style.display = 'block';
+        }
+    }
+
+    // Only validate when the Check button is clicked
+    checkButton?.addEventListener('click', validateUncertainty);
+    
+    // Clear feedback when user starts typing again
+    uncertaintyInput?.addEventListener('input', function() {
+        feedbackSpan.textContent = '';
+        explanationDiv.style.display = 'none';
+    });
+    }
+
+    function setupDensityCalculation() {
+    // Correct answers for each fluid
+    const correctFluids = {
+        1: 'glycerine',
+        2: 'water', 
+        3: 'salt-water',
+        4: 'vegetable-oil'
+    };
+    
+    const correctNames = {
+        1: 'Glycerine',
+        2: 'Water',
+        3: 'Salt Water', 
+        4: 'Vegetable Oil'
+    };
+
+    // Auto-calculate density and verify fluid identification
+    for (let i = 1; i <= 4; i++) {
+        const sgInput = document.getElementById(`reading${i}`);
+        const densityInput = document.getElementById(`density${i}`);
+        const fluidSelect = document.getElementById(`fluid-id${i}`);
+        const verificationSpan = document.getElementById(`verification${i}`);
+
+        function calculateDensity() {
+            const sg = parseFloat(sgInput.value);
+            
+            if (sg && sg > 0) {
+                const density = sg * 1000;
+                densityInput.value = Math.round(density);
+            } else {
+                densityInput.value = '';
+            }
+        }
+
+        function verifyFluidIdentification() {
+            const selectedFluid = fluidSelect.value;
+            const correctFluid = correctFluids[i];
+            const correctName = correctNames[i];
+            
+            if (!selectedFluid) {
+                verificationSpan.textContent = '';
+                verificationSpan.style.color = '';
+                verificationSpan.style.backgroundColor = '';
+                return;
+            }
+            
+            if (selectedFluid === correctFluid) {
+                verificationSpan.textContent = '🎉 Congratulations! You guessed correctly';
+                verificationSpan.style.color = '#155724';
+                verificationSpan.style.backgroundColor = '#d4edda';
+                verificationSpan.style.borderRadius = '4px';
+            } else {
+                verificationSpan.textContent = `❌ This fluid is ${correctName}`;
+                verificationSpan.style.color = '#721c24';
+                verificationSpan.style.backgroundColor = '#f8d7da';
+                verificationSpan.style.borderRadius = '4px';
+            }
+        }
+
+        sgInput?.addEventListener('input', calculateDensity);
+        sgInput?.addEventListener('change', calculateDensity);
+        fluidSelect?.addEventListener('change', verifyFluidIdentification);
+    }
+    }
+
+	     function setupAutoCalculation() {
+			// Only setup average density calculation for Activity 4
+			// All table values are now manual input by users
+			for (let i = 1; i <= 3; i++) {
+				const densityInput = document.getElementById(`density-calc-${i}`);
+        
+				// Update average whenever density values change
+				densityInput?.addEventListener('input', updateAverageDensity);
+				densityInput?.addEventListener('change', updateAverageDensity);
+			}
+    
+			// Setup mystery fluid selection
+			setupMysteryFluidSelection();
+    
+			// Initial calculation in case there are pre-filled values
+			updateAverageDensity();
+		}	
+
+
+	
+	function updateAverageDensity() {
+    const density1 = parseFloat(document.getElementById('density-calc-1').value);
+    const density2 = parseFloat(document.getElementById('density-calc-2').value);
+    const density3 = parseFloat(document.getElementById('density-calc-3').value);
+    
+    let validDensities = [];
+    if (!isNaN(density1) && density1 > 0) validDensities.push(density1);
+    if (!isNaN(density2) && density2 > 0) validDensities.push(density2);
+    if (!isNaN(density3) && density3 > 0) validDensities.push(density3);
+    
+    const avgSpan = document.getElementById('average-density');
+    
+    if (validDensities.length > 0) {
+        const average = validDensities.reduce((sum, density) => sum + density, 0) / validDensities.length;
+        avgSpan.textContent = Math.round(average) + ' kg/m³';
+        avgSpan.style.color = '#e74c3c';
+    } else {
+        avgSpan.textContent = '-- kg/m³';
+        avgSpan.style.color = '#6c757d';
+    }
+    }
+
+	function setupMysteryFluidSelection() {
+    const mysterySelect = document.getElementById('mystery-fluid-select');
+    const feedbackDiv = document.getElementById('mystery-fluid-feedback');
+    
+    mysterySelect?.addEventListener('change', function() {
+        const selectedFluid = this.value;
+        
+        if (!selectedFluid) {
+            feedbackDiv.style.display = 'none';
+            return;
+        }
+        
+        if (selectedFluid === 'glycerine') {
+            feedbackDiv.innerHTML = 'Congratulations! You guessed correctly - the fluid is Glycerine!';
+            feedbackDiv.style.backgroundColor = '#d4edda';
+            feedbackDiv.style.color = '#155724';
+            feedbackDiv.style.border = '1px solid #c3e6cb';
+        } else {
+            feedbackDiv.innerHTML = 'The mysterious fluid is Glycerine';
+            feedbackDiv.style.backgroundColor = '#f8d7da';
+            feedbackDiv.style.color = '#721c24';
+            feedbackDiv.style.border = '1px solid #f5c6cb';
+        }
+        
+        feedbackDiv.style.display = 'block';
+    });
+	} 
+
+
+
+        function nextStep() {
+            console.log('%cAdvancing to next step', 'color: blue; font-weight: bold;');
+            
+            currentStep++;
+            const nextStepId = `activity${currentActivity}-step${currentStep}`;
+            
+            if (document.getElementById(nextStepId)) {
+                showStep(nextStepId);
+                updateProgress();
+            } else {
+                console.log('%cNo more steps in this activity', 'color: orange; font-weight: bold;');
+            }
+        }
+
+        function previousStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                const prevStepId = `activity${currentActivity}-step${currentStep}`;
+                showStep(prevStepId);
+                updateProgress();
+            }
+        }
+
+        function completeActivity(activityNum) {
+            console.log('%cCompleting Activity ' + activityNum, 'color: green; font-weight: bold; font-size: 16px;');
+            
+            completedActivities[activityNum - 1] = true;
+            
+            // Show completion card
+            const completionCard = document.getElementById(`activity${activityNum}-complete`);
+            if (completionCard) {
+                completionCard.classList.add('show');
+            }
+            
+            // Update activity selector
+            const activityCard = document.getElementById(`activity${activityNum}`);
+            if (activityCard) {
+                activityCard.classList.add('completed');
+                activityCard.innerHTML = activityCard.innerHTML.replace('→', '✓ Completed');
+            }
+            
+            // Enable next activity
+            if (activityNum < 4) {
+                const nextActivityCard = document.getElementById(`activity${activityNum + 1}`);
+                if (nextActivityCard) {
+                    nextActivityCard.classList.remove('disabled');
+                }
+            }
+            
+            // If all activities completed, show final summary
+            if (completedActivities.every(activity => activity)) {
+                setTimeout(() => {
+                    showFinalSummary();
+                }, 2000);
+            } else {
+                setTimeout(() => {
+                    returnToMain();
+                }, 3000);
+            }
+        }
+
+        function showFinalSummary() {
+            console.log('%cShowing final summary - All activities completed!', 'color: green; font-weight: bold; font-size: 16px; background: yellow;');
+            
+            document.querySelector('.activity-selector').style.display = 'none';
+            document.querySelector('.progress-container').style.display = 'none';
+            
+            // Hide all step containers
+            const allSteps = document.querySelectorAll('.step-container');
+            allSteps.forEach(step => step.classList.remove('active'));
+            
+            // Show final summary
+            const summary = document.getElementById('final-summary');
+            if (summary) {
+                summary.classList.add('active');
+                summary.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                
+                // Re-render MathJax for final summary
+                if (window.MathJax && window.MathJax.typesetPromise) {
+                    window.MathJax.typesetPromise([summary]).catch(function (err) {
+                        console.log('MathJax typeset error: ' + err.message);
+                    });
+                }
+            }
+        }
+
+        function returnToMain() {
+            console.log('%cReturning to main activity selector', 'color: blue; font-weight: bold;');
+            
+            // Hide all step containers and progress bar
+            const allSteps = document.querySelectorAll('.step-container');
+            allSteps.forEach(step => step.classList.remove('active'));
+            
+            document.querySelector('.progress-container').style.display = 'none';
+            document.querySelector('.activity-selector').style.display = 'block';
+            
+            // Reset current step
+            currentStep = 0;
+            currentActivity = 0;
+            
+            // Scroll to top
+            document.querySelector('.activity-selector').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function updateProgress() {
+            const totalSteps = getCurrentActivityStepCount();
+            const progressPercent = ((currentStep - 1) / (totalSteps - 1)) * 100;
+            
+            document.getElementById('progressFill').style.width = progressPercent + '%';
+            document.getElementById('progressText').textContent = Math.round(progressPercent) + '%';
+            document.getElementById('stepCounter').textContent = `${currentStep} of ${totalSteps}`;
+            
+            console.log(`Progress updated: ${currentStep}/${totalSteps} (${Math.round(progressPercent)}%)`);
+        }
+
+        function getCurrentActivityStepCount() {
+            // Each activity has different number of steps
+            const stepCounts = {
+                1: 3, // Activity 1: 3 steps
+                2: 3, // Activity 2: 3 steps  
+                3: 3, // Activity 3: 3 steps
+                4: 3  // Activity 4: 3 steps
+            };
+            return stepCounts[currentActivity] || 4;
+        }
+
+
+		function checkPredictionFeedback() {
+			// Get the selected prediction from Step 1
+			const selectedPrediction = document.querySelector('input[name="prediction"]:checked');
+			const feedbackDiv = document.getElementById('prediction-feedback-step7');
+			const checkbox7 = document.getElementById('proc3-7');
+    
+			if (selectedPrediction && feedbackDiv && checkbox7) {
+				// Only show message if checkbox 7 is ticked AND prediction was 'd'
+				if (selectedPrediction.value === 'd' && checkbox7.checked) {
+					feedbackDiv.style.display = 'block';
+				} else {
+					feedbackDiv.style.display = 'none';
+				}
+			}
+		}
+
+
+        // Initialize event listeners when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('%cPage loaded - Setting up initial event listeners', 'color: blue; font-weight: bold;');
+    
+            // Add debugging verification
+            console.log('%cVERIFY: Step requirements defined for:', Object.keys(stepRequirements).join(', '), 'color: blue; font-weight: bold;');
+    
+            // Verify step requirement counts match actual checkboxes
+            Object.keys(stepRequirements).forEach(key => {
+                const [activity, step] = key.split('-');
+                const stepId = `activity${activity}-step${step}`;
+                const stepElement = document.getElementById(stepId);
+                if (stepElement) {
+                    const actualCheckboxes = stepElement.querySelectorAll('input[type="checkbox"]').length;
+                    const requiredCount = stepRequirements[key];
+                    console.log(`%cVERIFY: ${stepId} has ${actualCheckboxes} checkboxes, requires ${requiredCount} tasks`, 'color: blue; font-weight: bold;');
+                    
+                    if (actualCheckboxes !== requiredCount) {
+                        console.log(`%c⚠️ MISMATCH: ${stepId} checkbox count (${actualCheckboxes}) doesn't match requirement (${requiredCount})`, 'color: red; font-weight: bold; background: yellow;');
+                    }
+                }
+            });
+
+  // Wait for MathJax to load, then typeset the initial page
+     if (window.MathJax) {
+         window.MathJax.startup.promise.then(() => {
+             console.log('%cMathJax loaded successfully', 'color: green; font-weight: bold;');
+         }).catch((err) => {
+            console.log('%cMathJax loading error: ' + err.message, 'color: red; font-weight: bold;');
+         });
+       }
+  });
+
+        // Console debugging for incomplete code detection
+        setTimeout(() => {
+            const scripts = document.getElementsByTagName('script');
+            const lastScript = scripts[scripts.length - 1];
+            const scriptContent = lastScript.textContent;
+            
+            if (!scriptContent.includes('DOMContentLoaded') || scriptContent.trim().endsWith('scrollIn')) {
+                console.log('%c⚠️ CODE INCOMPLETE - RESPONSE WAS TRUNCATED ⚠️', 'color: red; font-weight: bold; font-size: 18px; background: yellow; padding: 10px; border: 3px solid red;');
+            } else {
+                console.log('%c✅ JavaScript code appears complete', 'color: green; font-weight: bold;');
+            }
+        }, 1000);
+    </script>
+
+    <style media="print">
+        .navigation-buttons, .activity-selector, .progress-container {
+            display: none !important;
+        }
+        
+        .step-container {
+            display: block !important;
+            page-break-inside: avoid;
+            margin-bottom: 30px;
+        }
+        
+        .step-container:not(#final-summary) {
+            display: none !important;
+        }
+        
+        body {
+            background: white !important;
+            color: black !important;
+        }
+        
+        .header, .step-container {
+            box-shadow: none !important;
+            border: 1px solid #ccc;
+        }
+    </style>
+
+</body>
+</html>
