@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vacuum Solar Collector — Thermal Efficiency</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Sans+3:wght@300;400;500;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<script>
+  window.MathJax = {
+    tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']] },
+    startup: { ready() { MathJax.startup.defaultReady(); } }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+<style>
+  :root {
+    --teal-900: #0d3d3a;
+    --teal-800: #145752;
+    --teal-700: #1a6e66;
+    --teal-600: #228a80;
+    --teal-500: #2aa898;
+    --teal-400: #3dc4b2;
+    --teal-300: #6fd6ca;
+    --teal-100: #d4f4f1;
+    --teal-50:  #edfaf8;
+
+    --amber-900: #6b3500;
+    --amber-700: #b85c00;
+    --amber-600: #d46a00;
+    --amber-500: #f07d0c;
+    --amber-400: #f59a3a;
+    --amber-300: #f8b96a;
+    --amber-100: #fde8c8;
+    --amber-50:  #fff6ec;
+
+    --slate-900: #1a2230;
+    --slate-700: #374358;
+    --slate-500: #5e7291;
+    --slate-300: #a8b8cc;
+    --slate-100: #e8eef5;
+    --white: #ffffff;
+
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-body: 'Source Sans 3', sans-serif;
+    --font-code: 'Fira Code', monospace;
+
+    --radius-sm: 6px;
+    --radius-md: 12px;
+    --radius-lg: 20px;
+    --radius-xl: 28px;
+
+    --shadow-card: 0 4px 24px rgba(13,61,58,.12), 0 1px 4px rgba(13,61,58,.08);
+    --shadow-float: 0 12px 40px rgba(13,61,58,.18), 0 2px 8px rgba(13,61,58,.10);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-body);
+    background: linear-gradient(160deg, var(--teal-900) 0%, #0a2e2b 40%, var(--slate-900) 100%);
+    min-height: 100vh;
+    color: var(--slate-900);
+    padding: 0;
+  }
+
+  /* ── Header ── */
+  .site-header {
+    background: linear-gradient(135deg, var(--teal-800) 0%, var(--teal-900) 100%);
+    border-bottom: 1px solid rgba(255,255,255,.08);
+    padding: 28px 40px 24px;
+    display: flex; align-items: center; gap: 20px;
+  }
+  .site-header svg { flex-shrink: 0; }
+  .header-text h1 {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    color: var(--white);
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+  .header-text p {
+    font-size: .85rem;
+    color: var(--teal-300);
+    font-weight: 400;
+    margin-top: 3px;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+
+  /* ── Progress bar ── */
+  .progress-wrap {
+    background: rgba(255,255,255,.06);
+    border-bottom: 1px solid rgba(255,255,255,.07);
+    padding: 18px 40px;
+  }
+  .progress-meta {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 10px;
+  }
+  .step-label { font-size: .78rem; color: var(--teal-300); letter-spacing: .06em; text-transform: uppercase; font-weight: 600; }
+  .step-fraction { font-family: var(--font-code); font-size: .82rem; color: var(--amber-400); }
+  .progress-track {
+    height: 6px; background: rgba(255,255,255,.12); border-radius: 99px; overflow: visible;
+    position: relative;
+  }
+  .progress-fill {
+    height: 100%; background: linear-gradient(90deg, var(--teal-400), var(--amber-400));
+    border-radius: 99px;
+    transition: width .55s cubic-bezier(.4,0,.2,1);
+    position: relative;
+  }
+  .progress-fill::after {
+    content: '';
+    position: absolute; right: -4px; top: 50%; transform: translateY(-50%);
+    width: 14px; height: 14px;
+    background: var(--amber-400);
+    border-radius: 50%;
+    border: 3px solid var(--teal-900);
+    box-shadow: 0 0 0 3px rgba(245,154,58,.3);
+    transition: right .55s cubic-bezier(.4,0,.2,1);
+  }
+  .step-dots {
+    display: flex; gap: 8px; margin-top: 14px;
+  }
+  .step-dot {
+    flex: 1; height: 3px; border-radius: 99px;
+    background: rgba(255,255,255,.15);
+    transition: background .3s;
+  }
+  .step-dot.done { background: var(--teal-400); }
+  .step-dot.active { background: var(--amber-400); }
+
+  /* ── Main layout ── */
+  .main {
+    max-width: 960px; margin: 0 auto;
+    padding: 36px 24px 60px;
+  }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-float);
+    overflow: hidden;
+    display: none;
+    animation: fadeUp .4s ease both;
+  }
+  .card.active { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .card-header {
+    background: linear-gradient(135deg, var(--teal-700) 0%, var(--teal-800) 100%);
+    padding: 28px 36px 24px;
+    display: flex; align-items: flex-start; gap: 20px;
+  }
+  .step-badge {
+    background: var(--amber-500);
+    color: var(--white);
+    font-family: var(--font-display);
+    font-size: .85rem;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 99px;
+    white-space: nowrap;
+    margin-top: 4px;
+    flex-shrink: 0;
+  }
+  .card-header-text h2 {
+    font-family: var(--font-display);
+    font-size: 1.45rem;
+    color: var(--white);
+    line-height: 1.25;
+  }
+  .card-header-text p {
+    color: var(--teal-300);
+    font-size: .88rem;
+    margin-top: 6px;
+    font-weight: 300;
+  }
+
+  .card-body { padding: 32px 36px; }
+
+  /* ── Diagram ── */
+  .diagram-wrap {
+    background: linear-gradient(160deg, #f0faf9 0%, #fef7ee 100%);
+    border: 1.5px solid var(--teal-100);
+    border-radius: var(--radius-lg);
+    padding: 28px 16px 20px;
+    margin-bottom: 28px;
+    overflow: hidden;
+  }
+  .diagram-wrap svg { display: block; margin: 0 auto; max-width: 100%; }
+
+  /* ── Theory box ── */
+  .theory-box {
+    background: linear-gradient(135deg, var(--teal-50) 0%, var(--amber-50) 100%);
+    border-left: 4px solid var(--teal-500);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+  }
+  .theory-box h3 {
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    color: var(--teal-800);
+    margin-bottom: 10px;
+  }
+  .theory-box p, .theory-box li {
+    font-size: .93rem;
+    line-height: 1.75;
+    color: var(--slate-700);
+  }
+  .theory-box ul { padding-left: 18px; margin-top: 8px; }
+  .theory-box li { margin-bottom: 4px; }
+
+  /* ── Formula chip ── */
+  .formula-chip {
+    background: var(--slate-900);
+    color: var(--teal-300);
+    border-radius: var(--radius-md);
+    padding: 16px 20px;
+    margin: 18px 0;
+    font-size: .95rem;
+    overflow-x: auto;
+  }
+  .formula-chip .MathJax { color: var(--white) !important; }
+
+  /* ── Param table ── */
+  .param-table {
+    width: 100%; border-collapse: collapse;
+    font-size: .88rem; margin-top: 16px;
+  }
+  .param-table th {
+    background: var(--teal-700); color: var(--white);
+    padding: 9px 14px; text-align: left; font-weight: 600;
+    font-family: var(--font-body);
+  }
+  .param-table th:first-child { border-radius: var(--radius-sm) 0 0 0; }
+  .param-table th:last-child  { border-radius: 0 var(--radius-sm) 0 0; }
+  .param-table td { padding: 9px 14px; border-bottom: 1px solid var(--slate-100); color: var(--slate-700); }
+  .param-table tr:last-child td { border-bottom: none; }
+  .param-table tr:nth-child(even) td { background: var(--teal-50); }
+  .param-symbol { font-family: var(--font-code); color: var(--teal-700); font-size: .85rem; }
+
+  /* ── Quiz ── */
+  .quiz-section {
+    border-top: 2px dashed var(--amber-200, #f8d5a0);
+    padding-top: 24px;
+    margin-top: 4px;
+  }
+  .quiz-section h3 {
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    color: var(--amber-700);
+    margin-bottom: 6px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .quiz-section h3::before {
+    content: '?';
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 24px; height: 24px;
+    background: var(--amber-500); color: var(--white);
+    border-radius: 50%; font-size: .8rem; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .quiz-question { font-size: .95rem; color: var(--slate-700); margin-bottom: 18px; line-height: 1.6; }
+
+  .quiz-options { display: flex; flex-direction: column; gap: 10px; }
+  .quiz-option {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 14px 16px;
+    border: 2px solid var(--slate-100);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: border-color .2s, background .2s, transform .15s;
+    user-select: none;
+    font-size: .92rem;
+    color: var(--slate-700);
+    line-height: 1.5;
+    background: var(--white);
+  }
+  .quiz-option:hover:not(.locked) {
+    border-color: var(--teal-400);
+    background: var(--teal-50);
+    transform: translateX(3px);
+  }
+  .quiz-option.selected { border-color: var(--teal-500); background: var(--teal-50); }
+  .quiz-option.correct  { border-color: #22a559; background: #f0faf4; color: #145c32; }
+  .quiz-option.wrong    { border-color: #e05050; background: #fff4f4; color: #7a1a1a; }
+  .quiz-option.reveal-correct { border-color: #22a559; background: #f0faf4; color: #145c32; }
+  .option-letter {
+    width: 26px; height: 26px; flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--slate-100); color: var(--slate-700);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 600; font-size: .82rem; font-family: var(--font-code);
+    transition: background .2s, color .2s;
+  }
+  .quiz-option.correct  .option-letter { background: #22a559; color: var(--white); }
+  .quiz-option.wrong    .option-letter { background: #e05050; color: var(--white); }
+  .quiz-option.reveal-correct .option-letter { background: #22a559; color: var(--white); }
+
+  .feedback-box {
+    margin-top: 16px;
+    padding: 14px 18px;
+    border-radius: var(--radius-md);
+    font-size: .9rem;
+    line-height: 1.6;
+    display: none;
+    animation: fadeUp .3s ease;
+  }
+  .feedback-box.correct { background: #edfaf3; border-left: 4px solid #22a559; color: #145c32; }
+  .feedback-box.wrong   { background: #fff4f4; border-left: 4px solid #e05050; color: #7a1a1a; }
+  .feedback-icon { font-size: 1.1rem; margin-right: 6px; }
+
+  /* ── Buttons ── */
+  .btn-row { display: flex; justify-content: flex-end; gap: 12px; margin-top: 28px; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 12px 26px;
+    border-radius: 99px; border: none; cursor: pointer;
+    font-family: var(--font-body); font-size: .9rem; font-weight: 600;
+    transition: transform .15s, box-shadow .2s, opacity .2s;
+  }
+  .btn:active { transform: scale(.97); }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--teal-600), var(--teal-800));
+    color: var(--white);
+    box-shadow: 0 4px 16px rgba(34,138,128,.35);
+  }
+  .btn-primary:hover:not(:disabled) { box-shadow: 0 6px 24px rgba(34,138,128,.45); transform: translateY(-1px); }
+  .btn-primary:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+  .btn-submit {
+    background: linear-gradient(135deg, var(--amber-500), var(--amber-700));
+    color: var(--white);
+    box-shadow: 0 4px 16px rgba(240,125,12,.35);
+  }
+  .btn-submit:hover:not(:disabled) { box-shadow: 0 6px 24px rgba(240,125,12,.45); transform: translateY(-1px); }
+  .btn-submit:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+
+  /* ── Completion card ── */
+  .completion-card { text-align: center; padding: 52px 40px; }
+  .completion-card .trophy {
+    font-size: 4rem; margin-bottom: 16px;
+    animation: bounce 1s ease infinite alternate;
+  }
+  @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-10px); } }
+  .completion-card h2 {
+    font-family: var(--font-display);
+    font-size: 2rem; color: var(--teal-800); margin-bottom: 8px;
+  }
+  .completion-card .subtitle { color: var(--slate-500); font-size: .95rem; margin-bottom: 36px; }
+  .score-display {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 140px; height: 140px;
+    border-radius: 50%;
+    background: conic-gradient(var(--teal-500) calc(var(--pct) * 1%), var(--slate-100) 0);
+    margin: 0 auto 28px;
+    position: relative;
+  }
+  .score-display::before {
+    content: '';
+    position: absolute; inset: 12px;
+    border-radius: 50%;
+    background: var(--white);
+  }
+  .score-inner {
+    position: relative; z-index: 1;
+    text-align: center;
+  }
+  .score-num {
+    display: block;
+    font-family: var(--font-display); font-size: 2rem; color: var(--teal-800); line-height: 1;
+  }
+  .score-denom { font-size: .8rem; color: var(--slate-500); }
+  .score-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 12px; margin-bottom: 32px;
+  }
+  .score-step {
+    background: var(--teal-50);
+    border-radius: var(--radius-md);
+    padding: 14px 8px;
+    font-size: .8rem; color: var(--slate-500);
+  }
+  .score-step .result-icon { font-size: 1.3rem; display: block; margin-bottom: 6px; }
+  .score-step .step-name { font-weight: 600; color: var(--slate-700); font-size: .78rem; }
+  .completion-msg {
+    background: var(--amber-50); border: 1.5px solid var(--amber-200, #f9d4a0);
+    border-radius: var(--radius-lg); padding: 18px 24px;
+    font-size: .9rem; color: var(--amber-900); line-height: 1.7; margin-bottom: 28px;
+  }
+  .btn-restart {
+    background: linear-gradient(135deg, var(--amber-500), var(--amber-700));
+    color: var(--white); box-shadow: 0 4px 16px rgba(240,125,12,.35);
+  }
+
+  /* ── Highlight pill ── */
+  .highlight {
+    display: inline-block;
+    background: var(--amber-100); color: var(--amber-900);
+    padding: 1px 8px; border-radius: 99px;
+    font-weight: 600; font-size: .88em;
+  }
+
+  /* ── Info callout ── */
+  .callout {
+    display: flex; gap: 14px; align-items: flex-start;
+    background: var(--amber-50); border: 1.5px solid var(--amber-200, #f9d4a0);
+    border-radius: var(--radius-md);
+    padding: 16px 18px; margin: 18px 0;
+    font-size: .88rem; color: var(--amber-900); line-height: 1.6;
+  }
+  .callout-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 1px; }
+
+  /* ── Responsive ── */
+  @media (max-width: 640px) {
+    .site-header { padding: 20px 20px; }
+    .progress-wrap { padding: 14px 20px; }
+    .main { padding: 20px 14px 48px; }
+    .card-header { padding: 20px 20px 18px; flex-direction: column; gap: 10px; }
+    .card-body { padding: 20px 20px; }
+    .score-grid { grid-template-columns: repeat(2, 1fr); }
+    .completion-card { padding: 36px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header class="site-header">
+  <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="22" cy="22" r="20" fill="rgba(245,154,58,.18)" stroke="rgba(245,154,58,.5)" stroke-width="1.5"/>
+    <circle cx="22" cy="22" r="6" fill="#f59a3a"/>
+    <line x1="22" y1="4" x2="22" y2="10" stroke="#f59a3a" stroke-width="2" stroke-linecap="round"/>
+    <line x1="22" y1="34" x2="22" y2="40" stroke="#f59a3a" stroke-width="2" stroke-linecap="round"/>
+    <line x1="4" y1="22" x2="10" y2="22" stroke="#f59a3a" stroke-width="2" stroke-linecap="round"/>
+    <line x1="34" y1="22" x2="40" y2="22" stroke="#f59a3a" stroke-width="2" stroke-linecap="round"/>
+    <line x1="8.1" y1="8.1" x2="12.4" y2="12.4" stroke="#f59a3a" stroke-width="2" stroke-linecap="round"/>
+    <line x1="31.6" y1="31.6" x2="35.9" y2="35.9" stroke="#f59a3a" stroke-width="2" stroke-linecap="round"/>
+    <line x1="35.9" y1="8.1" x2="31.6" y2="12.4" stroke="#f59a3a" stroke-width="2" stroke-linecap="round"/>
+    <line x1="12.4" y1="31.6" x2="8.1" y2="35.9" stroke="#f59a3a" stroke-width="2" stroke-linecap="round"/>
+  </svg>
+  <div class="header-text">
+    <h1>Vacuum Solar Collector — Thermal Efficiency</h1>
+    <p>First-Year Engineering · Interactive Learning Module</p>
+  </div>
+</header>
+
+<!-- ── Progress bar ── -->
+<div class="progress-wrap">
+  <div class="progress-meta">
+    <span class="step-label" id="progressLabel">Step 1 of 4</span>
+    <span class="step-fraction" id="progressFraction">0 / 4 complete</span>
+  </div>
+  <div class="progress-track">
+    <div class="progress-fill" id="progressFill" style="width:0%"></div>
+  </div>
+  <div class="step-dots">
+    <div class="step-dot active" id="dot0"></div>
+    <div class="step-dot" id="dot1"></div>
+    <div class="step-dot" id="dot2"></div>
+    <div class="step-dot" id="dot3"></div>
+  </div>
+</div>
+
+<!-- ── Main ── -->
+<main class="main">
+
+  <!-- =========================================================
+       STEP 1 — Anatomy & Components
+  ========================================================== -->
+  <div class="card active" id="step-0">
+    <div class="card-header">
+      <div class="step-badge">Step 1</div>
+      <div class="card-header-text">
+        <h2>Anatomy of a Vacuum Tube Solar Collector</h2>
+        <p>Understand the physical components before analysing heat transfer.</p>
+      </div>
+    </div>
+    <div class="card-body">
+
+      <!-- Diagram -->
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 820 360" xmlns="http://www.w3.org/2000/svg" font-family="'Source Sans 3', sans-serif" font-size="13">
+
+          <!-- Sky / sunrays background -->
+          <defs>
+            <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#e8f6f4"/>
+              <stop offset="100%" stop-color="#fef7ec"/>
+            </linearGradient>
+            <linearGradient id="vacuumGrad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#1a6e66" stop-opacity=".15"/>
+              <stop offset="100%" stop-color="#1a6e66" stop-opacity=".05"/>
+            </linearGradient>
+            <linearGradient id="absorberGrad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#0d3d3a"/>
+              <stop offset="100%" stop-color="#1a6e66"/>
+            </linearGradient>
+            <linearGradient id="fluidGrad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#2aa898"/>
+              <stop offset="100%" stop-color="#3dc4b2"/>
+            </linearGradient>
+            <marker id="arrow" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto">
+              <polygon points="0 0, 7 3.5, 0 7" fill="#d46a00"/>
+            </marker>
+            <marker id="arrowTeal" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto">
+              <polygon points="0 0, 7 3.5, 0 7" fill="#228a80"/>
+            </marker>
+          </defs>
+
+          <rect width="820" height="360" fill="url(#skyGrad)" rx="14"/>
+
+          <!-- Sun rays (top-left) -->
+          <g opacity=".65">
+            <line x1="60" y1="10" x2="100" y2="60" stroke="#f59a3a" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="90" y1="5" x2="115" y2="58" stroke="#f59a3a" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="40" y1="30" x2="90" y2="70" stroke="#f59a3a" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="120" y1="8" x2="130" y2="62" stroke="#f59a3a" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="30" y1="55" x2="82" y2="82" stroke="#f59a3a" stroke-width="2" stroke-linecap="round"/>
+          </g>
+          <!-- Sun -->
+          <circle cx="72" cy="38" r="22" fill="#f59a3a" opacity=".85"/>
+          <circle cx="72" cy="38" r="16" fill="#f8b96a"/>
+
+          <!-- === Outer glass tube === -->
+          <!-- Left cap -->
+          <ellipse cx="178" cy="178" rx="16" ry="62" fill="#b2e0db" opacity=".55" stroke="#2aa898" stroke-width="1.5"/>
+          <!-- Tube body -->
+          <rect x="178" y="116" width="384" height="124" rx="0" fill="#d4f4f1" opacity=".4" stroke="none"/>
+          <!-- Right cap -->
+          <ellipse cx="562" cy="178" rx="16" ry="62" fill="#b2e0db" opacity=".55" stroke="#2aa898" stroke-width="1.5"/>
+          <!-- Top/bottom lines -->
+          <line x1="178" y1="116" x2="562" y2="116" stroke="#2aa898" stroke-width="2"/>
+          <line x1="178" y1="240" x2="562" y2="240" stroke="#2aa898" stroke-width="2"/>
+
+          <!-- Outer glass label -->
+          <line x1="370" y1="116" x2="370" y2="88" stroke="#228a80" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#arrowTeal)"/>
+          <rect x="285" y="66" width="168" height="22" rx="5" fill="white" opacity=".88"/>
+          <text x="369" y="81" text-anchor="middle" fill="#145752" font-weight="600" font-size="12">Outer Glass Tube</text>
+
+          <!-- === Vacuum annulus === -->
+          <!-- just a shaded band inside -->
+          <rect x="194" y="132" width="352" height="92" fill="url(#vacuumGrad)"/>
+          <ellipse cx="194" cy="178" rx="13" ry="46" fill="#e0f5f3" opacity=".7" stroke="#3dc4b2" stroke-width="1"/>
+          <ellipse cx="546" cy="178" rx="13" ry="46" fill="#e0f5f3" opacity=".7" stroke="#3dc4b2" stroke-width="1"/>
+          <line x1="194" y1="132" x2="546" y2="132" stroke="#3dc4b2" stroke-width="1.2" stroke-dasharray="5 3"/>
+          <line x1="194" y1="224" x2="546" y2="224" stroke="#3dc4b2" stroke-width="1.2" stroke-dasharray="5 3"/>
+
+          <!-- Vacuum label -->
+          <line x1="290" y1="178" x2="248" y2="310" stroke="#228a80" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#arrowTeal)"/>
+          <rect x="155" y="306" width="184" height="22" rx="5" fill="white" opacity=".88"/>
+          <text x="247" y="321" text-anchor="middle" fill="#145752" font-weight="600" font-size="12">Vacuum Annulus (~10⁻³ Pa)</text>
+
+          <!-- === Absorber plate === -->
+          <rect x="210" y="158" width="320" height="40" rx="4" fill="url(#absorberGrad)"/>
+          <!-- Selective coating hint -->
+          <rect x="210" y="158" width="320" height="6" rx="2" fill="#f07d0c" opacity=".7"/>
+
+          <!-- Absorber label -->
+          <line x1="370" y1="165" x2="430" y2="124" stroke="#d46a00" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+          <rect x="426" y="104" width="184" height="22" rx="5" fill="white" opacity=".92"/>
+          <text x="518" y="119" text-anchor="middle" fill="#6b3500" font-weight="600" font-size="12">Selective Absorber Coating</text>
+
+          <!-- === Heat transfer fluid pipe === -->
+          <rect x="210" y="168" width="320" height="20" rx="3" fill="url(#fluidGrad)" opacity=".85"/>
+
+          <!-- Fluid label -->
+          <line x1="370" y1="188" x2="430" y2="232" stroke="#d46a00" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+          <rect x="385" y="228" width="204" height="22" rx="5" fill="white" opacity=".92"/>
+          <text x="487" y="243" text-anchor="middle" fill="#6b3500" font-weight="600" font-size="12">Heat Transfer Fluid (HTF) Pipe</text>
+
+          <!-- === Header manifold === -->
+          <rect x="562" y="140" width="38" height="76" rx="8" fill="#1a6e66"/>
+          <rect x="562" y="140" width="38" height="76" rx="8" fill="none" stroke="#3dc4b2" stroke-width="1.5"/>
+          <!-- inlet/outlet pipes -->
+          <rect x="600" y="155" width="60" height="16" rx="4" fill="#2aa898"/>
+          <rect x="600" y="187" width="60" height="16" rx="4" fill="#228a80"/>
+          <text x="668" y="167" fill="#145752" font-weight="600" font-size="11">Fluid IN</text>
+          <text x="668" y="199" fill="#145752" font-weight="600" font-size="11">Fluid OUT</text>
+
+          <!-- Flow arrows on pipe -->
+          <polygon points="730,163 736,167 730,171" fill="#2aa898"/>
+          <polygon points="736,195 730,199 736,203" fill="#228a80"/>
+
+          <!-- Manifold label -->
+          <line x1="581" y1="140" x2="581" y2="100" stroke="#228a80" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#arrowTeal)"/>
+          <rect x="495" y="78" width="172" height="22" rx="5" fill="white" opacity=".88"/>
+          <text x="581" y="93" text-anchor="middle" fill="#145752" font-weight="600" font-size="12">Header Manifold</text>
+
+          <!-- Solar irradiance arrows -->
+          <g fill="none" stroke="#f59a3a" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrow)">
+            <line x1="150" y1="90" x2="210" y2="145"/>
+            <line x1="200" y1="80" x2="270" y2="145"/>
+            <line x1="250" y1="76" x2="330" y2="145"/>
+            <line x1="300" y1="74" x2="390" y2="145"/>
+            <line x1="350" y1="73" x2="450" y2="145"/>
+            <line x1="400" y1="74" x2="500" y2="145"/>
+            <line x1="450" y1="76" x2="536" y2="145"/>
+          </g>
+          <text x="310" y="62" fill="#b85c00" font-weight="700" font-size="12" text-anchor="middle">Solar Irradiance G (W/m²)</text>
+
+          <!-- Key legend -->
+          <rect x="18" y="290" width="152" height="56" rx="8" fill="white" opacity=".85" stroke="#e0eeec" stroke-width="1"/>
+          <rect x="28" y="300" width="12" height="8" rx="2" fill="#f07d0c" opacity=".8"/>
+          <text x="46" y="309" fill="#6b3500" font-size="11">Selective coating</text>
+          <rect x="28" y="316" width="12" height="8" rx="2" fill="#1a6e66"/>
+          <text x="46" y="325" fill="#145752" font-size="11">Absorber plate</text>
+          <rect x="28" y="332" width="12" height="8" rx="2" fill="#2aa898"/>
+          <text x="46" y="341" fill="#145752" font-size="11">HTF pipe</text>
+        </svg>
+      </div>
+
+      <div class="theory-box">
+        <h3>📐 Key Components</h3>
+        <p>A vacuum tube solar collector converts solar radiation into useful heat by exploiting four carefully engineered layers:</p>
+        <ul>
+          <li><strong>Outer glass tube</strong> — borosilicate glass with high solar transmittance ($\tau \approx 0.92$). Transmits shortwave radiation but resists thermal shock.</li>
+          <li><strong>Vacuum annulus</strong> — evacuated to pressures below $10^{-2}$ Pa, eliminating convective and conductive heat losses between the glass and absorber.</li>
+          <li><strong>Selective absorber coating</strong> — a thin film (e.g. Al-N/Al or TiNO$_x$) with high absorptance ($\alpha > 0.94$) in the solar spectrum and very low emittance ($\varepsilon < 0.08$) in the infrared, dramatically reducing radiation losses at operating temperature.</li>
+          <li><strong>Heat transfer fluid (HTF) pipe</strong> — bonded to the absorber; carries the useful heat to the header manifold and on to the load.</li>
+        </ul>
+      </div>
+
+      <div class="callout">
+        <span class="callout-icon">💡</span>
+        <span>The vacuum is the central innovation: without it, convection would dissipate heat from the hot absorber to the surrounding air and efficiency would drop by 30–50% at temperatures above 80 °C.</span>
+      </div>
+
+      <!-- Quiz -->
+      <div class="quiz-section">
+        <h3>Quick Check — Step 1</h3>
+        <p class="quiz-question">Which component is primarily responsible for suppressing <em>convective</em> heat losses from the absorber to the environment in a vacuum tube collector?</p>
+        <div class="quiz-options" id="q0-options">
+          <div class="quiz-option" onclick="selectOption(0,0,false)"><span class="option-letter">A</span><span>The selective absorber coating</span></div>
+          <div class="quiz-option" onclick="selectOption(0,1,false)"><span class="option-letter">B</span><span>The borosilicate outer glass tube</span></div>
+          <div class="quiz-option" onclick="selectOption(0,2,true)"><span class="option-letter">C</span><span>The evacuated vacuum annulus between the tubes</span></div>
+          <div class="quiz-option" onclick="selectOption(0,3,false)"><span class="option-letter">D</span><span>The heat transfer fluid pipe</span></div>
+        </div>
+        <div class="feedback-box" id="feedback-0"></div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-submit" id="submit-0" onclick="submitQuiz(0)" disabled>Submit Answer</button>
+        <button class="btn btn-primary" id="next-0" onclick="goStep(1)" style="display:none">Next Step →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       STEP 2 — Energy Balance & Efficiency Equation
+  ========================================================== -->
+  <div class="card" id="step-1">
+    <div class="card-header">
+      <div class="step-badge">Step 2</div>
+      <div class="card-header-text">
+        <h2>Energy Balance &amp; the Efficiency Equation</h2>
+        <p>Derive how useful heat output relates to incident solar radiation.</p>
+      </div>
+    </div>
+    <div class="card-body">
+
+      <div class="theory-box">
+        <h3>⚖️ Hottel–Whillier–Bliss Model</h3>
+        <p>The steady-state energy balance on the absorber gives the <span class="highlight">Hottel–Whillier–Bliss (HWB) equation</span>, the foundation of flat-plate and evacuated-tube collector analysis:</p>
+      </div>
+
+      <div class="formula-chip">
+        $$\dot{Q}_u = A_c \left[ S - U_L\,(T_m - T_a) \right]$$
+      </div>
+
+      <table class="param-table">
+        <thead><tr><th>Symbol</th><th>Quantity</th><th>Typical unit</th></tr></thead>
+        <tbody>
+          <tr><td class="param-symbol">$\dot{Q}_u$</td><td>Useful heat output rate</td><td>W</td></tr>
+          <tr><td class="param-symbol">$A_c$</td><td>Collector aperture area</td><td>m²</td></tr>
+          <tr><td class="param-symbol">$S = \tau\alpha G$</td><td>Absorbed solar irradiance</td><td>W m⁻²</td></tr>
+          <tr><td class="param-symbol">$U_L$</td><td>Overall heat-loss coefficient</td><td>W m⁻² K⁻¹</td></tr>
+          <tr><td class="param-symbol">$T_m$</td><td>Mean fluid temperature</td><td>°C or K</td></tr>
+          <tr><td class="param-symbol">$T_a$</td><td>Ambient temperature</td><td>°C or K</td></tr>
+        </tbody>
+      </table>
+
+      <div class="theory-box" style="margin-top:22px">
+        <h3>📈 Instantaneous Thermal Efficiency</h3>
+        <p>Dividing useful power by incident solar power on the aperture gives the efficiency $\eta$:</p>
+      </div>
+
+      <div class="formula-chip">
+        $$\eta = \frac{\dot{Q}_u}{G\,A_c} = \underbrace{\tau\alpha}_{\eta_0} - \underbrace{\frac{U_L}{G}}_{\text{slope}} \cdot (T_m - T_a)$$
+      </div>
+
+      <div class="theory-box">
+        <h3>🔍 Physical Meaning of the Terms</h3>
+        <ul>
+          <li><strong>$\eta_0 = \tau\alpha$</strong> — <em>optical efficiency</em> (zero-loss efficiency): the fraction of incident energy absorbed when $T_m = T_a$. Vacuum collectors achieve $\eta_0 \approx 0.70$–$0.80$.</li>
+          <li><strong>$U_L/G$</strong> — the <em>efficiency slope</em>. Because the vacuum eliminates convection, $U_L$ is dominated by radiation losses alone, giving very low values ($U_L \approx 0.5$–$1.5$ W m⁻² K⁻¹) compared to flat-plate collectors ($U_L \approx 4$–$8$ W m⁻² K⁻¹).</li>
+          <li><strong>$(T_m - T_a)$</strong> — the <em>reduced temperature</em> parameter: the larger the operating temperature above ambient, the more heat is radiated back from the absorber and the lower the efficiency.</li>
+        </ul>
+      </div>
+
+      <div class="callout">
+        <span class="callout-icon">📊</span>
+        <span>On an $\eta$ vs $(T_m - T_a)$ graph, the y-intercept is $\eta_0$ and the negative gradient is $U_L/G$. Vacuum collectors have a <strong>shallower gradient</strong> than flat-plate collectors, making them much better at high operating temperatures.</span>
+      </div>
+
+      <!-- Quiz -->
+      <div class="quiz-section">
+        <h3>Quick Check — Step 2</h3>
+        <p class="quiz-question">A vacuum tube collector operates with $G = 800$ W m⁻², $\eta_0 = 0.74$, $U_L = 1.0$ W m⁻² K⁻¹, and $(T_m - T_a) = 60$ K. What is the instantaneous thermal efficiency?</p>
+        <div class="quiz-options" id="q1-options">
+          <div class="quiz-option" onclick="selectOption(1,0,false)"><span class="option-letter">A</span><span>$\eta = 0.62$</span></div>
+          <div class="quiz-option" onclick="selectOption(1,1,true)"><span class="option-letter">B</span><span>$\eta = 0.665$</span></div>
+          <div class="quiz-option" onclick="selectOption(1,2,false)"><span class="option-letter">C</span><span>$\eta = 0.74$</span></div>
+          <div class="quiz-option" onclick="selectOption(1,3,false)"><span class="option-letter">D</span><span>$\eta = 0.71$</span></div>
+        </div>
+        <div class="feedback-box" id="feedback-1"></div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-submit" id="submit-1" onclick="submitQuiz(1)" disabled>Submit Answer</button>
+        <button class="btn btn-primary" id="next-1" onclick="goStep(2)" style="display:none">Next Step →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       STEP 3 — Heat Loss Mechanisms
+  ========================================================== -->
+  <div class="card" id="step-2">
+    <div class="card-header">
+      <div class="step-badge">Step 3</div>
+      <div class="card-header-text">
+        <h2>Heat Loss Mechanisms &amp; the Role of $U_L$</h2>
+        <p>Understand what drives thermal losses and how the vacuum suppresses them.</p>
+      </div>
+    </div>
+    <div class="card-body">
+
+      <div class="theory-box">
+        <h3>🌡️ Three Modes of Heat Loss</h3>
+        <p>Total heat loss from the absorber at elevated temperature $T_{abs}$ to the ambient $T_a$ occurs through three modes. The vacuum dramatically alters which mode dominates:</p>
+        <ul>
+          <li><strong>Conduction</strong> — negligible after assembly; solid contacts are minimised. The glass tube walls conduct but their thermal resistance is large and constant.</li>
+          <li><strong>Convection</strong> — <em>eliminated by the vacuum</em>. Without gas molecules, no convective cells can form. This is the primary advantage over flat-plate collectors.</li>
+          <li><strong>Radiation</strong> — <em>the dominant loss</em> in a vacuum collector. Net radiation loss per unit area between the absorber (emittance $\varepsilon_a$) and the inner glass surface (emittance $\varepsilon_g$) is given by:</li>
+        </ul>
+      </div>
+
+      <div class="formula-chip">
+        $$\dot{q}_{rad} = \frac{\sigma(T_{abs}^4 - T_g^4)}{\dfrac{1}{\varepsilon_a} + \dfrac{1}{\varepsilon_g} - 1}$$
+      </div>
+
+      <div class="theory-box">
+        <h3>🎯 The Selective Coating Advantage</h3>
+        <p>The Stefan-Boltzmann law tells us that radiation depends on $T^4$, so at high temperatures even a small $\varepsilon_a$ causes significant losses. A <span class="highlight">selective surface</span> exploits the mismatch between the solar spectrum (peak ~500 nm) and the thermal emission spectrum of the absorber (~10 000 nm at 100 °C):</p>
+        <ul>
+          <li>High absorptance $\alpha \approx 0.94$–$0.97$ in the <strong>solar</strong> (shortwave) band → maximises energy capture.</li>
+          <li>Low emittance $\varepsilon \approx 0.04$–$0.12$ in the <strong>thermal</strong> (longwave) band → minimises re-radiation losses.</li>
+        </ul>
+        <p>This combination gives an effective $U_L$ of only 0.5–1.5 W m⁻² K⁻¹, versus 4–8 W m⁻² K⁻¹ for an uncoated flat plate.</p>
+      </div>
+
+      <div class="theory-box">
+        <h3>📉 Overall Loss Coefficient</h3>
+        <p>For a vacuum tube collector the loss coefficient simplifies to a radiation-dominated term plus small end-loss contributions:</p>
+      </div>
+
+      <div class="formula-chip">
+        $$U_L \approx U_{rad} + U_{end} \approx \frac{4\,\sigma\,\varepsilon_{eff}\,T_m^3}{1} + \text{(small)}$$
+      </div>
+
+      <div class="callout">
+        <span class="callout-icon">🔬</span>
+        <span>Because $U_L$ is proportional to $T_m^3$, losses grow non-linearly with temperature — but the magnitude stays far lower than in flat-plate collectors where convection adds a large temperature-independent term.</span>
+      </div>
+
+      <!-- Quiz -->
+      <div class="quiz-section">
+        <h3>Quick Check — Step 3</h3>
+        <p class="quiz-question">Why does a selective absorber coating improve efficiency at high operating temperatures?</p>
+        <div class="quiz-options" id="q2-options">
+          <div class="quiz-option" onclick="selectOption(2,0,false)"><span class="option-letter">A</span><span>It increases the thermal conductivity between the absorber and the fluid pipe, raising heat transfer.</span></div>
+          <div class="quiz-option" onclick="selectOption(2,1,false)"><span class="option-letter">B</span><span>It increases solar absorptance but also increases infrared emittance, trading one loss for another.</span></div>
+          <div class="quiz-option" onclick="selectOption(2,2,true)"><span class="option-letter">C</span><span>It provides high absorptance in the solar spectrum while having low emittance in the infrared, reducing radiative re-emission losses.</span></div>
+          <div class="quiz-option" onclick="selectOption(2,3,false)"><span class="option-letter">D</span><span>It acts as an additional insulating layer that prevents convective heat transfer.</span></div>
+        </div>
+        <div class="feedback-box" id="feedback-2"></div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-submit" id="submit-2" onclick="submitQuiz(2)" disabled>Submit Answer</button>
+        <button class="btn btn-primary" id="next-2" onclick="goStep(3)" style="display:none">Next Step →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       STEP 4 — Collector Performance & Design Trade-offs
+  ========================================================== -->
+  <div class="card" id="step-3">
+    <div class="card-header">
+      <div class="step-badge">Step 4</div>
+      <div class="card-header-text">
+        <h2>Collector Performance &amp; Design Trade-offs</h2>
+        <p>Interpret the efficiency curve and apply it to engineering decisions.</p>
+      </div>
+    </div>
+    <div class="card-body">
+
+      <div class="theory-box">
+        <h3>📐 The Reduced Temperature Parameter</h3>
+        <p>Engineers often plot efficiency against the <em>reduced temperature</em> (also called the <em>dimensionless temperature difference</em>):</p>
+      </div>
+
+      <div class="formula-chip">
+        $$T^* = \frac{T_m - T_a}{G} \quad \left[\text{m}^2\,\text{K}\,\text{W}^{-1}\right]$$
+      </div>
+
+      <div class="theory-box">
+        <p>Then the linearised efficiency equation becomes:</p>
+      </div>
+
+      <div class="formula-chip">
+        $$\eta = \eta_0 - a_1\,T^* - a_2\,G\,(T^*)^2$$
+      </div>
+
+      <div class="theory-box">
+        <p>where $a_1$ (W m⁻² K⁻¹) and $a_2$ (W m⁻² K⁻²) are the <strong>first- and second-order loss coefficients</strong> determined by standard ISO 9806 testing. The second-order term captures the non-linear growth of radiation losses with temperature.</p>
+        <h3 style="margin-top:16px">⚖️ Key Design Trade-offs</h3>
+        <ul>
+          <li><strong>Higher $\eta_0$</strong> → more expensive glass with anti-reflection coating; marginal gains above $\tau \approx 0.92$.</li>
+          <li><strong>Lower $U_L$</strong> → better vacuum (harder to maintain long-term) and/or better selective coating. Critical for industrial process heat above 150 °C.</li>
+          <li><strong>Larger aperture $A_c$</strong> → more output but also more structural loading, wind drag, and optical end-losses.</li>
+          <li><strong>Flow rate</strong> → higher flow reduces $T_m$ and improves $\eta$, but increases pumping power (system-level trade-off).</li>
+        </ul>
+      </div>
+
+      <div class="theory-box">
+        <h3>🌍 Comparison: Vacuum vs Flat-Plate</h3>
+        <p>At low temperature differences ($T^* &lt; 0.02$ m² K W⁻¹) flat-plate collectors are cost-competitive. Above $T^* \approx 0.05$ m² K W⁻¹ (e.g., solar cooling, industrial heat), vacuum tubes are decisively more efficient because their low $U_L$ keeps the efficiency curve flat where flat-plate efficiency has collapsed to near zero.</p>
+      </div>
+
+      <!-- Diagram: efficiency curves -->
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 720 310" xmlns="http://www.w3.org/2000/svg" font-family="'Source Sans 3', sans-serif">
+          <defs>
+            <linearGradient id="vacLine" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#2aa898"/>
+              <stop offset="100%" stop-color="#1a6e66"/>
+            </linearGradient>
+          </defs>
+          <rect width="720" height="310" fill="#f9fffe" rx="10"/>
+
+          <!-- Axes -->
+          <line x1="70" y1="240" x2="660" y2="240" stroke="#a8b8cc" stroke-width="1.5"/>
+          <line x1="70" y1="30" x2="70" y2="240" stroke="#a8b8cc" stroke-width="1.5"/>
+
+          <!-- Y ticks & labels -->
+          <g fill="#5e7291" font-size="11" text-anchor="end">
+            <text x="62" y="44">0.8</text><line x1="66" y1="40" x2="70" y2="40" stroke="#a8b8cc"/>
+            <text x="62" y="84">0.6</text><line x1="66" y1="80" x2="70" y2="80" stroke="#a8b8cc"/>
+            <text x="62" y="124">0.4</text><line x1="66" y1="120" x2="70" y2="120" stroke="#a8b8cc"/>
+            <text x="62" y="164">0.2</text><line x1="66" y1="160" x2="70" y2="160" stroke="#a8b8cc"/>
+            <text x="62" y="244">0</text>
+          </g>
+          <!-- Grid lines -->
+          <g stroke="#e8eef5" stroke-width="1">
+            <line x1="70" y1="40" x2="660" y2="40"/>
+            <line x1="70" y1="80" x2="660" y2="80"/>
+            <line x1="70" y1="120" x2="660" y2="120"/>
+            <line x1="70" y1="160" x2="660" y2="160"/>
+            <line x1="70" y1="200" x2="660" y2="200"/>
+          </g>
+
+          <!-- X ticks & labels -->
+          <g fill="#5e7291" font-size="11" text-anchor="middle">
+            <text x="70"  y="258">0</text>
+            <text x="188" y="258">0.02</text><line x1="188" y1="240" x2="188" y2="244" stroke="#a8b8cc"/>
+            <text x="306" y="258">0.04</text><line x1="306" y1="240" x2="306" y2="244" stroke="#a8b8cc"/>
+            <text x="424" y="258">0.06</text><line x1="424" y1="240" x2="424" y2="244" stroke="#a8b8cc"/>
+            <text x="542" y="258">0.08</text><line x1="542" y1="240" x2="542" y2="244" stroke="#a8b8cc"/>
+            <text x="660" y="258">0.10</text><line x1="660" y1="240" x2="660" y2="244" stroke="#a8b8cc"/>
+          </g>
+
+          <!-- Axis labels -->
+          <text x="365" y="278" text-anchor="middle" fill="#374358" font-size="12" font-weight="600">T* = (Tm − Ta) / G  (m² K W⁻¹)</text>
+          <text x="22" y="145" text-anchor="middle" fill="#374358" font-size="12" font-weight="600" transform="rotate(-90,22,145)">η  (—)</text>
+          <text x="365" y="18" text-anchor="middle" fill="#374358" font-size="12" font-weight="700">Efficiency Curves: Vacuum Tube vs Flat-Plate Collector</text>
+
+          <!--
+            Vacuum tube: η0=0.74, a1=1.1 W/m²K
+            At T*=0: η=0.74 → y = 240 - 0.74*200 = 92
+            At T*=0.10: η=0.74-1.1*800*0.10/800=0.74-0.1375=0.60 — wait, use η = η0 - a1*T*
+            a1=1.1: At T*=0.10, η=0.74-1.1*0.10=0.74-0.11=0.63
+            Scale: y = 240 - η*200; x = 70 + T**5900
+          -->
+          <!-- Vacuum tube line -->
+          <polyline
+            points="70,92  188,119  306,146  424,173  542,200  660,214"
+            fill="none" stroke="#2aa898" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Extra point near x-axis: T*=0.082 → η=0.74-0.11*0.082/0.10 nope keep linear -->
+
+          <!--
+            Flat-plate: η0=0.74, a1=4.5 W/m²K
+            At T*=0.10: η=0.74-4.5*0.10=0.74-0.45=0.29
+            T* where η=0: 0.74/4.5 = 0.164 (off chart, clip at 0.10)
+          -->
+          <!-- Flat-plate line -->
+          <polyline
+            points="70,92  188,184  306,237  424,237  660,237"
+            fill="none" stroke="#f59a3a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"
+            stroke-dasharray="8 4"/>
+          <!-- Note: clipped at η=0 -->
+          <!-- Flat-plate η=0 point: T*=0.164/0.10*590+70=1037 off chart, so crosses y=240 at x = 70+(0.74/4.5)*5900=70+970 off chart — clip at y=240 -->
+
+          <!-- Legend -->
+          <rect x="490" y="55" width="160" height="58" rx="7" fill="white" stroke="#e0eeec" stroke-width="1"/>
+          <line x1="502" y1="76" x2="526" y2="76" stroke="#2aa898" stroke-width="3" stroke-linecap="round"/>
+          <text x="534" y="80" fill="#145752" font-size="11" font-weight="600">Vacuum Tube</text>
+          <line x1="502" y1="98" x2="526" y2="98" stroke="#f59a3a" stroke-width="3" stroke-dasharray="6 3" stroke-linecap="round"/>
+          <text x="534" y="102" fill="#6b3500" font-size="11" font-weight="600">Flat-Plate</text>
+
+          <!-- Annotation: operating advantage zone -->
+          <rect x="306" y="50" width="118" height="34" rx="6" fill="#edfaf3" stroke="#22a559" stroke-width="1"/>
+          <text x="365" y="65" text-anchor="middle" fill="#145c32" font-size="10" font-weight="600">Vacuum advantage</text>
+          <text x="365" y="78" text-anchor="middle" fill="#145c32" font-size="10">T* &gt; 0.04</text>
+        </svg>
+      </div>
+
+      <!-- Quiz -->
+      <div class="quiz-section">
+        <h3>Quick Check — Step 4</h3>
+        <p class="quiz-question">A solar cooling system requires a collector outlet temperature of 90 °C on a day when $T_a = 30$ °C and $G = 750$ W m⁻². Calculate $T^*$ and select the correct interpretation.</p>
+        <div class="quiz-options" id="q3-options">
+          <div class="quiz-option" onclick="selectOption(3,0,false)"><span class="option-letter">A</span><span>$T^* = 0.045$ m² K W⁻¹ — a flat-plate collector is equally efficient here.</span></div>
+          <div class="quiz-option" onclick="selectOption(3,1,false)"><span class="option-letter">B</span><span>$T^* = 0.080$ m² K W⁻¹ — both collector types perform similarly at this operating point.</span></div>
+          <div class="quiz-option" onclick="selectOption(3,2,true)"><span class="option-letter">C</span><span>$T^* = 0.080$ m² K W⁻¹ — a vacuum tube collector is decisively more efficient because its low $U_L$ keeps efficiency high at this elevated $T^*$.</span></div>
+          <div class="quiz-option" onclick="selectOption(3,3,false)"><span class="option-letter">D</span><span>$T^* = 0.012$ m² K W⁻¹ — both collector types are equally suited; choose based on cost alone.</span></div>
+        </div>
+        <div class="feedback-box" id="feedback-3"></div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-submit" id="submit-3" onclick="submitQuiz(3)" disabled>Submit Answer</button>
+        <button class="btn btn-primary" id="next-3" onclick="showCompletion()" style="display:none">See Results →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       COMPLETION CARD
+  ========================================================== -->
+  <div class="card" id="step-complete">
+    <div class="completion-card">
+      <div class="trophy" id="trophyIcon">🏆</div>
+      <h2 id="completionTitle">Module Complete!</h2>
+      <p class="subtitle">Vacuum Solar Collector — Thermal Efficiency</p>
+
+      <div class="score-display" id="scoreDisplay" style="--pct:0">
+        <div class="score-inner">
+          <span class="score-num" id="scoreNum">0</span>
+          <span class="score-denom">out of 4</span>
+        </div>
+      </div>
+
+      <div class="score-grid" id="scoreGrid"></div>
+
+      <div class="completion-msg" id="completionMsg"></div>
+
+      <button class="btn btn-restart" onclick="restartModule()">↺ Restart Module</button>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────
+const answers = [null, null, null, null];     // selected option index per step
+const correct  = [null, null, null, null];     // was each answer correct?
+const stepTitles = [
+  'Anatomy & Components',
+  'Energy Balance',
+  'Heat Loss Mechanisms',
+  'Performance & Trade-offs'
+];
+
+const feedbackData = [
+  {
+    correct: '✅ Correct! The vacuum annulus removes air (and all gas molecules) from the space between the outer glass tube and the absorber, so convective heat transfer is physically impossible — there is no medium to carry heat by bulk fluid motion.',
+    wrong: [
+      '❌ Not quite. The selective coating reduces <em>radiative</em> re-emission losses (longwave band), not convective losses. Convection requires a gas medium.',
+      '❌ The outer glass tube transmits solar radiation to the absorber — it does not suppress convection. The key anti-convection feature is the vacuum space between the tubes.',
+      null, // correct
+      '❌ The HTF pipe carries useful heat away from the absorber, but it does not suppress environmental convective losses.'
+    ]
+  },
+  {
+    correct: '✅ Correct! Using $\\eta = \\eta_0 - \\frac{U_L}{G}(T_m-T_a) = 0.74 - \\frac{1.0}{800}\\times60 = 0.74 - 0.075 = 0.665$.',
+    wrong: [
+      '❌ Not quite. Check your arithmetic: $\\eta = 0.74 - (1.0/800) \\times 60 = 0.74 - 0.075 = 0.665$, not 0.62.',
+      null, // correct
+      '❌ $\\eta_0 = 0.74$ is the zero-loss optical efficiency, valid only when $T_m = T_a$. You must subtract the loss term $U_L(T_m-T_a)/G = 0.075$.',
+      '❌ Close — check the calculation again. $(1.0/800) \\times 60 = 0.075$, so $\\eta = 0.74 - 0.075 = 0.665$.'
+    ]
+  },
+  {
+    correct: '✅ Correct! A selective surface exploits the spectral separation between solar irradiance (peak ~500 nm, shortwave) and thermal emission from the absorber (~10 µm at 100 °C, longwave). High $\\alpha$ captures solar energy; low $\\varepsilon$ minimises re-radiation losses — both at the same time.',
+    wrong: [
+      '❌ Incorrect. The selective coating is a surface treatment for radiation management, not a thermal conductor. It does not affect conduction between the absorber and the HTF pipe.',
+      '❌ Not correct. A selective surface achieves <em>both</em> high solar absorptance <em>and</em> low infrared emittance simultaneously — these are not in conflict because the two spectra are widely separated.',
+      null, // correct
+      '❌ The vacuum annulus prevents convection, not the selective coating. The coating specifically targets radiation losses by exploiting the spectral difference between solar and thermal bands.'
+    ]
+  },
+  {
+    correct: '✅ Correct! $T^* = (90-30)/750 = 60/750 = 0.080$ m² K W⁻¹. At $T^* = 0.080$ the flat-plate efficiency curve has collapsed toward zero, while a vacuum tube collector still operates at ~$\\eta \\approx 0.65$ — a decisive advantage for solar cooling and industrial process heat applications.',
+    wrong: [
+      '❌ $T^* = (90-30)/750 = 0.080$, not 0.045. And at $T^*=0.080$ vacuum tubes are decisively superior — flat-plate efficiency is very poor here.',
+      '❌ $T^* = 0.080$ m² K W⁻¹ is correct, but at this value flat-plate and vacuum tube performance are <em>not</em> similar. The flat-plate has nearly zero efficiency at $T^* = 0.08$.',
+      null, // correct
+      '❌ $T^* = (T_m - T_a)/G = 60/750 = 0.080$, not 0.012. Also at $T^* = 0.012$ flat-plate collectors <em>are</em> competitive, but that is not the value here.'
+    ]
+  }
+];
+
+// ── UI helpers ──────────────────────────────────────────────────────────
+function goStep(n) {
+  document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+  document.getElementById('step-' + n).classList.add('active');
+  updateProgress(n);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  // Trigger MathJax re-render
+  if (window.MathJax) MathJax.typesetPromise();
+}
+
+function updateProgress(stepIdx) {
+  const total = 4;
+  const done = answers.filter(a => a !== null).length;
+  const pct = stepIdx === 4 ? 100 : Math.round((stepIdx / total) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent =
+    stepIdx < 4 ? `Step ${stepIdx + 1} of 4` : 'Complete!';
+  document.getElementById('progressFraction').textContent =
+    `${done} / 4 complete`;
+
+  for (let i = 0; i < 4; i++) {
+    const dot = document.getElementById('dot' + i);
+    dot.className = 'step-dot';
+    if (i < stepIdx) dot.classList.add('done');
+    else if (i === stepIdx) dot.classList.add('active');
+  }
+}
+
+// ── Quiz logic ──────────────────────────────────────────────────────────
+function selectOption(stepIdx, optIdx, isCorrect) {
+  const opts = document.querySelectorAll(`#q${stepIdx}-options .quiz-option`);
+  const isLocked = opts[0].classList.contains('locked');
+  if (isLocked) return;
+  opts.forEach(o => o.classList.remove('selected'));
+  opts[optIdx].classList.add('selected');
+  answers[stepIdx] = { idx: optIdx, isCorrect };
+  document.getElementById('submit-' + stepIdx).disabled = false;
+}
+
+function submitQuiz(stepIdx) {
+  const ans = answers[stepIdx];
+  if (!ans) return;
+  const opts = document.querySelectorAll(`#q${stepIdx}-options .quiz-option`);
+  const fb = document.getElementById('feedback-' + stepIdx);
+  const fd = feedbackData[stepIdx];
+
+  // Lock options
+  opts.forEach(o => o.classList.add('locked'));
+
+  // Mark selected
+  if (ans.isCorrect) {
+    opts[ans.idx].classList.add('correct');
+    correct[stepIdx] = true;
+    fb.className = 'feedback-box correct';
+    fb.innerHTML = '<span class="feedback-icon">✅</span>' + fd.correct;
+  } else {
+    opts[ans.idx].classList.add('wrong');
+    correct[stepIdx] = false;
+    // Reveal correct
+    opts.forEach((o, i) => {
+      // find correct option
+      const isC = document.querySelectorAll(`#q${stepIdx}-options .quiz-option`)[i]
+        .getAttribute('onclick')?.includes('true');
+    });
+    // Re-iterate to highlight correct
+    document.querySelectorAll(`#q${stepIdx}-options .quiz-option`).forEach((o, i) => {
+      if (o.getAttribute('onclick') && o.getAttribute('onclick').includes(',true)')) {
+        o.classList.add('reveal-correct');
+      }
+    });
+    fb.className = 'feedback-box wrong';
+    fb.innerHTML = '<span class="feedback-icon">❌</span>' +
+      (fd.wrong[ans.idx] || 'Incorrect — try to recall the theory before proceeding.');
+  }
+
+  fb.style.display = 'block';
+  document.getElementById('submit-' + stepIdx).disabled = true;
+  document.getElementById('next-' + stepIdx).style.display = 'inline-flex';
+  updateProgress(stepIdx);
+
+  if (window.MathJax) MathJax.typesetPromise([fb]);
+}
+
+// ── Completion ──────────────────────────────────────────────────────────
+function showCompletion() {
+  const score = correct.filter(Boolean).length;
+  const pct = Math.round((score / 4) * 100);
+
+  document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+  document.getElementById('step-complete').classList.add('active');
+  updateProgress(4);
+
+  // Score ring (CSS var)
+  document.getElementById('scoreDisplay').style.setProperty('--pct', pct);
+  document.getElementById('scoreNum').textContent = score;
+
+  // Emoji / title
+  const icons = ['😔','🤔','👍','🌟','🏆'];
+  document.getElementById('trophyIcon').textContent = icons[score];
+
+  // Step breakdown
+  const grid = document.getElementById('scoreGrid');
+  grid.innerHTML = stepTitles.map((t, i) =>
+    `<div class="score-step">
+      <span class="result-icon">${correct[i] ? '✅' : '❌'}</span>
+      <span class="step-name">Step ${i+1}<br>${t}</span>
+    </div>`
+  ).join('');
+
+  // Message
+  const msgs = [
+    'Keep going — review each step\'s theory boxes and try again. The vacuum and selective coating concepts are the key to understanding this collector.',
+    'You\'re partway there. Focus on the energy balance equation and the role of $U_L$ — these underpin all efficiency calculations.',
+    'Good effort! Review the reduced temperature parameter $T^*$ and how it positions vacuum collectors on the efficiency curve.',
+    'Excellent work — nearly there! One small slip, but your understanding of thermal efficiency is strong.',
+    '🎉 Perfect score! You have a solid grasp of vacuum solar collector operation: the energy balance, heat loss suppression, selective coatings, and performance trade-offs.'
+  ];
+  document.getElementById('completionMsg').innerHTML = msgs[score];
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (window.MathJax) MathJax.typesetPromise();
+}
+
+function restartModule() {
+  // Reset state
+  for (let i = 0; i < 4; i++) { answers[i] = null; correct[i] = null; }
+
+  // Reset UI for each step
+  for (let i = 0; i < 4; i++) {
+    const opts = document.querySelectorAll(`#q${i}-options .quiz-option`);
+    opts.forEach(o => {
+      o.classList.remove('selected','correct','wrong','reveal-correct','locked');
+    });
+    const fb = document.getElementById('feedback-' + i);
+    fb.style.display = 'none'; fb.textContent = '';
+    document.getElementById('submit-' + i).disabled = true;
+    document.getElementById('next-' + i).style.display = 'none';
+  }
+
+  goStep(0);
+}
+
+// Initial MathJax render
+document.addEventListener('DOMContentLoaded', () => {
+  if (window.MathJax) MathJax.typesetPromise();
+});
+</script>
+</body>
+</html>
