@@ -37,3 +37,12 @@ Interested in building your own interactive teaching tool? Refer to the guide:
 📄 **[How to Build an Interactive Teaching Tool]**
 
 This document walks you through the full process of creating your own DTL from scratch.
+
+## Some compiled examples
+- [Post Processing](https://nidiana.github.io/LabsDiscussion/MeasurementLab/PostProcessing.html)
+- [Measurement Lab Procedure](https://nidiana.github.io/LabsDiscussion/MeasurementLab/PostProcessing.html)
+- [Assessment](https://nidiana.github.io/LabsDiscussion/MeasurementLab/PostProcessing.html)
+- [Hydrostatic](https://nidiana.github.io/LabsDiscussion/MeasurementLab/PostProcessing.html)
+- [Orifice Plate](https://nidiana.github.io/LabsDiscussion/MeasurementLab/PostProcessing.html)
+- [Osborne Reynolds](https://nidiana.github.io/LabsDiscussion/MeasurementLab/PostProcessing.html)
+- [Energy Conversion](https://nidiana.github.io/LabsDiscussion/MeasurementLab/PostProcessing.html)
