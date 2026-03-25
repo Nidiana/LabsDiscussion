@@ -1,0 +1,1385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Measurement Lab</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .scenario-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border-left: 5px solid #ff6b35;
+        }
+
+        .progress-container {
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #45a049);
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 10px;
+        }
+
+        .step-counter {
+            color: white;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .step-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.5s ease;
+            border-left: 5px solid #1e3c72;
+        }
+
+        .step-card.active {
+            transform: translateY(0);
+            opacity: 1;
+            border-left-color: #4CAF50;
+        }
+
+        .step-card.completed {
+            background: #f8f9fa;
+            border-left-color: #28a745;
+        }
+
+        .step-card.locked {
+            background: #f5f5f5;
+            border-left-color: #cccccc;
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .step-number {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-right: 20px;
+            flex-shrink: 0;
+        }
+
+        .step-title {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .step-content {
+            margin-left: 70px;
+        }
+
+        .learning-objective {
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .team-roles {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .safety-warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            border-left: 4px solid #f39c12;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 4px solid #dee2e6;
+        }
+
+        .checkbox-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            margin-right: 15px;
+            transform: scale(1.3);
+        }
+
+        .checkbox-item.checked {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+
+        .component-checkbox.checked {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+
+        .component-checkbox.checked span {
+            text-decoration: line-through;
+            color: #6c757d;
+        }
+
+        .quiz-container {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 2px dashed #6c757d;
+        }
+
+        .quiz-question {
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #495057;
+        }
+
+        .quiz-options {
+            display: grid;
+            gap: 10px;
+        }
+
+        .quiz-option {
+            padding: 12px;
+            background: white;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quiz-option:hover {
+            border-color: #adb5bd;
+            background: #f8f9fa;
+        }
+
+        .quiz-option.selected {
+            border-color: #007bff;
+            background: #e3f2fd;
+        }
+
+        .quiz-option.correct {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+
+        .quiz-option.incorrect {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+
+        .quiz-feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .quiz-feedback.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .quiz-feedback.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            gap: 15px;
+            position: sticky;
+            bottom: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+        }
+
+        .btn {
+            padding: 15px 35px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            min-width: 140px;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            border: 2px solid transparent;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(30, 60, 114, 0.4);
+        }
+
+        .btn-primary:disabled {
+            background: #cccccc;
+            color: #666666;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            border: 2px solid transparent;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .role-selector {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 2px solid #007bff;
+        }
+
+        .role-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .role-card-info {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            border: 2px solid #dee2e6;
+        }
+
+        .completion-card {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            text-align: center;
+            padding: 40px;
+            border-radius: 15px;
+            margin-top: 30px;
+            display: none;
+        }
+
+        .completion-card.show {
+            display: block;
+            animation: bounceIn 1s ease;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0.3);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            70% {
+                transform: scale(0.9);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1.05); box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4); }
+            50% { transform: scale(1.1); box-shadow: 0 12px 35px rgba(76, 175, 80, 0.6); }
+            100% { transform: scale(1.05); box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4); }
+        }
+
+        .locked-message {
+            text-align: center;
+            color: #6c757d;
+            font-style: italic;
+            padding: 20px;
+        }
+
+        .equipment-diagram {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid #17a2b8;
+        }
+
+        .equipment-diagram h4 {
+            color: #17a2b8;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .diagram-container {
+            text-align: center;
+            margin: 15px 0;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .system-diagram {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: transform 0.3s ease;
+        }
+
+        .system-diagram:hover {
+            transform: scale(1.02);
+        }
+
+        .diagram-fallback {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 20px;
+            color: #856404;
+        }
+
+        .component-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .checkbox-item.compact {
+            padding: 10px 12px;
+            margin: 0;
+            font-size: 0.9em;
+        }
+
+        .checkbox-item.compact input[type="checkbox"] {
+            margin-right: 8px;
+            transform: scale(1.2);
+        }
+
+        .checkbox-item.compact span {
+            line-height: 1.2;
+        }
+
+        .step-with-image {
+            margin: 15px 0;
+        }
+
+        .image-container {
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .step-image {
+            max-width: 200px;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: transform 0.3s ease;
+        }
+
+        .step-image:hover {
+            transform: scale(1.05);
+        }
+
+        .image-fallback {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            color: #856404;
+            font-size: 0.9em;
+        }
+
+        .image-direction {
+            color: #6c757d;
+            font-size: 0.85em;
+            font-style: italic;
+        }
+
+        .image-direction-mobile {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .step-content {
+                margin-left: 0;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .component-grid {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .checkbox-item.compact {
+                font-size: 0.85em;
+                padding: 8px 10px;
+            }
+
+            .image-direction-mobile {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📬 The Measurement Lab</h1>
+            <p>Measurement & Uncertainty Analysis</p>
+        </div>
+
+        <div class="scenario-card">
+            <h2>🏭 Overview</h2>
+            <p><strong>You are the consulting engineers</strong> hired to advise to SolarFlow Industries on how they should monitor a critical pump system.</p>
+            <p><strong>Goal:</strong> You will advise SolarFlow Industries on the following:
+            <ul style="margin: 10px 0 10px 20px;">
+                <li> Which of 3 methods should they use to monitor pump flow rate?</li>
+                <li> How can they minimize uncertainty in their measurements of flow rate?</li>
+            </ul>
+            <p><strong>You must complete all the steps in this iterative guide. It will help you set up the equipment, record and process data, and ultimately provide your recommendations. </strong>
+            <p>Your measurement precision and engineering judgment will directly determine whether this renewable energy facility continues operating efficiently or faces costly shutdowns.</p>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="step-counter" id="stepCounter">Step 1 of 6</div>
+        </div>
+
+        <!-- Step 0: Equipment Identification -->
+        <div class="step-card active" id="step0">
+            <div class="step-header">
+                <div class="step-number">1</div>
+                <div class="step-title">Equipment Identification & System Understanding</div>
+            </div>
+            <div class="step-content">
+
+                <div class="safety-warning">
+                    <span class="icon">⚠️</span>
+                    <strong>Safety First:</strong> Water and electricity are present. Keep workstation clean and dry. Alert the staff immediately of any spills or electrical issues.
+                </div>
+
+                <div class="equipment-diagram">
+                    <h4>🔧 Hydraulic Bench System Diagram</h4>
+                    <p style="text-align: center; margin-bottom: 20px; color: #6c757d;">
+                        <strong>As a team, tick the box as you recognize each component in the diagram below.</strong>
+                    </p>
+                    
+                    <!-- First row of components (1-3) -->
+                    <div class="component-grid">
+                        <label class="checkbox-item component-checkbox compact">
+                            <input type="checkbox" name="step0" value="flow-regulating-valve">
+                            <span>Flow regulating valve (1)</span>
+                        </label>
+                        <label class="checkbox-item component-checkbox compact">
+                            <input type="checkbox" name="step0" value="pump-switch">
+                            <span>Pump switch on/off (2)</span>
+                        </label>
+                        <label class="checkbox-item component-checkbox compact">
+                            <input type="checkbox" name="step0" value="electricity-supplier">
+                            <span>Electricity supply ON/OFF (3)</span>
+                        </label>
+                    </div>
+
+                    <!-- Second row of components (4-6) -->
+                    <div class="component-grid">
+                        <label class="checkbox-item component-checkbox compact">
+                            <input type="checkbox" name="step0" value="inlet-pipe">
+                            <span>Inlet pipe (4)</span>
+                        </label>
+                        <label class="checkbox-item component-checkbox compact">
+                            <input type="checkbox" name="step0" value="manometer">
+                            <span>Manometer (5)</span>
+                        </label>
+                        <label class="checkbox-item component-checkbox compact">
+                            <input type="checkbox" name="step0" value="tubes">
+                            <span>Tubes (6)</span>
+                        </label>
+                    </div>
+
+                    <!-- The diagram -->
+                    <div class="diagram-container">
+                        <!-- Primary method: Google Drive thumbnail (2024 working method) -->
+                        <img src="https://drive.google.com/thumbnail?id=19MahsZ5CsnlsHDjoGJAE-AfkD6P7cStj&sz=w1000" 
+                             alt="Hydraulic Bench Equipment Diagram" 
+                             class="system-diagram"
+                             onerror="this.onerror=null; this.src='https://drive.google.com/uc?export=view&id=19MahsZ5CsnlsHDjoGJAE-AfkD6P7cStj'; this.nextElementSibling.style.display='none';">
+                        <div class="diagram-fallback" style="display: none;">
+                            <p>📋 <strong>Loading Equipment Diagram...</strong></p>
+                            <p>If the diagram doesn't appear, please ensure the Google Drive link is publicly accessible.</p>
+                            <p><a href="https://drive.google.com/file/d/19MahsZ5CsnlsHDjoGJAE-AfkD6P7cStj/view?usp=sharing" target="_blank">🔎 View Diagram in Google Drive</a></p>
+                        </div>
+                    </div>
+
+                    <!-- Third row of components (7-9) -->
+                    <div class="component-grid">
+                        <label class="checkbox-item component-checkbox compact">
+                            <input type="checkbox" name="step0" value="orifice-plate">
+                            <span>Orifice plate (7)</span>
+                        </label>
+                        <label class="checkbox-item component-checkbox compact">
+                            <input type="checkbox" name="step0" value="rotameter">
+                            <span>Rotameter (8)</span>
+                        </label>
+                        <label class="checkbox-item component-checkbox compact">
+                            <input type="checkbox" name="step0" value="bucket-tank">
+                            <span>Bucket (tank) (9)</span>
+                        </label>
+                    </div>
+
+                    <!-- Fourth row of components (10-11) -->
+                    <div class="component-grid">
+                        <label class="checkbox-item component-checkbox compact">
+                            <input type="checkbox" name="step0" value="water-scale-volume">
+                            <span>Water scale volume (10)</span>
+                        </label>
+                        <label class="checkbox-item component-checkbox compact">
+                            <input type="checkbox" name="step0" value="valve-collect-water">
+                            <span>Valve to collect water in tank (11)</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 1: System Setup  -->
+        <div class="step-card locked" id="step1">
+            <div class="step-header">
+                <div class="step-number">2</div>
+                <div class="step-title">Safe System Setup & Initialization</div>
+            </div>
+            <div class="step-content">
+                <div class="locked-message">
+                    <p>🔒 Complete equipment identification to unlock this step</p>
+                </div>
+                <div class="step-content-hidden" style="display: none;">
+                    <div class="safety-warning">
+                        <span class="icon">⚠️</span>
+                        <strong>Critical Safety Sequence:</strong> Never deviate from this startup order. Electrical safety is paramount. Keep laptops away from experimental apparatus to prevent water damage.
+                    </div>
+
+                    <h4>🔧 Pre-Startup Verification</h4>
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="step1" value="tubes-disconnected">
+                        <span>1.-Check the orifice plate tubes are disconnected from the manometer (ask to the staff for help if needed)</span>
+                    </label>
+                    
+                    <div class="step-with-image">
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="step1" value="pump-off">
+                            <span>2.-Ensure the pump is turned OFF at the control panel</span>
+                            <div class="image-direction image-direction-mobile">📸 See picture below</div>
+                        </label>
+                        <div class="image-container">
+                            <img src="https://drive.google.com/thumbnail?id=1X620Uq8eqD95ehwEySGtGb1ZkOoaWaKk&sz=w200" 
+                                 alt="Pump Switch OFF Position" 
+                                 class="step-image"
+                                 onerror="this.onerror=null; this.src='https://drive.google.com/uc?export=view&id=1X620Uq8eqD95ehwEySGtGb1ZkOoaWaKk'; this.nextElementSibling.style.display='block'; this.style.display='none';">
+                            <div class="image-fallback" style="display: none;">
+                                <p>🔌 <strong>Pump Switch Image</strong></p>
+                                <p>Shows pump switch in OFF position</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="step1" value="valve-zero">
+                        <span>3.-Flow regulating valve is set to ZERO</span>
+                    </label>
+                    
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="step1" value="valve-zero">
+                        <span>4.-Ensure the water collection valve is in the vertical position to allow for full water recirculation. Refer to the instructional sticker on the tank for guidance.</span>
+                    </label>
+
+                    <h4>⚡ Electrical System Activation</h4>
+                    <div class="step-with-image">
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="step1" value="main-power">
+                            <span>5.-Switch ON the electricity  by pressing the GREEN button on left side of bench</span>
+                            <div class="image-direction image-direction-mobile">📸 See picture below</div>
+                        </label>
+                        <div class="image-container">
+                            <img src="https://drive.google.com/thumbnail?id=1r_tZNROm66GT1bxKxUXr-9F5fgs43Ooo&sz=w200" 
+                                 alt="Green Power Button" 
+                                 class="step-image"
+                                 onerror="this.onerror=null; this.src='https://drive.google.com/uc?export=view&id=1r_tZNROm66GT1bxKxUXr-9F5fgs43Ooo'; this.nextElementSibling.style.display='block'; this.style.display='none';">
+                            <div class="image-fallback" style="display: none;">
+                                <p>🟢 <strong>Green Button Image</strong></p>
+                                <p>Shows main power activation button</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4>🌊 Controlled Flow Initialization</h4>
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="step1" value="gradual-increase">
+                        <span>6.-Turn the pump switch "On" and very slowly increase the flow by turning the pump power dial to the value of 4</span>
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="step1" value="flow-settle">
+                        <span>7.-Allow the flow to settle (1-2 minutes) until the bubbles are gone</span>
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="step1" value="inlet-check">
+                        <span>8.-Make sure that the inlet pipe is bubble-free (gently lift pipe to help bubbles move and escape)</span>
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="step1" value="valve-adjust">
+                        <span>9.-Slowly decrease the pump dial to 3. Note: if the flow rate goes beyond the 10 LPM in the rotameter, then reduce to 2.5</span>
+                    </label>
+
+                    <h4>📊 Manometer Setup</h4>
+                    <div class="step-with-image">
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="step1" value="manometer-on">
+                            <span>10.-Turn on the manometer by pressing "ON" and press "ZERO"</span>
+                            <div class="image-direction image-direction-mobile">📸 See picture below</div>
+                        </label>
+                        <div class="image-container">
+                            <img src="https://drive.google.com/thumbnail?id=1AfY1-CfKskRdA6ZWnMv0kY53HyQNoVeH&sz=w200" 
+                                 alt="Digital Manometer ON Button" 
+                                 class="step-image"
+                                 onerror="this.onerror=null; this.src='https://drive.google.com/uc?export=view&id=1AfY1-CfKskRdA6ZWnMv0kY53HyQNoVeH'; this.nextElementSibling.style.display='block'; this.style.display='none';">
+                            <div class="image-fallback" style="display: none;">
+                                <p>📊 <strong>Manometer Image</strong></p>
+                                <p>Shows digital manometer ON button</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="step1" value="units-correct">
+                        <span>11.-Set correct units to mmH₂O by pressing the "UNIT" button</span>
+                    </label>
+
+                    <h4>🧪 Tube Connection Protocol</h4>
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="step1" value="bubble-free">
+                        <span>12.-Ensure there are NO bubbles in the two transparent tubes. Shake the pipes gently to remove any bubble.</span>
+                    </label>
+                    
+                    <div class="step-with-image">
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="step1" value="water-flowing">
+                            <span>13.-Bring the tube close to the manometer connector, ensuring a small amount of water is flowing out (see picture below)</span>
+                            <div class="image-direction image-direction-mobile">📸 See picture below</div>
+                        </label>
+                        <div class="image-container">
+                            <img src="https://drive.google.com/thumbnail?id=1jnaHceTn1egjrhmkGKB0AESsvvxIn6fP&sz=w200" 
+                                 alt="Water Flowing from Tube" 
+                                 class="step-image"
+                                 onerror="this.onerror=null; this.src='https://drive.google.com/uc?export=view&id=1jnaHceTn1egjrhmkGKB0AESsvvxIn6fP'; this.nextElementSibling.style.display='block'; this.style.display='none';">
+                            <div class="image-fallback" style="display: none;">
+                                <p>💧 <strong>Water Flow Image</strong></p>
+                                <p>Shows proper water flow before connection</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="step-with-image">
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="step1" value="horizontal-connection">
+                            <span>14.-Tilt manometer at 45-degree inclination and connect tubes while device is angled. </span>
+                            <div class="image-direction image-direction-mobile">📸 See picture below</div>
+                        </label>
+                        <div class="image-container">
+                            <img src="https://drive.google.com/thumbnail?id=1GymVApCgr5hXlzur0__NF4wvvx_A_wkF&sz=w200"
+                                 alt="Manometer Horizontal Position" 
+                                 class="step-image"
+                                 onerror="this.onerror=null; this.src='https://drive.google.com/uc?export=view&id=1TU16eGu1bWFwtKL0yfS7hq_4JGSwQiD4'; this.nextElementSibling.style.display='block'; this.style.display='none';">
+                            <div class="image-fallback" style="display: none;">
+                                <p>📐 <strong>Manometer Position Image</strong></p>
+                                <p>Shows correct horizontal positioning</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="step1" value="both-tubes">
+                        <span>15.-Check that both tubes connected are free of bubbles (detach momentarily if air bubble persists) or contact a staff member if you couldn't remove the bubbles.</span>
+                    </label>
+
+                    <h4>✅ Final System Verification</h4>
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="step1" value="water-reaching">
+                        <span>16.-Water is flowing through ALL devices and reaching the orange tank allowing full recirculation</span>
+                    </label>
+
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="step1" value="system-running">
+                        <span>17.-Keep the equipment running - ready for next measurement phase</span>
+                    </label>
+
+                    <div class="quiz-container" id="setupQuiz" style="display: none;">
+                        <div class="quiz-question">Why is it critical to ensure no air bubbles in the manometer tubes?</div>
+                        <div class="quiz-options">
+                            <div class="quiz-option" data-answer="wrong">Air bubbles improve pressure sensitivity</div>
+                            <div class="quiz-option" data-answer="correct">Air bubbles create measurement errors and inconsistent readings</div>
+                            <div class="quiz-option" data-answer="wrong">Air bubbles protect the digital sensor</div>
+                            <div class="quiz-option" data-answer="wrong">Air bubbles are required for proper calibration</div>
+                        </div>
+                        <div class="quiz-feedback" style="display: none;"></div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Step 2: Recording Data -->
+        <div class="step-card locked" id="step2">
+            <div class="step-header">
+                <div class="step-number">3</div>
+                <div class="step-title">Taking Measurements (Data Collection)</div>
+            </div>
+            <div class="step-content">
+                <div class="locked-message">
+                    <p>🔒 Complete system set up to unlock this step</p>
+                </div>
+                <div class="step-content-hidden" style="display: none;">
+            
+
+					
+                    <div class="safety-warning">
+                        <span class="icon">⚠️</span>
+                        <strong>Important:</strong> In this section you will record data during 20-30 minutes. Do not worry to make calculation in this section, focus in your measurement technique and record all necessary data. Ask for help in case something is not clear.
+                    </div>
+
+                    <div class="team-roles">
+                        <h4>📊 Role-Specific Data Collection Protocol</h4>
+                        <p> (1) Find the 4 printouts available at your desk, select a role (described below) and take 5-10 min to read your task. Failing to read carefully, will lead to a full repetition of the experiment. You will use the same printouts later for Postprocessing data. </p>
+                        <p> (2)  Start collecting data according to your assigned role:</p>
+                        
+                        <div class="role-grid">
+                            <div class="role-card-info">
+                                <h5>📊 Digital Manometer</h5>
+                                <p>Read display 10 times over ~1 minute (check detail in the printout)</p>
+                            </div>
+                            <div class="role-card-info">
+                                <h5>🌪️ Rotameter</h5>
+                                <p>Watch ball position (the top of ball). check detail in the printout</p>
+                            </div>
+                            <div class="role-card-info">
+                                <h5>⏱️ Tank & Timer</h5>
+                                <p>Close tank valve, measure volume scale vs. time (3 repeated runs). Check detail in the printout</p>
+                            </div>
+                            <div class="role-card-info">
+                                <h5>📝 Data Recorder</h5>
+                                <p>Communicate with team, ensure every measurement is clearly recorded with uncertainties. Do not worry about Relative uncertainty in raw data now </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4>📝 Data Collection Checkpoints</h4>
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="step2" value="speed3-data">
+                        <span>We have recorded all data for the three techniques (including uncertainties ± )</span>
+                    </label>
+                    
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="step2" value="speed2-data">
+                        <span>We have turned off the pump, disconnected the manometer tubes, and wipe your work area dry</span>
+                    </label>
+
+
+                    <div class="equipment-diagram">
+                        <h4>📏 About Uncertainty</h4>
+                        <p>Any measurement you take is only meaningful if you also report its uncertainty. Uncertainty shows how much doubt there is about the value you measured. With precision instruments, we still have measurement uncertainty - even a digital manometer reading of 87.43 mmH₂O has inherent uncertainty based on instrument resolution and measurement conditions.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3: Post-processing Results (previously step 4) -->
+        <div class="step-card locked" id="step3">
+            <div class="step-header">
+                <div class="step-number">4</div>
+                <div class="step-title">Post-processing Results</div>
+            </div>
+            <div class="step-content">
+                <div class="locked-message">
+                    <p>🔒 Complete data recording to unlock this step</p>
+                </div>
+                <div class="step-content-hidden" style="display: none;">
+                    <div class="safety-warning">
+                        <span class="icon">⚠️</span>
+                        <strong>Important: In the previous step you only collect data, now it is time to take a seat for calculations. Processing instructions for each device at the back of assigned printouts</strong> 
+                    </div>
+
+                    <div class="equipment-diagram">
+                        <h4>🧮 Required Calculations for Each Method</h4>
+                
+                        <p>1.-As a team, split the following calculations evenly. Use the Data record Sheet and follow printout instructions for Post-processing.</p>
+                        <p> Some of the calculation you need to complete are the following: </p>
+                        <ul style="margin-left: 20px; margin-top: 10px;">
+                            <li>The <strong>Relative uncertainty for the raw data</strong> Find this box in the right side of the Data Record sheets</li>
+                            <li>The <strong>Maximum and minimum values</strong> of flow rate. Read details at the back of the printout titled "for Post-processing"</li>
+                            <li>The <strong>Average flow rate</strong></li>
+                            <li>The <strong>Flow rate uncertainty ∆Q(±)</strong></li>
+                            <li>The <strong>Flow rate relative uncertainty</strong> (∆Q / Q_avg × 100%)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="safety-warning">
+                        <span class="icon">🔗</span>
+                        <strong>Post-processing Tool Access:</strong> 
+                        <p>2.-Open the post-processing App available in the computer desktop. The tool will graphically plot everything for you and help you visually understand uncertainty. Input all the data and complete the Summary Table. Ask for help if you don't understand any input requirements.</p>
+                    </div>
+
+                    <div class="team-roles">
+                        <h4>👥 Suggested Teamwork Division</h4>
+                        <div class="role-grid">
+                            <div class="role-card-info">
+                                <h5>🔧 Team A</h5>
+                                <p>Two people working on <strong>orifice plate and rotameter calculations</strong></p>
+                            </div>
+                            <div class="role-card-info">
+                                <h5>📝 Team B</h5>
+                                <p>Two people working on <strong>volume displacement calculations</strong></p>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="step3" value="manual-calculations">
+                        <span>I have completed all required manual calculations for my assigned measurement devices</span>
+                    </label>
+                    
+
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="step3" value="template-completed">
+                        <span>I have successfully input all data into the post-processing template and complete the Summary Table</span>
+                    </label>
+
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="step3" value="results-verified">
+                        <span>I have verified my results and understand the uncertainty analysis</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    
+
+        <!-- Step 4: Assessment  -->
+        <div class="step-card locked" id="step4">
+            <div class="step-header">
+                <div class="step-number">5</div>
+                <div class="step-title">Analysis of Results and Final Assessment</div>
+            </div>
+            <div class="step-content">
+                <div class="locked-message">
+                    <p>🔒 Complete post-processing to unlock this step</p>
+                </div>
+                <div class="step-content-hidden" style="display: none;">
+                    
+
+                    <div class="safety-warning">
+                        <span class="icon">📝</span>
+                        <strong>Final Assessment:</strong> Complete the assessment and submit your conclusions via SolarFlow Industries' online portal. This will ask you a series of questions, including a final recommendation for which method you advise them to use.
+                    </div>
+
+                <h4> Thank you for using the Digital instruction , you don't need to come back here once you open the following link </h4>
+                    <div class="equipment-diagram">
+                        <h4>🎓 Assessment Instructions</h4>
+                        <p>Click the link below to access the final assessment. Answer all questions based on your experimental work and data analysis.</p>
+                        
+                        <div style="text-align: center; margin: 20px 0;">
+                            <a href="https://script.google.com/macros/s/AKfycbz-8HCMA8rw_vQeMfXSkOzQPm07bW1azlvIPqzQ2tiI3ImElF5_6l8vn9lgANyybZha_Q/exec" 
+                               target="_blank" 
+                               class="btn btn-primary" 
+                               style="display: inline-block; text-decoration: none; margin: 10px;">
+                                📋 Submit Conclusions via SolarFlow Industries Portal
+                            </a>
+                        </div>
+                    </div>
+
+
+                    <div class="team-roles">
+                        <h4>🎯 Professional Practice Reminder</h4>
+                        <p><strong>Remember to consult normative standards when performing measurements in professional practice.</strong> All theory used in this activity follows international laboratory guidelines. Consult the Guide to the Expression of Uncertainty in Measurement (GUM) document for reference.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Updated Completion -->
+        <div class="completion-card" id="completionCard">
+            <h2>🎉 Measurement Laboratory Completed!</h2>
+            <p><strong>Congratulations!</strong> You have successfully completed the Measurement Lab and gained practical experience with:</p>
+            <ul style="list-style: none; padding: 0; margin: 20px 0;">
+                <li>✅ Equipment identification and system understanding</li>
+                <li>✅ Safe system startup and measurement procedures</li>
+                <li>✅ Data collection using three different flow measurement methods</li>
+                <li>✅ Uncertainty analysis and error propagation calculations</li>
+                <li>✅ Critical evaluation and professional recommendation</li>
+            </ul>
+            <div style="background: rgba(255,255,255,0.2); border-radius: 10px; padding: 20px; margin: 20px 0;">
+                <p><strong>📬 Key Learning Outcomes Achieved:</strong></p>
+                <p><strong>Practical:</strong> Experience taking measurements from instrumentation and appreciating that instruments never give exact accurate/precise results.</p>
+                <p><strong>Record:</strong> Understanding the uncertainty associated with every measurement and how to quantify it.</p>
+                <p><strong>Error:</strong> Seeing how uncertainty in raw data can get worse (propagates) when processed in calculations.</p>
+            </div>
+            <p style="font-size: 1.2em; font-weight: bold;">See you in the next lab! 🚀</p>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn btn-secondary" id="prevBtn" onclick="previousStep()" disabled>Previous</button>
+            <button class="btn btn-primary" id="nextBtn" onclick="nextStep()" disabled>Next Step</button>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 0;
+        const totalSteps = 5;
+
+        // Initialize the interface
+        document.addEventListener('DOMContentLoaded', function() {
+            updateProgress();
+            setupEventListeners();
+            updateButtons();
+        });
+
+        function setupEventListeners() {
+            // Quiz handling
+            setupQuiz('setupQuiz');
+
+            // Checkbox listeners
+            setupCheckboxListeners();
+            
+            // Show quiz when step 1 (system setup) is nearly complete
+            const step1Checkboxes = document.querySelectorAll('#step1 input[type="checkbox"]');
+            step1Checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const totalStep1 = document.querySelectorAll('#step1 input[type="checkbox"]').length;
+                    const checkedStep1 = document.querySelectorAll('#step1 input[type="checkbox"]:checked').length;
+                    
+                    // Show quiz when all but understanding-check are completed
+                    if (checkedStep1 === totalStep1 - 1 && currentStep === 1) {
+                        const quiz = document.getElementById('setupQuiz');
+                        if (quiz) {
+                            quiz.style.display = 'block';
+                        }
+                    }
+                });
+            });
+        }
+
+        function setupQuiz(quizId) {
+            const quiz = document.getElementById(quizId);
+            if (!quiz) return;
+
+            const options = quiz.querySelectorAll('.quiz-option');
+            const feedback = quiz.querySelector('.quiz-feedback');
+            let answered = false;
+
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    if (answered) return;
+
+                    // Remove all previous selections
+                    options.forEach(opt => opt.classList.remove('selected', 'correct', 'incorrect'));
+                    
+                    this.classList.add('selected');
+                    
+                    if (this.dataset.answer === 'correct') {
+                        this.classList.add('correct');
+                        feedback.textContent = '✅ Correct! You can proceed to the next step.';
+                        feedback.className = 'quiz-feedback success';
+                        answered = true;
+                        
+                        
+                        checkStepCompletion();
+                    } else {
+                        this.classList.add('incorrect');
+                        feedback.textContent = '❌ Incorrect. Review the material and try again.';
+                        feedback.className = 'quiz-feedback error';
+                        
+                        // Allow retry after 2 seconds
+                        setTimeout(() => {
+                            options.forEach(opt => opt.classList.remove('selected', 'correct', 'incorrect'));
+                            answered = false;
+                        }, 2000);
+                    }
+                    
+                    feedback.style.display = 'block';
+                });
+            });
+        }
+
+        function setupCheckboxListeners() {
+            // Add event listeners to all checkboxes
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    // Update visual styling
+                    const item = this.closest('.checkbox-item');
+                    if (this.checked) {
+                        item.classList.add('checked');
+                    } else {
+                        item.classList.remove('checked');
+                    }
+                    
+                    // Check if current step is complete
+                    checkStepCompletion();
+                });
+            });
+        }
+
+        function checkStepCompletion() {
+            const nextBtn = document.getElementById('nextBtn');
+            let isComplete = false;
+            
+            if (currentStep === 0) {
+                // Step 0: Equipment identification - all 11 components must be identified
+                const totalComponents = document.querySelectorAll('#step0 input[type="checkbox"]').length;
+                const identifiedComponents = document.querySelectorAll('#step0 input[type="checkbox"]:checked').length;
+                isComplete = totalComponents === identifiedComponents;
+                console.log(`Step 0: ${identifiedComponents}/${totalComponents} components identified`);
+                
+            } else if (currentStep === 1) {
+                // Step 1: System setup - all setup checkboxes including quiz
+                const totalCheckboxes = document.querySelectorAll('#step1 input[type="checkbox"]').length;
+                const checkedBoxes = document.querySelectorAll('#step1 input[type="checkbox"]:checked').length;
+                isComplete = totalCheckboxes === checkedBoxes;
+                console.log(`Step 1: ${checkedBoxes}/${totalCheckboxes} setup checkboxes checked`);
+            
+                
+            } else if (currentStep === 2) {
+                // Step 3: Recording data - 2 checkboxes
+                const checkboxes = document.querySelectorAll('#step2 input[type="checkbox"]:checked');
+                isComplete = checkboxes.length === 2;
+                console.log(`Step 2: ${checkboxes.length}/2 data collection checkboxes checked`);
+                
+            } else if (currentStep === 3) {
+                // Step 4: Post-processing - 3 checkboxes
+                const checkboxes = document.querySelectorAll('#step3 input[type="checkbox"]:checked');
+                isComplete = checkboxes.length === 3;
+                console.log(`Step 3: ${checkboxes.length}/3 post-processing checkboxes checked`);
+                
+            } else if (currentStep === 4) {
+                // Step 5: Assessment - 2 checkboxes
+                const checkboxes = document.querySelectorAll('#step4 input[type="checkbox"]:checked');
+                isComplete = checkboxes.length === 2;
+                console.log(`Step 4: ${checkboxes.length}/2 assessment checkboxes checked`);
+            }
+            
+            console.log(`Current step: ${currentStep}, Is complete: ${isComplete}`);
+            
+            if (isComplete) {
+                nextBtn.disabled = false;
+                nextBtn.style.background = 'linear-gradient(135deg, #4CAF50, #45a049)';
+                nextBtn.style.color = 'white';
+                nextBtn.style.animation = 'pulse 1.5s infinite';
+                
+                if (currentStep === totalSteps - 1) {
+                    nextBtn.textContent = '🎉 Complete Laboratory';
+                } else {
+                    const stepNames = ['Equipment ID', 'System Setup', 'Data Collection', 'Post-processing', 'Final Assessment'];
+                    nextBtn.textContent = `✓ Continue to ${stepNames[currentStep + 1]}`;
+                }
+                
+                // Show success message
+                showStepCompletionMessage();
+            } else {
+                nextBtn.disabled = true;
+                nextBtn.style.background = '#cccccc';
+                nextBtn.style.color = '#666666';
+                nextBtn.style.animation = 'none';
+                
+                // More specific feedback
+                if (currentStep === 0) {
+                    const remaining = 11 - document.querySelectorAll('#step0 input[type="checkbox"]:checked').length;
+                    nextBtn.textContent = `Identify ${remaining} More Components`;
+                } else if (currentStep === 1) {
+                    nextBtn.textContent = 'Complete All Setup Tasks';
+                } else if (currentStep === 2) {
+                    nextBtn.textContent = 'Check Both Team Setup Boxes';
+                } else if (currentStep === 3) {
+                    nextBtn.textContent = 'Complete Both Data Collection Tasks';
+                } else if (currentStep === 4) {
+                    nextBtn.textContent = 'Complete All Post-processing Tasks';
+                } else if (currentStep === 5) {
+                    nextBtn.textContent = 'Complete Assessment Tasks';
+                } else {
+                    nextBtn.textContent = `Complete Step ${currentStep + 1} First`;
+                }
+                
+                hideStepCompletionMessage();
+            }
+        }
+
+        function showStepCompletionMessage() {
+            // Remove any existing message
+            const existingMessage = document.querySelector('.completion-message');
+            if (existingMessage) {
+                existingMessage.remove();
+            }
+            
+            // Create success message
+            const message = document.createElement('div');
+            message.className = 'completion-message';
+            message.innerHTML = '🎉 Step completed! Click "Continue" to proceed.';
+            message.style.cssText = `
+                background: linear-gradient(135deg, #4CAF50, #45a049);
+                color: white;
+                padding: 15px;
+                border-radius: 10px;
+                text-align: center;
+                margin: 15px 0;
+                font-weight: bold;
+                animation: slideIn 0.5s ease;
+            `;
+            
+            // Insert before action buttons
+            const actionButtons = document.querySelector('.action-buttons');
+            actionButtons.parentNode.insertBefore(message, actionButtons);
+        }
+
+        function hideStepCompletionMessage() {
+            const message = document.querySelector('.completion-message');
+            if (message) {
+                message.remove();
+            }
+        }
+
+        function nextStep() {
+            if (currentStep < totalSteps - 1) {
+                // Mark current step as completed
+                const currentStepElement = document.getElementById(`step${currentStep}`);
+                currentStepElement.classList.remove('active');
+                currentStepElement.classList.add('completed');
+                
+                // Move to next step
+                currentStep++;
+                const nextStepElement = document.getElementById(`step${currentStep}`);
+                
+                // Unlock and activate next step
+                nextStepElement.classList.remove('locked');
+                nextStepElement.classList.add('active');
+                
+                // Show hidden content
+                const hiddenContent = nextStepElement.querySelector('.step-content-hidden');
+                const lockedMessage = nextStepElement.querySelector('.locked-message');
+                if (hiddenContent && lockedMessage) {
+                    lockedMessage.style.display = 'none';
+                    hiddenContent.style.display = 'block';
+                }
+                
+                // Scroll into view smoothly
+                nextStepElement.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center' 
+                });
+                
+                updateProgress();
+                updateButtons();
+                checkStepCompletion();
+            } else {
+                // Complete the lab
+                completeSetup();
+            }
+        }
+
+        function previousStep() {
+            if (currentStep > 0) {
+                // Remove active class from current step
+                const currentStepElement = document.getElementById(`step${currentStep}`);
+                currentStepElement.classList.remove('active');
+                
+                // Move to previous step
+                currentStep--;
+                const prevStepElement = document.getElementById(`step${currentStep}`);
+                
+                // Remove completed class and add active class
+                prevStepElement.classList.remove('completed');
+                prevStepElement.classList.add('active');
+                
+                // Scroll into view
+                prevStepElement.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center' 
+                });
+                
+                updateProgress();
+                updateButtons();
+                checkStepCompletion();
+            }
+        }
+
+        function updateProgress() {
+            const progress = ((currentStep + 1) / totalSteps) * 100;
+            const progressFill = document.getElementById('progressFill');
+            const stepCounter = document.getElementById('stepCounter');
+            
+            progressFill.style.width = progress + '%';
+            stepCounter.textContent = `Step ${currentStep + 1} of ${totalSteps}`;
+        }
+
+        function updateButtons() {
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            // Previous button
+            prevBtn.disabled = currentStep === 0;
+            prevBtn.style.opacity = currentStep === 0 ? '0.6' : '1';
+            
+            // Check if current step requirements are met
+            checkStepCompletion();
+        }
+
+        function completeSetup() {
+            // Mark final step as completed
+            const finalStep = document.getElementById(`step${currentStep}`);
+            finalStep.classList.add('completed');
+            
+            // Show completion card
+            const completionCard = document.getElementById('completionCard');
+            completionCard.classList.add('show');
+            completionCard.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center' 
+            });
+            
+            // Update progress to 100%
+            const progressFill = document.getElementById('progressFill');
+            progressFill.style.width = '100%';
+            
+            const stepCounter = document.getElementById('stepCounter');
+            stepCounter.textContent = 'Laboratory Complete! 🎉';
+            
+            // Hide action buttons
+            const actionButtons = document.querySelector('.action-buttons');
+            actionButtons.style.display = 'none';
+        }
+    </script>
+<p align="center">
+  This is <strong>an Open Educational Resource</strong>!<br /><br />
+  <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.
+</p>
+</body>
+</html>

@@ -1,0 +1,1552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The Data PostProcessing Tool</title>
+
+  <!-- GLOBAL BODY STYLES (shared) -->
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+    }
+  </style>
+
+  <!-- COMBINED ORIFICE & ROTAMETER SECTION -->
+  <style>
+    #combinedSection .container {
+      max-width: 1200px;
+      margin: 0 auto 40px;
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    #combinedSection .header {
+      text-align: center;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      font-weight: bold;
+      font-size: 24px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    #combinedSection .rotameter-icon {
+      font-size: 32px;
+    }
+    #combinedSection .conditions-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin: 20px;
+    }
+    #combinedSection .condition-section {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      border: 2px solid transparent;
+      transition: all 0.3s ease;
+    }
+    #combinedSection .condition-section:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    }
+    #combinedSection .orifice-section { border-top: 4px solid #74b9ff; }
+    #combinedSection .rotameter-section { border-top: 4px solid #fd79a8; }
+    #combinedSection .condition-header {
+      text-align: center;
+      font-weight: bold;
+      font-size: 20px;
+      margin-bottom: 20px;
+      padding: 10px;
+      border-radius: 8px;
+      color: white;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+    #combinedSection .orifice-section .condition-header {
+      background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+    }
+    #combinedSection .rotameter-section .condition-header {
+      background: linear-gradient(135deg, #fd79a8 0%, #e84393 100%);
+    }
+    #combinedSection .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    #combinedSection .data-table th,
+    #combinedSection .data-table td {
+      border: 1px solid #e0e0e0;
+      padding: 12px 8px;
+      text-align: center;
+    }
+    #combinedSection .data-table th {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      font-weight: bold;
+      font-size: 12px;
+      color: #495057;
+    }
+    #combinedSection .input-field {
+      width: 70px;
+      padding: 8px;
+      border: 2px solid #ddd;
+      border-radius: 5px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+    #combinedSection .orifice-section .input-field {
+      border-color: #74b9ff;
+      background: linear-gradient(135deg, #ffffff 0%, #f8fcff 100%);
+    }
+    #combinedSection .rotameter-section .input-field {
+      border-color: #fd79a8;
+      background: linear-gradient(135deg, #ffffff 0%, #fff8fc 100%);
+    }
+    #combinedSection .input-field:focus {
+      outline: none;
+      transform: scale(1.05);
+      box-shadow: 0 0 0 3px rgba(116,185,255,0.3);
+    }
+    #combinedSection .rotameter-section .input-field:focus {
+      box-shadow: 0 0 0 3px rgba(253,121,168,0.3);
+    }
+    #combinedSection .input-field[readonly] {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      cursor: not-allowed;
+    }
+    #combinedSection .uncertainty-section {
+      margin-top: 20px;
+      padding: 15px;
+      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+    }
+    #combinedSection .uncertainty-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      padding: 8px 12px;
+      background: white;
+      border-radius: 6px;
+      border: 1px solid #e0e0e0;
+    }
+    #combinedSection .uncertainty-label {
+      font-weight: bold;
+      font-size: 14px;
+      color: #495057;
+    }
+    #combinedSection .wide-input { width: 100px; }
+
+    .input-container {
+      position: relative;
+      display: inline-block;
+    }
+
+    .validation-indicator {
+      position: absolute;
+      right: -25px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    .validation-cross {
+      color: #e74c3c;
+    }
+
+    .validation-check {
+      color: #27ae60;
+    }
+
+    .input-field.invalid {
+      border-color: #e74c3c !important;
+      background: linear-gradient(135deg, #fff5f5 0%, #ffe6e6 100%) !important;
+    }
+
+    .input-field.valid {
+      border-color: #27ae60 !important;
+      background: linear-gradient(135deg, #f0fff4 0%, #e6ffe6 100%) !important;
+    }
+    
+    #combinedSection .units {
+      margin-left: 5px;
+      font-weight: 500;
+    }
+    #combinedSection .uncertainty-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    @media (max-width: 768px) {
+      #combinedSection .conditions-container {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+
+<style>
+  /* === VOLUME SECTION STYLES === */
+  #volumeSection .container {
+    max-width: 1200px;
+    margin: 20px auto 40px;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    overflow: hidden;
+    padding: 20px;
+  }
+
+  #volumeSection .header {
+    text-align: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    font-weight: bold;
+    font-size: 24px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    margin-bottom: 20px;
+  }
+
+  #volumeSection .conditions-container {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    margin: 20px;
+  }
+
+  #volumeSection .condition-section {
+    background: white;
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    border-top: 4px solid #74b9ff;
+    transition: all 0.3s ease;
+  }
+
+  #volumeSection .condition-section:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  }
+
+  #volumeSection .condition-header {
+    text-align: center;
+    font-weight: bold;
+    font-size: 20px;
+    margin-bottom: 25px;
+    padding: 12px;
+    border-radius: 8px;
+    color: white;
+    background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  }
+
+  #volumeSection .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    font-size: 13px;
+  }
+
+  #volumeSection .data-table th,
+  #volumeSection .data-table td {
+    border: 1px solid #e0e0e0;
+    padding: 8px 4px;
+    text-align: center;
+    vertical-align: middle;
+  }
+
+  #volumeSection .input-field {
+    width: 60px;
+    padding: 6px;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 12px;
+    transition: all 0.3s ease;
+  }
+
+  #volumeSection .input-field:focus {
+    outline: none;
+    transform: scale(1.05);
+    box-shadow: 0 0 0 3px rgba(116,185,255,0.3);
+  }
+
+  #volumeSection .input-field[readonly] {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    cursor: not-allowed;
+    color: #666;
+  }
+
+  @media (max-width: 768px) {
+    #volumeSection .input-field {
+      width: 50px;
+      font-size: 10px;
+    }
+  }
+</style>
+
+<style>
+  /* === PLOT SECTION (for all devices) === */
+  #plotSection {
+    max-width: 1200px;
+    margin: 20px auto;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    overflow: hidden;
+    padding: 20px;
+  }
+
+  #plotSection .plot-header {
+    text-align: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    font-weight: bold;
+    font-size: 24px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+
+  #plotSection .plot-and-table-container {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+    align-items: flex-start;
+  }
+
+  #plotSection .chart-container {
+    position: relative;
+    height: 400px;
+    flex: 1;
+  }
+
+  #plotSection .summary-table-container {
+    flex: 1;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+  }
+
+  #plotSection .summary-table-container h3 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #495057;
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  #plotSection .summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    background: white;
+  }
+
+  #plotSection .summary-table th,
+  #plotSection .summary-table td {
+    border: 1px solid #e0e0e0;
+    padding: 12px 8px;
+    text-align: center;
+    vertical-align: middle;
+  }
+
+  #plotSection .summary-table th {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-weight: bold;
+    font-size: 12px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  }
+
+  #plotSection .summary-table td:first-child {
+    font-weight: bold;
+    background: #f8f9fa;
+    text-align: left;
+    padding-left: 12px;
+	width: 120px;
+  }
+
+  #plotSection .summary-input {
+    width: 80px;
+    padding: 8px;
+    border: 2px solid #74b9ff;
+    border-radius: 4px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 12px;
+    background: white;
+    transition: all 0.3s ease;
+  }
+
+  #plotSection .summary-input:focus {
+    outline: none;
+    transform: scale(1.05);
+    box-shadow: 0 0 0 3px rgba(116,185,255,0.3);
+  }
+
+  @media (max-width: 768px) {
+    #plotSection .plot-and-table-container {
+      flex-direction: column;
+    }
+    
+    #plotSection .summary-input {
+      width: 60px;
+      font-size: 10px;
+    }
+  }
+  
+  #plotSection .summary-table th:first-child {
+  width: 120px;
+}
+
+.check-button {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.check-button:hover {
+  background: #5a6268;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.validation-result {
+  margin-top: 10px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.validation-result.show {
+  opacity: 1;
+}
+
+.validation-success {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.validation-error {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+</style>
+
+  <!-- EXTERNAL LIBRARIES -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <!-- AUTO-SAVE AND DATA PERSISTENCE -->
+  <script>
+    let hasUnsavedChanges = false;
+    let autoSaveInterval;
+
+    // Function to save all form data to localStorage
+    function saveFormData() {
+      const formData = {};
+      
+      // Get all input fields
+      const inputs = document.querySelectorAll('input[type="number"]');
+      inputs.forEach(input => {
+        if (input.id && input.value !== '') {
+          formData[input.id] = input.value;
+        }
+      });
+      
+      // Save to localStorage
+      localStorage.setItem('flowMeterToolData', JSON.stringify(formData));
+      hasUnsavedChanges = false;
+      
+      // Show brief save confirmation
+      showSaveStatus('Data auto-saved', 'success');
+    }
+
+    // Function to load saved data from localStorage
+    function loadFormData() {
+      const savedData = localStorage.getItem('flowMeterToolData');
+      if (savedData) {
+        try {
+          const formData = JSON.parse(savedData);
+          Object.keys(formData).forEach(fieldId => {
+            const element = document.getElementById(fieldId);
+            if (element) {
+              element.value = formData[fieldId];
+              // Trigger input events to update calculations and validations
+              element.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+          });
+          showSaveStatus('Previous data restored', 'info');
+        } catch (error) {
+          console.warn('Could not load saved data:', error);
+        }
+      }
+    }
+
+    // Function to show save status messages
+    function showSaveStatus(message, type) {
+      // Remove existing status message
+      const existingStatus = document.getElementById('saveStatus');
+      if (existingStatus) {
+        existingStatus.remove();
+      }
+
+      // Create status message
+      const statusDiv = document.createElement('div');
+      statusDiv.id = 'saveStatus';
+      statusDiv.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 10px 15px;
+        border-radius: 5px;
+        font-size: 14px;
+        font-weight: bold;
+        z-index: 1000;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        ${type === 'success' ? 'background: #d4edda; color: #155724; border: 1px solid #c3e6cb;' : 
+          type === 'info' ? 'background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb;' : 
+          'background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;'}
+      `;
+      statusDiv.textContent = message;
+      
+      document.body.appendChild(statusDiv);
+      
+      // Fade in
+      setTimeout(() => statusDiv.style.opacity = '1', 10);
+      
+      // Fade out after 2 seconds
+      setTimeout(() => {
+        statusDiv.style.opacity = '0';
+        setTimeout(() => statusDiv.remove(), 300);
+      }, 2000);
+    }
+
+    // Function to clear saved data
+    function clearSavedData() {
+      if (confirm('Are you sure you want to clear all saved data? This cannot be undone.')) {
+        localStorage.removeItem('flowMeterToolData');
+        showSaveStatus('Saved data cleared', 'info');
+        location.reload(); // Refresh to show empty form
+      }
+    }
+
+    // Mark form as having unsaved changes
+    function markAsChanged() {
+      hasUnsavedChanges = true;
+    }
+
+    // Warning before page unload
+    window.addEventListener('beforeunload', function(e) {
+      if (hasUnsavedChanges) {
+        const message = 'You have unsaved changes. Are you sure you want to leave?';
+        e.returnValue = message;
+        return message;
+      }
+    });
+
+    // Initialize auto-save system
+    function initAutoSave() {
+      // Load saved data when page loads
+      loadFormData();
+      
+      // Set up auto-save every 10 seconds
+      autoSaveInterval = setInterval(() => {
+        if (hasUnsavedChanges) {
+          saveFormData();
+        }
+      }, 10000);
+
+      // Listen for any input changes
+      document.addEventListener('input', function(e) {
+        if (e.target.type === 'number') {
+          markAsChanged();
+        }
+      });
+
+      // Manual save button functionality (we'll add this to the UI)
+      const saveButton = document.createElement('button');
+      saveButton.innerHTML = '💾 Save Progress';
+      saveButton.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        padding: 12px 20px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        z-index: 1000;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        transition: all 0.3s ease;
+      `;
+      saveButton.addEventListener('click', saveFormData);
+      saveButton.addEventListener('mouseover', () => {
+        saveButton.style.background = '#0056b3';
+        saveButton.style.transform = 'translateY(-2px)';
+      });
+      saveButton.addEventListener('mouseout', () => {
+        saveButton.style.background = '#007bff';
+        saveButton.style.transform = 'translateY(0)';
+      });
+      document.body.appendChild(saveButton);
+
+      // Clear data button
+      const clearButton = document.createElement('button');
+      clearButton.innerHTML = '🗑️ Clear Data';
+      clearButton.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        left: 160px;
+        padding: 12px 20px;
+        background: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        z-index: 1000;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        transition: all 0.3s ease;
+      `;
+      clearButton.addEventListener('click', clearSavedData);
+      clearButton.addEventListener('mouseover', () => {
+        clearButton.style.background = '#c82333';
+        clearButton.style.transform = 'translateY(-2px)';
+      });
+      clearButton.addEventListener('mouseout', () => {
+        clearButton.style.background = '#dc3545';
+        clearButton.style.transform = 'translateY(0)';
+      });
+      document.body.appendChild(clearButton);
+    }
+  </script>
+</head>
+
+
+<body>
+
+<div id="debug" style="position: fixed; bottom: 20px; right: 20px; background: #333; color: #fff; padding: 10px; border-radius: 5px; font-size: 12px; z-index: 9999; max-width: 300px;">
+  <strong>Debug Info:</strong><br>
+  google object: <span id="google-check">checking...</span><br>
+  google.script: <span id="script-check">checking...</span><br>
+  google.script.run: <span id="run-check">checking...</span>
+</div>
+
+<script>
+  document.getElementById('google-check').textContent = typeof google !== 'undefined' ? '✓ exists' : '✗ missing';
+  document.getElementById('script-check').textContent = (typeof google !== 'undefined' && google.script) ? '✓ exists' : '✗ missing';
+  document.getElementById('run-check').textContent = (typeof google !== 'undefined' && google.script && google.script.run) ? '✓ exists' : '✗ missing';
+</script>
+
+  <!-- COMBINED ORIFICE PLATE & ROTAMETER SECTION -->
+  <div id="combinedSection">
+    <div class="container">
+      <div class="header">
+        <div class="rotameter-icon">⚡</div>
+        The Data Post-processing Tool
+      </div>
+    
+      <div class="conditions-container">
+        <!-- Orifice Plate Condition A -->
+        <div class="condition-section orifice-section">
+          <div class="condition-header">Orifice Plate</div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Pressure Difference<br>(mmH<sub>2</sub>O)</th>
+                <th class="col-header">
+                Q, Flow Rate (LPM)<br>
+                  <span class="error-formula-latex">
+                  $$
+                  Q = C_D A_2 \sqrt{ \frac{2 \Delta h \, g}{1 - \left(\frac{A_2}{A_1}\right)^2} }
+                  $$
+                  </span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div class="row-label">Max</div>
+                  <input type="number" class="input-field" id="or_max_pressure_a" step=" " placeholder="0.0">
+                </td>
+                <td><input type="number" class="input-field" id="or_max_flow_a" step=" " readonly></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="row-label">Min</div>
+                  <input type="number" class="input-field" id="or_min_pressure_a" step=" " placeholder="0.0">
+                </td>
+                <td><input type="number" class="input-field" id="or_min_flow_a" step=" " readonly></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="row-label">Avg</div>
+                  <input type="number" class="input-field" id="or_ave_pressure_a" step=" " placeholder="0.0">
+                </td>
+                <td><input type="number" class="input-field" id="or_ave_flow_a" step=" " readonly></td>
+              </tr>
+            </tbody>
+          </table>
+			<div class="uncertainty-section">
+			<div class="uncertainty-row">
+				<span class="uncertainty-label">Orifice uncertainty ΔQ(LPM) ±</span>
+				<div class="input-container">
+				<input type="number" class="input-field" id="or_uncertainty_a" step=" " placeholder="0.000">
+				<span class="validation-indicator" id="or_uncertainty_a_indicator"></span>
+				</div>
+			</div>
+			<div class="uncertainty-row">
+				<span class="uncertainty-label">Relative uncertainty ΔQ/Q_Avg (%)</span>
+				<div class="input-container">
+				<input type="number" class="input-field wide-input" id="or_relative_uncertainty_a" step=" " placeholder="0.000000">
+				<span class="validation-indicator" id="or_relative_uncertainty_a_indicator"></span>
+				</div>
+			</div>
+			</div>
+        </div>
+
+<!-- Rotameter Condition A -->
+<div class="condition-section rotameter-section">
+  <div class="condition-header">Rotameter</div>
+  
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Q, Flow Rate (LPM)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <div class="row-label">Max</div>
+          <input type="number" class="input-field" id="max_flow_a" step="0.1" placeholder="0.0">
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <div class="row-label">Min</div>
+          <input type="number" class="input-field" id="min_flow_a" step="0.1" placeholder="0.0">
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <div class="row-label">Avg</div>
+          <input type="number" class="input-field" id="ave_flow_a" step="0.1" placeholder="0.0">
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  
+  <div class="uncertainty-section">
+    <div class="uncertainty-row">
+      <span class="uncertainty-label">Rotameter Uncertainty ΔQ(LPM) ±</span>
+      <div class="input-container">
+        <input type="number" class="input-field" id="uncertainty_a" step="0.001" placeholder="0.000">
+        <span class="validation-indicator" id="uncertainty_a_indicator"></span>
+      </div>
+    </div>
+    <div class="uncertainty-row">
+      <span class="uncertainty-label">Relative uncertainty ΔQ/Q_Avg (%)</span>
+      <div class="input-container">
+        <input type="number" class="input-field wide-input" id="relative_uncertainty_a" step="0.000001" placeholder="0.000000">
+        <span class="validation-indicator" id="relative_uncertainty_a_indicator"></span>
+      </div>
+    </div>
+  </div>
+</div>
+</div> 
+
+ <div id="volumeSection">
+   <div class="container">
+    <div class="header">
+      📊 Volume Displacement Calculator 
+    </div>
+    <div class="conditions-container">
+      <div class="condition-section condition-a">
+        <div class="condition-header"> Tank and Timer</div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th class="row-number">#</th>
+              <th class="col-header">Max Q (LPM)</th>
+              <th class="col-header">Min Q (LPM)</th>
+			  <th class="col-header">Avg Q (LPM)</th>
+              <th class="col-header">Flow Rate Uncertainty ±(ΔQ)</th>
+              <th class="col-header">Relative uncertainty % = (ΔQ/Q_Avg) × 100</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- ROW 1: Manual input for ALL fields with validation -->
+            <tr>
+              <td class="row-number">1</td>
+              <td><input type="number" class="input-field" id="max_q_a_1" step="0.01" placeholder="0.00"></td>
+              <td><input type="number" class="input-field" id="min_q_a_1" step="0.01" placeholder="0.00"></td>
+			  <td><input type="number" class="input-field" id="flowrate_a_1" step="0.01" placeholder="0.00"></td>
+              <td>
+                <div class="input-container">
+                  <input type="number" class="input-field" id="flow_unc_a_1" step="0.01" placeholder="0.00">
+                  <span class="validation-indicator" id="flow_unc_a_1_indicator"></span>
+                </div>
+              </td>
+              <td>
+                <div class="input-container">
+                  <input type="number" class="input-field" id="rel_unc_a_1" step="0.01" placeholder="0.00">
+                  <span class="validation-indicator" id="rel_unc_a_1_indicator"></span>
+                </div>
+              </td>
+            </tr>
+            <!-- ROW 2: Manual input for Max Q, Min Q, Avg Q; Automatic calculation for uncertainties -->
+            <tr>
+              <td class="row-number">2</td>
+              <td><input type="number" class="input-field" id="max_q_a_2" step="0.01" placeholder="0.00"></td>
+              <td><input type="number" class="input-field" id="min_q_a_2" step="0.01" placeholder="0.00"></td>
+			  <td><input type="number" class="input-field" id="flowrate_a_2" step="0.01" placeholder="0.00"></td>
+              <td><input type="number" class="input-field" id="flow_unc_a_2" step="0.01" placeholder="0.00" readonly></td>
+              <td><input type="number" class="input-field" id="rel_unc_a_2" step="0.01" placeholder="0.00" readonly></td>
+            </tr>
+            <!-- ROW 3: Manual input for Max Q, Min Q, Avg Q; Automatic calculation for uncertainties -->
+            <tr>
+              <td class="row-number">3</td>
+              <td><input type="number" class="input-field" id="max_q_a_3" step="0.01" placeholder="0.00"></td>
+              <td><input type="number" class="input-field" id="min_q_a_3" step="0.01" placeholder="0.00"></td>
+              <td><input type="number" class="input-field" id="flowrate_a_3" step="0.01" placeholder="0.00"></td>
+              <td><input type="number" class="input-field" id="flow_unc_a_3" step="0.01" placeholder="0.00" readonly></td>
+              <td><input type="number" class="input-field" id="rel_unc_a_3" step="0.01" placeholder="0.00" readonly></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div> 
+
+        <div id="plotSection">
+          <div class="plot-header">Flow Rate Comparison with Error Bars </div>
+          <div class="plot-and-table-container">
+            <div class="chart-container">
+              <canvas id="flowChart"></canvas>
+            </div>
+            <div class="summary-table-container">
+              <h3>Summary Table</h3>
+              <table class="summary-table">
+                <thead>
+                  <tr>
+                    <th>Measurement Method</th>
+                    <th>Raw Data<br>Relative Uncertainty (%)</th>
+                    <th>Processed Data<br>Relative Uncertainty (%)</th>
+					<th>Validation</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Orifice plate (Manometer)</td>
+                    <td><input type="number" class="summary-input" id="manometer_raw" step="0.01" placeholder="0.00"></td>
+                    <td><input type="number" class="summary-input" id="manometer_processed" step="0.01" placeholder="0.00"></td>
+					<td>
+						<button class="check-button" onclick="validateManometer()">Check</button>
+						<div class="validation-result" id="manometer_result"></div>
+					</td>
+                  </tr>
+                  <tr>
+                    <td>Rotameter</td>
+                    <td><input type="number" class="summary-input" id="rotameter_raw" step="0.01" placeholder="0.00"></td>
+                    <td><input type="number" class="summary-input" id="rotameter_processed" step="0.01" placeholder="0.00"></td>
+					<td>
+						<button class="check-button" onclick="validateRotameter()">Check</button>
+						<div class="validation-result" id="rotameter_result"></div>
+					</td>
+                  </tr>
+				<tr>
+					<td>Tank & Timer (for one case)</td>
+					<td>
+						<div class="dual-input-container">
+							<div class="input-label">Time</div>
+							<input type="number" class="summary-input" id="tank_timer_time_uncertainty" step="0.01" placeholder="0.00">
+							<div class="input-label">Volume</div>
+							<input type="number" class="summary-input" id="tank_timer_volume_uncertainty" step="0.01" placeholder="0.00">
+						</div>
+					</td>
+					<td><input type="number" class="summary-input" id="tank_timer_processed" step="0.01" placeholder="0.00"></td>
+					<td>
+						<button class="check-button" onclick="validateTankTimer()">Check</button>
+						<div class="validation-result" id="tank_timer_result"></div>
+					</td>
+				</tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+  <!-- ORIFICE JS -->
+<script>
+  const Cd = 0.63,
+        D1 = 0.010,
+        D2 = 0.006,
+        A1 = Math.PI * D1 * D1,
+        A2 = Math.PI * D2 * D2,
+        g  = 9.81;
+
+  function calculateOrificeValues(cond) {
+    const s = cond === 'A' ? '_a' : '_b';
+    const maxP = parseFloat(document.getElementById('or_max_pressure' + s).value),
+          minP = parseFloat(document.getElementById('or_min_pressure' + s).value),
+          aveP = parseFloat(document.getElementById('or_ave_pressure' + s).value);
+
+    const calcQ = dh => {
+      if (isNaN(dh) || dh <= 0) return 0;
+      const dh_m = dh * 0.001,
+            denom = 1 - (A2/A1)**2,
+            Qm3s = Cd * A2 * Math.sqrt(2 * g * dh_m / denom);
+      return Qm3s * 1000 * 60;
+    };
+
+    const [maxQ, minQ, aveQ] = [calcQ(maxP), calcQ(minP), calcQ(aveP)];
+
+    ['max','min','ave'].forEach((t,i) => {
+      const val = [maxQ,minQ,aveQ][i];
+      document.getElementById('or_' + t + '_flow' + s).value =
+        val > 0 ? val.toFixed(2) : '';
+    });
+  }
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialize auto-save system FIRST
+    initAutoSave();
+
+    // Pressure inputs trigger calculation
+    ['or_max_pressure_a', 'or_min_pressure_a', 'or_ave_pressure_a'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('input', () => {
+        calculateOrificeValues('A');
+        setTimeout(() => validateOrificeUncertainty(), 50);
+      });
+    });
+    
+    // Uncertainty inputs trigger validation
+    ['or_uncertainty_a', 'or_relative_uncertainty_a'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('input', validateOrificeUncertainty);
+    });
+
+    // Rotameter inputs trigger validation
+    ['max_flow_a', 'min_flow_a', 'ave_flow_a', 'uncertainty_a', 'relative_uncertainty_a'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('input', validateRotameterUncertainty);
+    });
+
+    // Tank and timer inputs - UPDATED LOGIC
+    // Row 1: Manual input with validation
+    ['max_q_a_1', 'min_q_a_1', 'flowrate_a_1', 'flow_unc_a_1', 'rel_unc_a_1'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('input', () => validateTankTimerUncertainty(1));
+    });
+
+    // Rows 2 & 3: Automatic calculation for uncertainties
+    for (let i = 2; i <= 3; i++) {
+      ['max_q_a_' + i, 'min_q_a_' + i, 'flowrate_a_' + i].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', () => calculateTankTimerRow(i));
+      });
+    }
+
+    // initial calculation
+    calculateOrificeValues('A');
+
+    // re-typeset any MathJax if available
+    if (window.MathJax && window.MathJax.typesetPromise) {
+      MathJax.typesetPromise().catch(err => console.warn('MathJax error:', err));
+    }
+  });
+</script>
+
+<script>
+// Validation function for orifice plate
+function validateOrificeUncertainty() {
+  const maxFlow = parseFloat(document.getElementById('or_max_flow_a').value);
+  const minFlow = parseFloat(document.getElementById('or_min_flow_a').value);
+  const aveFlow = parseFloat(document.getElementById('or_ave_flow_a').value);
+  const uncertaintyInput = document.getElementById('or_uncertainty_a');
+  const relativeUncertaintyInput = document.getElementById('or_relative_uncertainty_a');
+  
+  const uncertaintyIndicator = document.getElementById('or_uncertainty_a_indicator');
+  const relativeUncertaintyIndicator = document.getElementById('or_relative_uncertainty_a_indicator');
+  
+  // Validate uncertainty calculation: (max_flow - min_flow) / 2
+  if (!isNaN(maxFlow) && !isNaN(minFlow) && maxFlow > 0 && minFlow > 0) {
+    const correctUncertainty = (maxFlow - minFlow) / 2;
+    const inputUncertainty = parseFloat(uncertaintyInput.value);
+    
+    if (!isNaN(inputUncertainty)) {
+      const tolerance = 0.01;
+      if (Math.abs(inputUncertainty - correctUncertainty) <= tolerance) {
+        uncertaintyInput.classList.remove('invalid');
+        uncertaintyInput.classList.add('valid');
+        uncertaintyIndicator.innerHTML = '✓';
+        uncertaintyIndicator.className = 'validation-indicator validation-check';
+      } else {
+        uncertaintyInput.classList.remove('valid');
+        uncertaintyInput.classList.add('invalid');
+        uncertaintyIndicator.innerHTML = '✗';
+        uncertaintyIndicator.className = 'validation-indicator validation-cross';
+      }
+    } else {
+      uncertaintyInput.classList.remove('valid', 'invalid');
+      uncertaintyIndicator.innerHTML = '';
+      uncertaintyIndicator.className = 'validation-indicator';
+    }
+  }
+  
+  // Validate relative uncertainty: (uncertainty / ave_flow) * 100
+  if (!isNaN(aveFlow) && aveFlow > 0) {
+    const inputUncertainty = parseFloat(uncertaintyInput.value);
+    const inputRelativeUncertainty = parseFloat(relativeUncertaintyInput.value);
+    
+    if (!isNaN(inputUncertainty) && !isNaN(inputRelativeUncertainty)) {
+      const correctRelativeUncertainty = (inputUncertainty / aveFlow) * 100;
+      const tolerance = 0.01;
+      
+      if (Math.abs(inputRelativeUncertainty - correctRelativeUncertainty) <= tolerance) {
+        relativeUncertaintyInput.classList.remove('invalid');
+        relativeUncertaintyInput.classList.add('valid');
+        relativeUncertaintyIndicator.innerHTML = '✓';
+        relativeUncertaintyIndicator.className = 'validation-indicator validation-check';
+      } else {
+        relativeUncertaintyInput.classList.remove('valid');
+        relativeUncertaintyInput.classList.add('invalid');
+        relativeUncertaintyIndicator.innerHTML = '✗';
+        relativeUncertaintyIndicator.className = 'validation-indicator validation-cross';
+      }
+    } else {
+      relativeUncertaintyInput.classList.remove('valid', 'invalid');
+      relativeUncertaintyIndicator.innerHTML = '';
+      relativeUncertaintyIndicator.className = 'validation-indicator';
+    }
+  }
+}
+
+// Validation function for rotameter
+function validateRotameterUncertainty() {
+  const maxFlow = parseFloat(document.getElementById('max_flow_a').value);
+  const minFlow = parseFloat(document.getElementById('min_flow_a').value);
+  const aveFlow = parseFloat(document.getElementById('ave_flow_a').value);
+  const uncertaintyInput = document.getElementById('uncertainty_a');
+  const relativeUncertaintyInput = document.getElementById('relative_uncertainty_a');
+  
+  const uncertaintyIndicator = document.getElementById('uncertainty_a_indicator');
+  const relativeUncertaintyIndicator = document.getElementById('relative_uncertainty_a_indicator');
+  
+  // Validate uncertainty calculation: (max_flow - min_flow) / 2
+  if (!isNaN(maxFlow) && !isNaN(minFlow) && maxFlow > 0 && minFlow > 0) {
+    const correctUncertainty = (maxFlow - minFlow) / 2;
+    const inputUncertainty = parseFloat(uncertaintyInput.value);
+    
+    if (!isNaN(inputUncertainty)) {
+      const tolerance = 0.01;
+      if (Math.abs(inputUncertainty - correctUncertainty) <= tolerance) {
+        uncertaintyInput.classList.remove('invalid');
+        uncertaintyInput.classList.add('valid');
+        uncertaintyIndicator.innerHTML = '✓';
+        uncertaintyIndicator.className = 'validation-indicator validation-check';
+      } else {
+        uncertaintyInput.classList.remove('valid');
+        uncertaintyInput.classList.add('invalid');
+        uncertaintyIndicator.innerHTML = '✗';
+        uncertaintyIndicator.className = 'validation-indicator validation-cross';
+      }
+    } else {
+      uncertaintyInput.classList.remove('valid', 'invalid');
+      uncertaintyIndicator.innerHTML = '';
+      uncertaintyIndicator.className = 'validation-indicator';
+    }
+  }
+  
+  // Validate relative uncertainty: (uncertainty / ave_flow) * 100
+  if (!isNaN(aveFlow) && aveFlow > 0) {
+    const inputUncertainty = parseFloat(uncertaintyInput.value);
+    const inputRelativeUncertainty = parseFloat(relativeUncertaintyInput.value);
+    
+    if (!isNaN(inputUncertainty) && !isNaN(inputRelativeUncertainty)) {
+      const correctRelativeUncertainty = (inputUncertainty / aveFlow) * 100;
+      const tolerance = 0.01;
+      
+      if (Math.abs(inputRelativeUncertainty - correctRelativeUncertainty) <= tolerance) {
+        relativeUncertaintyInput.classList.remove('invalid');
+        relativeUncertaintyInput.classList.add('valid');
+        relativeUncertaintyIndicator.innerHTML = '✓';
+        relativeUncertaintyIndicator.className = 'validation-indicator validation-check';
+      } else {
+        relativeUncertaintyInput.classList.remove('valid');
+        relativeUncertaintyInput.classList.add('invalid');
+        relativeUncertaintyIndicator.innerHTML = '✗';
+        relativeUncertaintyIndicator.className = 'validation-indicator validation-cross';
+      }
+    } else {
+      relativeUncertaintyInput.classList.remove('valid', 'invalid');
+      relativeUncertaintyIndicator.innerHTML = '';
+      relativeUncertaintyIndicator.className = 'validation-indicator';
+    }
+  }
+}
+
+// Validation function for tank and timer ROW 1 ONLY (manual input)
+function validateTankTimerUncertainty(row) {
+  if (row !== 1) return; // Only validate row 1
+  
+  const maxQ = parseFloat(document.getElementById(`max_q_a_${row}`).value);
+  const minQ = parseFloat(document.getElementById(`min_q_a_${row}`).value);
+  const flowrate = parseFloat(document.getElementById(`flowrate_a_${row}`).value);
+  const flowUncInput = document.getElementById(`flow_unc_a_${row}`);
+  const relUncInput = document.getElementById(`rel_unc_a_${row}`);
+  
+  const flowUncIndicator = document.getElementById(`flow_unc_a_${row}_indicator`);
+  const relUncIndicator = document.getElementById(`rel_unc_a_${row}_indicator`);
+  
+  // Validate flow uncertainty: (max_q - min_q) / 2
+  if (!isNaN(maxQ) && !isNaN(minQ) && maxQ > 0 && minQ > 0) {
+    const correctFlowUnc = (maxQ - minQ) / 2;
+    const inputFlowUnc = parseFloat(flowUncInput.value);
+    
+    if (!isNaN(inputFlowUnc)) {
+      const tolerance = 0.01;
+      if (Math.abs(inputFlowUnc - correctFlowUnc) <= tolerance) {
+        flowUncInput.classList.remove('invalid');
+        flowUncInput.classList.add('valid');
+        flowUncIndicator.innerHTML = '✓';
+        flowUncIndicator.className = 'validation-indicator validation-check';
+      } else {
+        flowUncInput.classList.remove('valid');
+        flowUncInput.classList.add('invalid');
+        flowUncIndicator.innerHTML = '✗';
+        flowUncIndicator.className = 'validation-indicator validation-cross';
+      }
+    } else {
+      flowUncInput.classList.remove('valid', 'invalid');
+      flowUncIndicator.innerHTML = '';
+      flowUncIndicator.className = 'validation-indicator';
+    }
+  }
+  
+  // Validate relative uncertainty: (flow_unc / flowrate) * 100
+  if (!isNaN(flowrate) && flowrate > 0) {
+    const inputFlowUnc = parseFloat(flowUncInput.value);
+    const inputRelUnc = parseFloat(relUncInput.value);
+    
+    if (!isNaN(inputFlowUnc) && !isNaN(inputRelUnc)) {
+      const correctRelUnc = (inputFlowUnc / flowrate) * 100;
+      const tolerance = 0.01;
+      
+      if (Math.abs(inputRelUnc - correctRelUnc) <= tolerance) {
+        relUncInput.classList.remove('invalid');
+        relUncInput.classList.add('valid');
+        relUncIndicator.innerHTML = '✓';
+        relUncIndicator.className = 'validation-indicator validation-check';
+      } else {
+        relUncInput.classList.remove('valid');
+        relUncInput.classList.add('invalid');
+        relUncIndicator.innerHTML = '✗';
+        relUncIndicator.className = 'validation-indicator validation-cross';
+      }
+    } else {
+      relUncInput.classList.remove('valid', 'invalid');
+      relUncIndicator.innerHTML = '';
+      relUncIndicator.className = 'validation-indicator';
+    }
+  }
+}
+
+// Automatic calculation function for tank and timer ROWS 2 & 3
+function calculateTankTimerRow(row) {
+  if (row === 1) return; // Don't auto-calculate for row 1
+  
+  const maxQ = parseFloat(document.getElementById(`max_q_a_${row}`).value);
+  const minQ = parseFloat(document.getElementById(`min_q_a_${row}`).value);
+  const flowrate = parseFloat(document.getElementById(`flowrate_a_${row}`).value);
+
+  // Auto-calculate flow uncertainty: (max_q - min_q) / 2
+  if (!isNaN(maxQ) && !isNaN(minQ) && maxQ > 0 && minQ > 0) {
+    const flowUnc = (maxQ - minQ) / 2;
+    document.getElementById(`flow_unc_a_${row}`).value = flowUnc.toFixed(2);
+  } else {
+    document.getElementById(`flow_unc_a_${row}`).value = '';
+  }
+
+  // Auto-calculate relative uncertainty: (flow_unc / flowrate) * 100
+  const calculatedFlowUnc = parseFloat(document.getElementById(`flow_unc_a_${row}`).value);
+  if (!isNaN(flowrate) && flowrate > 0 && !isNaN(calculatedFlowUnc)) {
+    const relativeUnc = (calculatedFlowUnc / flowrate) * 100;
+    document.getElementById(`rel_unc_a_${row}`).value = relativeUnc.toFixed(2);
+  } else {
+    document.getElementById(`rel_unc_a_${row}`).value = '';
+  }
+
+  // Update chart after calculations
+  setTimeout(() => updateChart(), 50);
+}
+</script>
+
+  <!-- Plots -->
+<script>
+  let chart;
+  
+  function initChart() {
+    const ctx = document.getElementById('flowChart').getContext('2d');
+    chart = new Chart(ctx, {
+      type: 'scatter',
+      data: {
+        datasets: [
+          {
+            label: 'Orifice A',
+            data: [],
+            pointStyle: 'circle',
+            backgroundColor: 'rgba(39,174,96,0.8)',
+            borderColor: '#27ae60',
+            borderWidth: 2,
+            pointRadius: 2,
+            pointHoverRadius: 8
+          },
+          {
+            label: 'Rotameter A',
+            data: [],
+			pointStyle: 'circle',
+            backgroundColor: 'rgba(116,185,255,0.8)',
+            borderColor: '#74b9ff',
+            borderWidth: 2,
+            pointRadius: 2,
+            pointHoverRadius: 8
+          },
+          {
+            label: 'Volume A',
+            data: [],
+            pointStyle: 'circle',
+            backgroundColor: 'rgba(52,152,219,0.8)',
+            borderColor: '#3498db',
+            borderWidth: 2,
+            pointRadius: 2,
+            pointHoverRadius: 8
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          title: {
+            display: true,
+            text: 'Average Value with Uncertainty ',
+            font: { size: 16, weight: 'bold' }
+          },
+          legend: { display: true, position: 'top' }
+        },
+        scales: {
+      x: {
+        type: 'linear',
+        min: 0.5,
+        max: 3.5,
+        ticks: {
+        stepSize: 1,
+        callback: v => v === 1 ? 'Orifice' : v === 2 ? 'Rotameter' : v === 3 ? 'Volume' : ''
+        },
+        title: {
+          display: true,
+          text: 'Device',
+          font: { size: 14, weight: 'bold' }
+        }
+      },
+
+      y: { min: 2,
+    max: 12,
+        title: {
+        display: true,
+        text: 'Average (with ±uncertainty)',
+        font: { size: 14, weight: 'bold' }
+        },
+        beginAtZero: true
+      }
+    }
+
+      },
+      plugins: [{
+        id: 'errorBars',
+        afterDatasetsDraw: chart => {
+          const ctx = chart.ctx;
+          chart.data.datasets.forEach((ds, i) => {
+            if (!ds.data) return;
+            const meta = chart.getDatasetMeta(i);
+            ctx.save();
+            ctx.strokeStyle = ds.borderColor;
+            ctx.lineWidth = 2;
+            ds.data.forEach((pt, idx) => {
+              if (pt.errorBar != null) {
+                const el = meta.data[idx];
+                const upY = chart.scales.y.getPixelForValue(pt.y + pt.errorBar);
+                const dnY = chart.scales.y.getPixelForValue(pt.y - pt.errorBar);
+                const x  = el.x;
+                ctx.beginPath(); ctx.moveTo(x, upY); ctx.lineTo(x, dnY); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(x-6, upY); ctx.lineTo(x+6, upY); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(x-6, dnY); ctx.lineTo(x+6, dnY); ctx.stroke();
+              }
+            });
+            ctx.restore();
+          });
+        }
+      }]
+    });
+  }
+</script>
+
+<script>
+  function updateChart() {
+   // --- Orifice A (flow Q) ---
+  const orQ_A  = parseFloat(document.getElementById('or_ave_flow_a').value);
+  const uncQ_A = parseFloat(document.getElementById('or_uncertainty_a').value);
+  chart.data.datasets[0].data = isNaN(orQ_A)
+    ? []
+    : [{ x: 1, y: orQ_A, errorBar: isNaN(uncQ_A) ? 0 : uncQ_A }];
+
+    // --- Rotameter A ---
+    const rtA      = parseFloat(document.getElementById('ave_flow_a').value);
+    const uncRtA   = parseFloat(document.getElementById('uncertainty_a').value);
+    chart.data.datasets[1].data = isNaN(rtA)
+      ? []
+      : [{ x: 2, y: rtA, errorBar: (isNaN(uncRtA) ? 0 : uncRtA) }];
+
+    // --- Volume Displacement A (3 rows only) ---
+    let volDataA = [];
+    for (let i = 1; i <= 3; i++) {
+    const flow = parseFloat(document.getElementById(`flowrate_a_${i}`).value);
+    const unc = parseFloat(document.getElementById(`flow_unc_a_${i}`).value);
+    if (!isNaN(flow) && !isNaN(unc)) {
+      volDataA.push({ x: 3, y: flow, errorBar: unc });
+      }
+    }
+  chart.data.datasets[2].data = volDataA;
+      
+    chart.update();
+  }
+
+  // wire it up
+  document.addEventListener('DOMContentLoaded', () => {
+    initChart();
+    // call updateChart any time any of those inputs change:
+    [
+      'or_ave_pressure_a', 'or_uncertainty_a',
+      'ave_flow_a',       'uncertainty_a',
+      'flowrate_a_1','flow_unc_a_1',
+      'flowrate_a_2','flow_unc_a_2',
+      'flowrate_a_3','flow_unc_a_3'
+    ].forEach(id => 
+      document.getElementById(id)
+        .addEventListener('input', updateChart)
+    );
+  });
+</script>
+<script>
+function validateManometer() {
+  const rawData = parseFloat(document.getElementById('manometer_raw').value);
+  const processedData = parseFloat(document.getElementById('manometer_processed').value);
+  const resultDiv = document.getElementById('manometer_result');
+  
+  if (isNaN(rawData) || isNaN(processedData)) {
+    showValidationResult(resultDiv, false, 'Please enter values for both raw and processed data');
+    return;
+  }
+  
+  const expectedRaw = 2 * processedData;
+  const tolerance = 0.25 * expectedRaw;
+  const difference = Math.abs(rawData - expectedRaw);
+  
+  if (difference <= tolerance) {
+    showValidationResult(resultDiv, true, '✓ Correct!');
+  } else {
+    showValidationResult(resultDiv, false, `✗ Processed data uncertainty should = 1/2 of raw data uncertainty`);
+  }
+}
+
+function validateRotameter() {
+  const rawData = parseFloat(document.getElementById('rotameter_raw').value);
+  const processedData = parseFloat(document.getElementById('rotameter_processed').value);
+  const resultDiv = document.getElementById('rotameter_result');
+  
+  if (isNaN(rawData) || isNaN(processedData)) {
+    showValidationResult(resultDiv, false, 'Please enter values for both raw and processed data');
+    return;
+  }
+  
+  const tolerance = 0.001 * rawData;
+  const difference = Math.abs(rawData - processedData);
+  
+  if (difference <= tolerance) {
+    showValidationResult(resultDiv, true, '✓ Correct!');
+  } else {
+    showValidationResult(resultDiv, false, `✗ Processed data uncertainty should = raw data uncertainty`);
+  }
+}
+
+function validateTankTimer() {
+  const timeUncertainty = parseFloat(document.getElementById('tank_timer_time_uncertainty').value);
+  const volumeUncertainty = parseFloat(document.getElementById('tank_timer_volume_uncertainty').value);
+  const processedData = parseFloat(document.getElementById('tank_timer_processed').value);
+  const resultDiv = document.getElementById('tank_timer_result');
+  
+  if (isNaN(timeUncertainty) || isNaN(volumeUncertainty) || isNaN(processedData)) {
+    showValidationResult(resultDiv, false, 'Please enter values for time, volume, and processed data');
+    return;
+  }
+  
+  const expectedMinimum = Math.sqrt(Math.pow(timeUncertainty, 2) + Math.pow(volumeUncertainty, 2));
+  
+  if (processedData >= expectedMinimum) {
+    showValidationResult(resultDiv, true, '✓ Correct!');
+  } else {
+    showValidationResult(resultDiv, false, `✗ Processed data uncertainty should exceed raw data uncertainties`);
+  }
+}
+
+function showValidationResult(resultDiv, isValid, message) {
+  resultDiv.textContent = message;
+  resultDiv.className = 'validation-result show ' + (isValid ? 'validation-success' : 'validation-error');
+  
+  // Keep all messages visible - don't hide them
+}
+
+</script>
+
+
+<style>
+  #saveSection {
+    max-width: 600px;
+    margin: 30px auto;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    padding: 25px;
+  }
+
+  #saveSection .save-header {
+    text-align: center;
+    font-weight: bold;
+    font-size: 20px;
+    margin-bottom: 20px;
+    color: #495057;
+  }
+
+  #saveSection .ucard-input-group {
+    margin-bottom: 20px;
+  }
+
+  #saveSection .ucard-label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #495057;
+  }
+
+  #saveSection #ucardNumber {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #74b9ff;
+    border-radius: 6px;
+    font-size: 16px;
+    text-align: center;
+  }
+
+  #saveSection #saveButton {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102,126,234,0.4);
+  }
+
+  #saveSection #saveButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102,126,234,0.6);
+  }
+
+  #saveSection #saveButton:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  #saveSection .save-status {
+    margin-top: 15px;
+    padding: 12px;
+    border-radius: 6px;
+    text-align: center;
+    font-weight: bold;
+    display: none;
+  }
+
+  #saveSection .save-status.success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    display: block;
+  }
+
+  #saveSection .save-status.error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    display: block;
+  }
+</style>
+
+
+<p align="center">
+  This is <strong>an Open Educational Resource</strong>!<br /><br />
+  <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.
+</p>
+</body>
+</html>

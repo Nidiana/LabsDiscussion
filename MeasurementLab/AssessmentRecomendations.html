@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab Assessment and Recommendations</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 2.5em;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .header p {
+      margin: 10px 0 0 0;
+      font-size: 1.1em;
+      opacity: 0.9;
+    }
+
+    .quiz-content {
+      padding: 30px;
+    }
+
+    .question {
+      margin-bottom: 30px;
+      padding: 25px;
+      background: #f8f9fa;
+      border-radius: 10px;
+      border-left: 5px solid #3498db;
+      transition: transform 0.2s ease;
+    }
+
+    .question:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .question h3 {
+      color: #2c3e50;
+      margin-top: 0;
+      font-size: 1.3em;
+    }
+
+    .concept-box {
+      background: #e8f5e8;
+      border: 1px solid #4caf50;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 8px;
+    }
+
+    .concept-box h4 {
+      margin: 0 0 10px 0;
+      color: #2e7d32;
+    }
+
+    .options {
+      margin: 15px 0;
+    }
+
+    .option {
+      margin: 8px 0;
+      padding: 12px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+    }
+
+    .option:hover {
+      border-color: #3498db;
+      background: #f0f8ff;
+    }
+
+    .option.selected {
+      border-color: #3498db;
+      background: #e3f2fd;
+    }
+
+    .option.incorrect {
+      border-color: #e74c3c;
+      background: #ffeaea;
+      color: #c0392b;
+    }
+
+    .option.correct {
+      border-color: #27ae60;
+      background: #e8f5e8;
+      color: #2e7d32;
+    }
+
+    .option input[type="radio"], .option input[type="checkbox"] {
+      margin-right: 10px;
+      transform: scale(1.2);
+    }
+
+    .textarea-container {
+      margin: 15px 0;
+    }
+
+    .textarea-container textarea {
+      width: 100%;
+      max-width: 100%;
+      min-height: 80px;
+      padding: 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 14px;
+      resize: vertical;
+      transition: border-color 0.2s ease;
+      box-sizing: border-box;
+    }
+
+    .textarea-container textarea:focus {
+      border-color: #3498db;
+      outline: none;
+    }
+
+    .answer-box {
+      margin-top: 15px;
+      padding: 15px;
+      background: #f0f8ff;
+      border: 2px solid #3498db;
+      border-radius: 8px;
+      display: none;
+    }
+
+    .answer-box.visible {
+      display: block;
+    }
+
+    .answer-box h4 {
+      margin: 0 0 10px 0;
+      color: #2c3e50;
+    }
+
+    .answer-box img {
+      max-width: 100%;
+      height: auto;
+      margin: 15px 0;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      display: block;
+    }
+
+    .show-answer-btn {
+      background: #27ae60;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.2s ease;
+      margin-top: 15px;
+    }
+
+    .show-answer-btn:hover {
+      background: #219a52;
+    }
+
+    .show-answer-btn:disabled {
+      background: #95a5a6;
+      cursor: not-allowed;
+    }
+
+    .results {
+      margin-top: 30px;
+      padding: 25px;
+      background: #f8f9fa;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    .score {
+      font-size: 2em;
+      color: #3498db;
+      margin-bottom: 15px;
+    }
+
+    .reset-btn {
+      background: #e74c3c;
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 15px;
+    }
+
+    .reset-btn:hover {
+      background: #c0392b;
+    }
+
+    .submit-quiz-btn {
+      background: #9b59b6;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 18px;
+      display: block;
+      margin: 30px auto;
+      transition: background 0.2s ease;
+    }
+
+    .submit-quiz-btn:hover {
+      background: #8e44ad;
+    }
+
+    .char-count {
+      font-size: 12px;
+      color: #666;
+      text-align: right;
+      margin-top: 5px;
+    }
+
+    .completion-message {
+      margin-top: 30px;
+      padding: 30px;
+      border-radius: 15px;
+      text-align: center;
+      font-size: 1.1em;
+      font-weight: bold;
+      display: none;
+      animation: fadeIn 0.5s ease-in;
+    }
+
+    .completion-message.option-a {
+      background: linear-gradient(135deg, #27ae60, #2ecc71);
+      color: white;
+      border: 3px solid #1e8449;
+    }
+
+    .completion-message.option-b {
+      background: linear-gradient(135deg, #f39c12, #e67e22);
+      color: white;
+      border: 3px solid #d68910;
+    }
+
+    .completion-message h3 {
+      margin-top: 0;
+      font-size: 1.5em;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+.consent-section {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 15px;
+  margin: 20px 0;
+  font-size: 11px; /* Smaller than the smallest existing font size (12px) */
+  line-height: 1.4;
+}
+
+.consent-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.consent-checkbox input[type="checkbox"] {
+  margin: 0;
+  flex-shrink: 0;
+  transform: scale(1.1);
+}
+
+.consent-text {
+  color: #495057;
+}
+
+.consent-text a {
+  color: #007bff;
+  text-decoration: underline;
+}
+
+.consent-text a:hover {
+  color: #0056b3;
+}
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🔬 SolarFlow Industries online portal</h1>
+      <h3>Assessment and Recommendation</h3>
+    </div>
+  
+  <div style="padding: 20px;">
+    <label for="benchNumber" style="font-weight: bold;">Bench Number:</label>
+    <input type="text" id="benchNumber" placeholder="e.g. 19" style="padding: 5px; border-radius: 5px;">
+  </div>
+
+    <div class="quiz-content">
+
+      <!-- Question 1 -->
+      <div class="question">
+        <h3>Question 1: True Value Assessment</h3>
+        <p>Which device gives the true value for the flow rate of the pump?</p>
+        <div class="options">
+          <div class="option" onclick="selectOption(1, 'A')">
+            <input type="radio" name="q1" value="A">
+            <span>A. Orifice plate</span>
+          </div>
+          <div class="option" onclick="selectOption(1, 'B')">
+            <input type="radio" name="q1" value="B">
+            <span>B. Rotameter</span>
+          </div>
+          <div class="option" onclick="selectOption(1, 'C')">
+            <input type="radio" name="q1" value="C">
+            <span>C. Volume displacement method</span>
+          </div>
+          <div class="option" onclick="selectOption(1, 'D')">
+            <input type="radio" name="q1" value="D">
+            <span>D. None of  them</span>
+          </div>
+        </div>
+        <button class="show-answer-btn" onclick="showAnswer(1)">Display Explanation</button>
+        <div class="answer-box" id="answer1">
+          <h4>✓ Correct Answer: D None of them</h4>
+          <p>Every measurement is an approximation of the true value - if the instrument and measurements are very good, then it will give a very close approximation.</p>
+        </div>
+      </div>
+
+      <!-- Question 2 -->
+      <div class="question">
+        <h3>Question 2: Systematic Error Identification</h3>
+        <p>Which of the following is most likely a systematic error with the volume displacement method?</p>
+        <div class="concept-box">
+          <h4>💡 Key Concept:</h4>
+          <p>Systematic errors are consistent and repeatable — think bias.</p>
+        </div>
+        <div class="options">
+          <div class="option" onclick="selectOption(2, 'A')">
+            <input type="radio" name="q2" value="A">
+            <span>A. Variations in stopwatch timing by different students</span>
+          </div>
+          <div class="option" onclick="selectOption(2, 'B')">
+            <input type="radio" name="q2" value="B">
+            <span>B. Misreading the volume scale by 0.05 L each time because parallax error</span>
+          </div>
+          <div class="option" onclick="selectOption(2, 'C')">
+            <input type="radio" name="q2" value="C">
+            <span>C. Air bubbles forming during the experiment</span>
+          </div>
+          <div class="option" onclick="selectOption(2, 'D')">
+            <input type="radio" name="q2" value="D">
+            <span>D. Small splashes when pouring water into the tank</span>
+          </div>
+        </div>
+        <button class="show-answer-btn" onclick="showAnswer(2)">Display Explanation</button>
+        <div class="answer-box" id="answer2">
+          <h4>✓ Correct Answer: B</h4>
+          <p>Parallax error (consistently misreading the scale) introduces the same bias every time. This makes it systematic. Random timing differences or splashes are random errors, not systematic.</p>
+        </div>
+      </div>
+
+      <!-- Question 3 -->
+      <div class="question">
+        <h3>Question 3: Measurement Characteristics</h3>
+        <p>Compare the three measured values of Q (Q_avg) obtained using the tank/timer technique. What does this tell you about the precision of your method? What can you conclude about the accuracy of your measurements?</p>
+        <div class="options">
+          <div class="option" onclick="selectOption(3, 'A')">
+            <input type="radio" name="q3" value="A">
+            <span>A. High accuracy, but low precision</span>
+          </div>
+          <div class="option" onclick="selectOption(3, 'B')">
+            <input type="radio" name="q3" value="B">
+            <span>B. High precision, but uncertain accuracy</span>
+          </div>
+          <div class="option" onclick="selectOption(3, 'C')">
+            <input type="radio" name="q3" value="C">
+            <span>C. Both high accuracy and high precision</span>
+          </div>
+          <div class="option" onclick="selectOption(3, 'D')">
+            <input type="radio" name="q3" value="D">
+            <span>D. Low precision and uncertain accuracy</span>
+          </div>
+        </div>
+        <button class="show-answer-btn" onclick="showAnswer(3)">Display Explanation</button>
+        <div class="answer-box" id="answer3">
+          <h4>Answer Information:</h4>
+          <p>As the diagram shows, precision comes from repeatability (clustered results). Accuracy is closeness to the true value. In volume displacement, you can achieve high precision with consistent technique meaning that repetitions have a similar  Q_avg value, but accuracy is uncertain because it depends on calibration and operator judgment. </p>
+          <img src="https://drive.google.com/thumbnail?id=1OG5cv6oJGiS4s3aRRt0eUftr6JQXiR_d&sz=w800" 
+               alt="Precision vs Accuracy Diagram" 
+               style="width: 90%; max-width: 90%; height: auto; display: block; margin: 15px auto; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; transition: transform 0.3s ease;"
+               onclick="this.style.transform = this.style.transform === 'scale(1.1)' ? 'scale(1)' : 'scale(1.1)';"
+               onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='block';">
+          <div style="display: none; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 15px; color: #856404; text-align: center; margin: 10px 0;">
+            <p>📋 <strong>Precision vs Accuracy Diagram</strong></p>
+            <p>Image not available. Please check if the Google Drive link is publicly accessible.</p>
+            <p><a href="https://drive.google.com/file/d/1OG5cv6oJGiS4s3aRRt0eUftr6JQXiR_d/view?usp=sharing" target="_blank" style="color: #1e3c72;">📎 View Image in Google Drive</a></p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Question 4 -->
+      <div class="question">
+        <h3>Question 4: Calibration</h3>
+        <p>What could be classed as a calibration error in the manometer & orifice plate?</p>
+        <div class="options">
+          <div class="option" onclick="selectOption(4, 'A')">
+            <input type="radio" name="q4" value="A">
+            <span>A. Random fluctuations in the flow rate</span>
+          </div>
+
+
+          <div class="option" onclick="selectOption(4, 'B')">
+            <input type="radio" name="q4" value="B">
+            <span>B. A person misreading the display</span>
+          </div>
+
+          <div class="option" onclick="selectOption(4, 'C')">
+            <input type="radio" name="q4" value="C">
+            <span>C. Digital manometer not zeroed</span>
+          </div>
+
+        </div>
+        <button class="show-answer-btn" onclick="showAnswer(4)">Display Explanation</button>
+        <div class="answer-box" id="answer4">
+          <h4>✓ Correct Answers: C</h4>
+          <p>If the digital manometer is not zeroed before measurement, all readings are shifted, causing a systematic calibration error. Using wrong dimensions would also introduce systematic error, but random fluctuations and misreading are not calibration errors.</p>
+        </div>
+      </div> 
+
+      <!-- Question 5 -->
+      <div class="question">
+        <h3>Question 5: Error Propagation</h3>
+        <p>Looking at your summary table with relative uncertainties (in the Data Processing Tool), which method increases the processed relative uncertainty compared with the raw data relative uncertainty?</p>
+        <div class="options">
+          <div class="option" onclick="selectOption(5, 'A')">
+            <input type="radio" name="q5" value="A">
+            <span>A. Orifice plate</span>
+          </div>
+          <div class="option" onclick="selectOption(5, 'B')">
+            <input type="radio" name="q5" value="B">
+            <span>B. Rotameter</span>
+          </div>
+          <div class="option" onclick="selectOption(5, 'C')">
+            <input type="radio" name="q5" value="C">
+            <span>C. Volume displacement</span>
+          </div>
+          <div class="option" onclick="selectOption(5, 'D')">
+            <input type="radio" name="q5" value="D">
+            <span>D. None of them</span>
+          </div>
+          <div class="option" onclick="selectOption(5, 'E')">
+            <input type="radio" name="q5" value="E">
+            <span>E. I can't say</span>
+          </div>
+        </div>
+        <button class="show-answer-btn" onclick="showAnswer(5)">Display Explanation</button>
+        <div class="answer-box" id="answer5">
+          <h4>Answer Information:</h4>
+         <p>An orifice plate calculation, which relies on a square root function (Q∝ √ (Δh)), will inherently reduce the relative uncertainty to half of the input measurement's uncertainty. In contrast, a rotameter provides a direct reading, so the measurement uncertainty carries over directly to the final result without change. Finally, the volume displacement method (Q=V/t) compounds the uncertainties from two separate variables (volume and time), resulting in a final uncertainty that is necessarily larger than that of either individual measurement. The propagation formula is:</p>
+          <div style="text-align:center; margin:10px 0;">
+          δQ/Q = √[(δV/V)² + (δt/t)²]
+          </div>
+          
+        </div>
+      </div>
+
+      <!-- Question 6 -->
+      <div class="question">
+        <h3>Question 6: Error Bar Analysis</h3>
+        <p>Looking at the graph of uncertainties, in the Data Processing Tool, which method shows the smallest uncertainty (the one whose error bars are the shortest in the graph)?</p>
+        <div class="options">
+          <div class="option" onclick="selectOption(6, 'A')">
+            <input type="radio" name="q6" value="A">
+            <span>A. Manometer</span>
+          </div>
+          <div class="option" onclick="selectOption(6, 'B')">
+            <input type="radio" name="q6" value="B">
+            <span>B. Rotameter</span>
+          </div>
+          <div class="option" onclick="selectOption(6, 'C')">
+            <input type="radio" name="q6" value="C">
+            <span>C. Tank & Timer</span>
+          </div>
+          <div class="option" onclick="selectOption(6, 'D')">
+            <input type="radio" name="q6" value="D">
+            <span>D. I can't say</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Question 7 -->
+      <div class="question">
+        <h3>Question 7: Error Bar Analysis</h3>
+        <p>Looking at the graph of uncertainties (in the Data Processing Tool). Do you see agreement between all three methods, or do they disagree with each other? Or perhaps two agree and one is an outlier?</p>
+        <div class="options">
+          <div class="option" onclick="selectOption(7, 'A')">
+            <input type="radio" name="q7" value="A">
+            <span>A. All agree very closely</span>
+          </div>
+          <div class="option" onclick="selectOption(7, 'B')">
+            <input type="radio" name="q7" value="B">
+            <span>B. There is no trend</span>
+          </div>
+          <div class="option" onclick="selectOption(7, 'C')">
+            <input type="radio" name="q7" value="C">
+            <span>C. Two show good agreement, one seems to be anomalous</span>
+          </div>
+          <div class="option" onclick="selectOption(7, 'D')">
+            <input type="radio" name="q7" value="D">
+            <span>D. Other</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Question 8 -->
+      <div class="question">
+        <h3>Question 8: Engineering Recommendation</h3>
+        <p>Considering all of the above, which method do you advise SolarFlow Industries to use for daily monitoring of flow rate at Pump Station - Alpha. The recommended method should balance uncertainty, accuracy, ease of use, and practicality. </p>
+        <div class="options">
+          <div class="option" onclick="selectOption(8, 'A')">
+            <input type="radio" name="q8" value="A">
+            <span>A. Manometer</span>
+          </div>
+          <div class="option" onclick="selectOption(8, 'B')">
+            <input type="radio" name="q8" value="B">
+            <span>B. Rotameter</span>
+          </div>
+          <div class="option" onclick="selectOption(8, 'C')">
+            <input type="radio" name="q8" value="C">
+            <span>C. Tank & Timer</span>
+          </div>
+          <div class="option" onclick="selectOption(8, 'D')">
+            <input type="radio" name="q8" value="D">
+            <span>D. I can't say</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Question 9 -->
+      <div class="question">
+        <h3>Question 9: Method Improvement</h3>
+        <p>For this chosen method, how can you advise SolarFlow on ways to minimise uncertainty when taking measurements using this device?</p>
+        <div class="textarea-container">
+          <textarea id="q9_answer" placeholder="Enter your suggestions here..." maxlength="200" oninput="updateCharCount(9)"></textarea>
+          <div class="char-count" id="char-count-9">0/200 characters</div>
+        </div>
+      </div>
+
+      
+      <!-- Completion Messages -->
+      <div class="completion-message option-a" id="completionA">
+        <h3>🎉 Excellent Work!</h3>
+        <p><strong>You have completed the measurement lab successfully!</strong></p>
+        <p>Please verify that you have properly left the equipment as you found it. Turn off the pump, carefully disconnect the piping, and dry your working area.</p>
+        <p><strong>Proceed to check out with a member of the staff at the front desk!</strong></p>
+      </div>
+
+      <div class="completion-message option-b" id="completionB">
+        <h3>📋 Lab Complete</h3>
+        <p><strong>You have completed the measurement lab.</strong></p>
+        <p>Please verify that you have properly left the equipment as you found it. Turn off the pump, carefully disconnect the piping, and dry your working area.</p>
+        <p><strong>Wait for a member of staff to approach your desk!</strong></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let answers = {};
+    let showAnswerClicked = {};
+
+    const correctAnswers = {
+      1: 'D',
+      2: 'B',
+      3: ['B', 'D'],
+      4: 'C',
+      5: 'C',
+      6: null,
+      7: 'A',
+      8: null,
+      9: null
+    };
+
+    function selectOption(questionNum, option) {
+      if (showAnswerClicked[questionNum]) return;
+
+      const options = document.querySelectorAll(`input[name="q${questionNum}"]`);
+      options.forEach(opt => {
+        opt.closest('.option').classList.remove('selected');
+      });
+
+      const selectedOption = document.querySelector(`input[name="q${questionNum}"][value="${option}"]`);
+      selectedOption.checked = true;
+
+      const selectedDiv = selectedOption.closest('.option');
+      selectedDiv.classList.add('selected');
+
+      answers[questionNum] = option;
+    }
+
+    function toggleCheckbox(questionNum, option) {
+      if (showAnswerClicked[questionNum]) return;
+
+      const checkbox = document.querySelector(`input[name="q${questionNum}"][value="${option}"]`);
+      checkbox.checked = !checkbox.checked;
+
+      const optionDiv = checkbox.closest('.option');
+
+      if (checkbox.checked) {
+        optionDiv.classList.add('selected');
+      } else {
+        optionDiv.classList.remove('selected', 'correct', 'incorrect');
+      }
+
+      if (!answers[questionNum]) answers[questionNum] = [];
+      if (checkbox.checked) {
+        if (!answers[questionNum].includes(option)) {
+          answers[questionNum].push(option);
+        }
+      } else {
+        answers[questionNum] = answers[questionNum].filter(ans => ans !== option);
+      }
+
+      if (correctAnswers[questionNum] && Array.isArray(correctAnswers[questionNum])) {
+        if (checkbox.checked) {
+          if (correctAnswers[questionNum].includes(option)) {
+            optionDiv.classList.add('correct');
+          } else {
+            optionDiv.classList.add('incorrect');
+          }
+        }
+      }
+    }
+
+    function showAnswer(questionNum) {
+      const answerBox = document.getElementById(`answer${questionNum}`);
+      const button = answerBox.previousElementSibling;
+
+      answerBox.classList.add('visible');
+      button.disabled = true;
+      button.textContent = 'Explanation Displayed';
+
+      const options = document.querySelectorAll(`input[name="q${questionNum}"]`);
+      options.forEach(opt => {
+        opt.disabled = true;
+        const optionDiv = opt.closest('.option');
+        optionDiv.style.cursor = 'not-allowed';
+        optionDiv.style.opacity = '0.6';
+
+        // Clear previous correctness classes
+        optionDiv.classList.remove('correct', 'incorrect');
+
+        // Check if this one is selected
+        if (opt.checked) {
+          if (correctAnswers[questionNum] !== null) {
+            if (Array.isArray(correctAnswers[questionNum])) {
+              if (correctAnswers[questionNum].includes(opt.value)) {
+                optionDiv.classList.add('correct');
+              } else {
+                optionDiv.classList.add('incorrect');
+              }
+            } else {
+              if (opt.value === correctAnswers[questionNum]) {
+                optionDiv.classList.add('correct');
+              } else {
+                optionDiv.classList.add('incorrect');
+              }
+            }
+          } else {
+            // No correct answer defined: just keep it selected color
+            optionDiv.classList.add('selected');
+          }
+        }
+      });
+
+      showAnswerClicked[questionNum] = true;
+    }
+
+    function updateCharCount(questionNum) {
+      const textarea = document.getElementById(`q${questionNum}_answer`);
+      const charCount = document.getElementById(`char-count-${questionNum}`);
+      const currentLength = textarea.value.length;
+      charCount.textContent = `${currentLength}/200 characters`;
+
+      if (currentLength > 180) {
+        charCount.style.color = '#e74c3c';
+      } else if (currentLength > 150) {
+        charCount.style.color = '#f39c12';
+      } else {
+        charCount.style.color = '#666';
+      }
+    }
+
+    function determineCompletionMessage() {
+      // NEW CONDITIONS: Show Option B if:
+      // 1. Question 5 answer is different than C
+      if (answers[5] && answers[5] !== 'C') {
+        return 'B';
+      }
+      
+      // 2. Both Q1 is incorrect AND Q3 is different from B
+      if (answers[1] && answers[1] !== 'D' && answers[3] && answers[3] !== 'B') {
+        return 'B';
+      }
+
+      // EXISTING CONDITIONS: Check if questions 6 or 7 have specific answers that force Option B
+      if (answers[6] === 'D' || answers[7] === 'B' || answers[7] === 'D') {
+        return 'B';
+      }
+
+      // Check if all questions 1-5 are correct
+      if (answers[1] === 'D' && answers[2] === 'B' && answers[3] === 'B' && 
+          answers[4] === 'C' && answers[5] === 'C') {
+        return 'A';
+      }
+
+      // Check if at least 2 of questions (1,2,4,5) are correct AND question 3 is B or D
+      let correctCount = 0;
+      const questionsToCheck = [1, 2, 4, 5];
+      const correctAnswersToCheck = ['D', 'B', 'C', 'C'];
+      
+      for (let i = 0; i < questionsToCheck.length; i++) {
+        if (answers[questionsToCheck[i]] === correctAnswersToCheck[i]) {
+          correctCount++;
+        }
+      }
+
+      if (correctCount >= 2 && (answers[3] === 'B' || answers[3] === 'D')) {
+        return 'A';
+      }
+
+      // Default to Option B for all other cases
+      return 'B';
+    }
+
+    function showCompletionMessage(option) {
+      const completionA = document.getElementById('completionA');
+      const completionB = document.getElementById('completionB');
+      
+      // Hide both messages first
+      completionA.style.display = 'none';
+      completionB.style.display = 'none';
+      
+      // Show the appropriate message
+      if (option === 'A') {
+        completionA.style.display = 'block';
+      } else {
+        completionB.style.display = 'block';
+      }
+    }
+
+    function saveResults() {
+      // Add this line to collect consent answer
+        const consentCheckbox = document.getElementById('consentCheckbox');
+        const consentAnswer = consentCheckbox.checked ? "Yes" : "No";
+
+      
+      // Make sure text answer is saved into answers object
+      answers[9] = document.getElementById('q9_answer').value.trim() || "No answer";
+
+      let benchNumber = document.getElementById("benchNumber").value.trim();
+      if (!benchNumber) {
+        alert("Please enter the Bench Number before saving.");
+        return;
+      }
+
+      let q1Answer = answers[1] || "No answer";
+      let q2Answer = answers[2] || "No answer";
+      let q3Answer = answers[3] || "No answer";
+      let q4Answer = answers[4] || "No answer";
+      let q5Answer = answers[5] || "No answer";
+      let q6Answer = answers[6] || "No answer";
+      let q7Answer = answers[7] || "No answer";
+      let q8Answer = answers[8] || "No answer";
+      let q9Answer = answers[9];
+
+      // Timestamp
+      let now = new Date();
+      let time = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+
+      // Determine which completion message to show
+      const completionOption = determineCompletionMessage();
+
+      google.script.run
+        .withSuccessHandler(() => {
+          alert("Your answers have been saved successfully!");
+          // Show the appropriate completion message
+          showCompletionMessage(completionOption);
+        })
+        .withFailureHandler(error => {
+          alert("Error saving your answers: " + error);
+        })
+        .addRow([
+          benchNumber,
+          time,
+          q1Answer,
+          q2Answer,
+          q3Answer,
+          q4Answer,
+          q5Answer,
+          q6Answer,
+          q7Answer,
+          q8Answer,
+          q9Answer,
+          completionOption,
+          consentAnswer  // ADD THIS LINE
+        ]);
+    }
+
+  </script>
+  
+<p align="center">
+  This is <strong>an Open Educational Resource</strong>!<br /><br />
+  <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.
+</p>
+
+</body>
+</html>
