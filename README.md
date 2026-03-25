@@ -39,10 +39,12 @@ Interested in building your own interactive teaching tool? Refer to the guide:
 This document walks you through the full process of creating your own DTL from scratch.
 
 ## Some compiled examples
+## Lab Links
+
 - [Post Processing](https://nidiana.github.io/LabsDiscussion/MeasurementLab/PostProcessing.html)
-- [Measurement Lab Procedure](https://nidiana.github.io/LabsDiscussion/MeasurementLab/PostProcessing.html)
-- [Assessment](https://nidiana.github.io/LabsDiscussion/MeasurementLab/PostProcessing.html)
-- [Hydrostatic](https://nidiana.github.io/LabsDiscussion/MeasurementLab/PostProcessing.html)
-- [Orifice Plate](https://nidiana.github.io/LabsDiscussion/MeasurementLab/PostProcessing.html)
-- [Osborne Reynolds](https://nidiana.github.io/LabsDiscussion/MeasurementLab/PostProcessing.html)
-- [Energy Conversion](https://nidiana.github.io/LabsDiscussion/MeasurementLab/PostProcessing.html)
+- [Measurement Lab Procedure](https://nidiana.github.io/LabsDiscussion/MeasurementLab/MeasurementProcedure.html)
+- [Assessment](https://nidiana.github.io/LabsDiscussion/MeasurementLab/AssessmentRecomendations.html)
+- [Hydrostatic](https://nidiana.github.io/LabsDiscussion/Hydrostatic/HydrosticCarousel.html)
+- [Orifice Plate](https://nidiana.github.io/LabsDiscussion/OrificePlate/orifice_plate_analysis.html)
+- [Osborne Reynolds](https://nidiana.github.io/LabsDiscussion/Osborne_Reynolds/Osborne_Reynolds_V2.html)
+- [Energy Conversion](https://nidiana.github.io/LabsDiscussion/FlowEnergyConversion/FlowEnergyConversion.html)
