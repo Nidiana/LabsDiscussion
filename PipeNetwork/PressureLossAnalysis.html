@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pipe Network — Pressure Loss Analysis</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script>
+MathJax = {
+  tex: { inlineMath: [['\\(','\\)'], ['$','$']], displayMath: [['\\[','\\]']] },
+  options: { skipHtmlTags: ['script','noscript','style','textarea'] },
+  startup: { typeset: false }
+};
+</script>
+<style>
+:root{
+  --bg:#f0eeff;--paper:#fdfcff;--ink:#1e1a2e;--muted:#6e6a80;--border:#d4cfe8;
+  --navy:#1e2f6e;--navy-lt:#e8edf8;--navy-md:#a8b8e0;
+  --purple:#6b4fa0;--purple-lt:#f0ebfc;--purple-md:#c4aee8;
+  --teal:#3b82c4;--teal-lt:#e8f2fc;--teal-md:#a8cfed;
+  --amber:#d4860a;--amber-lt:#fff8e8;--amber-md:#f8d88a;
+  --green:#2d7a4f;--green-lt:#e8f8ef;--green-md:#90d4b0;
+  --red:#b91c1c;--red-lt:#fef2f2;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);font-size:17px;line-height:1.7;min-height:100vh}
+
+/* progress */
+.prog{background:var(--navy);padding:.85rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;gap:1rem}
+.prog-label{color:rgba(255,255,255,.5);font-size:.76rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.prog-dots{display:flex;gap:8px;align-items:center}
+.dot{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.2);transition:all .3s}
+.dot.done{background:rgba(255,255,255,.45)}
+.dot.active{background:#fff;transform:scale(1.4)}
+.prog-title{color:rgba(255,255,255,.75);font-size:.84rem;font-weight:500;text-align:right;white-space:nowrap}
+
+/* layout */
+.page{max-width:720px;margin:0 auto;padding:2.5rem 1.5rem 7rem}
+.slide{display:none;animation:fadeUp .35s ease}
+.slide.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* typography */
+.eyebrow{font-size:.73rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem}
+.slide-title{font-family:'Lora',serif;font-size:1.85rem;font-weight:600;line-height:1.2;margin-bottom:1.3rem}
+.slide-title em{font-style:italic;color:var(--purple)}
+.lead{font-size:1.05rem;line-height:1.75;color:#2d2840;margin-bottom:1.2rem}
+p{margin-bottom:.9rem;color:#2d2840;font-size:.97rem}
+strong{color:var(--ink);font-weight:500}
+
+/* diagram */
+.diagram-box{background:var(--navy);border-radius:14px;padding:1.25rem 1rem;margin:1.3rem 0}
+
+/* equation box */
+.eq-box{background:var(--navy);color:#e8e4f8;border-radius:11px;padding:1.1rem 1.6rem;margin:1rem 0;overflow-x:auto;line-height:2.4;font-size:1rem}
+
+/* checklist */
+.checklist{list-style:none;padding:0;margin:1.2rem 0;display:flex;flex-direction:column;gap:.6rem}
+.checklist li{display:flex;align-items:flex-start;gap:.85rem;background:var(--paper);border:1.5px solid var(--border);border-radius:10px;padding:.8rem 1.1rem;font-size:.94rem}
+.checklist li .ci{font-size:1.2rem;flex-shrink:0}
+.checklist li .ct{font-weight:500;display:block;color:var(--ink)}
+.checklist li .cd{font-size:.86rem;color:var(--muted);display:block;margin-top:.1rem}
+
+/* calc guide */
+.calc-guide{background:var(--paper);border:1.5px solid var(--border);border-radius:13px;padding:1.4rem;margin:1rem 0}
+.cg-title{font-size:.71rem;font-weight:500;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:.9rem}
+.cg-row{display:flex;align-items:center;gap:.9rem;padding:.58rem 0;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.cg-row:last-child{border-bottom:none}
+.cg-lbl{font-family:'DM Sans',monospace;font-size:.86rem;color:var(--muted);min-width:240px;flex-shrink:0}
+.cg-eq{font-family:'DM Mono',monospace;font-size:.82rem;color:var(--ink);flex:1}
+.inp-wrap{display:flex;align-items:center;gap:.4rem}
+.cinput{width:110px;padding:.47rem .7rem;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Mono',monospace;font-size:.92rem;color:var(--ink);background:var(--paper);transition:border-color .2s;text-align:right}
+.cinput:focus{outline:none;border-color:var(--purple)}
+.cunit{font-size:.77rem;color:var(--muted);min-width:55px}
+.cres{display:inline-block;background:var(--navy-lt);color:var(--navy);font-family:'DM Mono',monospace;font-size:.93rem;font-weight:500;padding:.3rem .82rem;border-radius:7px;min-width:110px;text-align:center;transition:all .3s}
+.cres.purple{background:var(--purple-lt);color:var(--purple)}
+.cres.teal{background:var(--teal-lt);color:var(--teal)}
+.cres.amber{background:var(--amber-lt);color:var(--amber)}
+.cres.green{background:var(--green-lt);color:var(--green)}
+.cres.red{background:var(--red-lt);color:var(--red)}
+
+/* callouts */
+.callout{border-radius:0 11px 11px 11px;padding:.9rem 1.2rem;margin:1rem 0;font-size:.93rem;line-height:1.65}
+.callout.navy  {background:var(--navy-lt);  border-left:3px solid var(--navy);  color:#1a2850}
+.callout.purple{background:var(--purple-lt);border-left:3px solid var(--purple);color:#4a3070}
+.callout.amber {background:var(--amber-lt); border-left:3px solid var(--amber); color:#7a4a08}
+.callout.green {background:var(--green-lt); border-left:3px solid var(--green); color:#1a5030}
+.callout strong{display:block;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.25rem;opacity:.65}
+
+/* budget bar */
+.budget-wrap{background:var(--paper);border:1.5px solid var(--border);border-radius:13px;padding:1.2rem;margin:1rem 0}
+.blabel{font-size:.82rem;color:var(--muted);margin-bottom:.45rem;font-weight:500}
+.bbar{display:flex;height:34px;border-radius:8px;overflow:hidden;margin-bottom:.5rem}
+.bbar .seg{display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:.75rem;color:#fff;font-weight:500;transition:width .7s ease;min-width:4px}
+.blegend{display:flex;gap:1.2rem;font-size:.8rem;color:var(--muted);margin-top:.5rem}
+.blegend span{display:flex;align-items:center;gap:.35rem}
+.blegend .sw{width:10px;height:10px;border-radius:2px;display:inline-block}
+
+/* prediction widget */
+.pred-wrap{background:var(--purple-lt);border:1.5px solid var(--purple-md);border-radius:14px;padding:1.3rem;margin:1.2rem 0}
+.pred-q{font-size:1rem;font-weight:500;color:var(--ink);margin-bottom:1rem;line-height:1.6}
+.pred-options{display:flex;flex-direction:column;gap:.6rem}
+.pred-opt{display:flex;align-items:center;gap:.75rem;padding:.7rem 1rem;border:1.5px solid var(--border);border-radius:10px;background:var(--paper);cursor:pointer;transition:all .2s}
+.pred-opt:hover{border-color:var(--purple)}
+.pred-opt.selected{border-color:var(--purple);background:var(--purple-lt)}
+.pred-opt.correct{border-color:var(--green);background:var(--green-lt)}
+.pred-opt.wrong{border-color:var(--red);background:var(--red-lt);opacity:.6}
+.pred-opt-icon{font-size:1.2rem;flex-shrink:0}
+.pred-opt-title{font-weight:500;font-size:.95rem;color:var(--ink)}
+
+/* verify line */
+.verify-line{font-family:'Lora',serif;font-size:1.05rem;font-style:italic;color:var(--navy);text-align:center;padding:1rem 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin:1.2rem 0}
+
+/* reveal */
+.rev-box{display:none;border-radius:11px;padding:1rem 1.2rem;margin-top:.75rem;font-size:.92rem;line-height:1.65;border:1.5px solid var(--border);background:var(--paper)}
+.rev-box.open{display:block;animation:fadeUp .3s ease}
+.rev-tag{font-size:.72rem;font-weight:500;letter-spacing:.07em;text-transform:uppercase;margin-bottom:.35rem;display:block}
+.rev-tag.ok{color:var(--green)}.rev-tag.no{color:var(--red)}
+
+/* explanation button */
+.exp-btn{display:inline-flex;align-items:center;gap:.5rem;margin:1rem 0;padding:.65rem 1.5rem;border:1.5px solid var(--navy);border-radius:9px;background:var(--paper);color:var(--navy);font-family:'DM Sans',sans-serif;font-size:.93rem;font-weight:500;cursor:pointer;transition:all .2s}
+.exp-btn:hover{background:var(--navy);color:#fff}
+.exp-panel{display:none;animation:fadeUp .3s ease}
+.exp-panel.open{display:block}
+
+/* question block */
+.qblock{background:var(--paper);border:2px solid var(--purple);border-radius:13px;padding:1.2rem 1.4rem;margin:1.5rem 0}
+.qblock .ql{font-size:.69rem;font-weight:500;letter-spacing:.09em;text-transform:uppercase;color:var(--purple);margin-bottom:.35rem}
+.qblock .qt{font-family:'Lora',serif;font-size:1rem;font-style:italic;color:var(--ink);line-height:1.65}
+
+/* iter stepper */
+.iter-nav{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:.9rem}
+.ibtn{padding:.4rem .85rem;border:1.5px solid var(--border);border-radius:7px;background:var(--paper);font-family:'DM Sans',sans-serif;font-size:.79rem;font-weight:500;color:var(--muted);cursor:pointer;transition:all .2s}
+.ibtn.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.ibtn:hover:not(.on){border-color:var(--navy);color:var(--navy)}
+.ipanel{display:none}.ipanel.on{display:block;animation:fadeUp .2s ease}
+
+/* comparison table */
+.ctab{width:100%;border-collapse:collapse;font-size:.87rem;margin:.8rem 0}
+.ctab thead tr{background:var(--navy);color:#fff}
+.ctab thead th{padding:.52rem .9rem;font-size:.75rem;font-weight:500;text-align:left}
+.ctab thead th:first-child{border-radius:8px 0 0 0}.ctab thead th:last-child{border-radius:0 8px 0 0}
+.ctab tbody td{padding:.52rem .9rem;border-bottom:1px solid var(--border);font-family:'DM Mono',monospace;font-size:.83rem}
+.ctab tbody tr:last-child td{border-bottom:none}
+.ctab .up{color:var(--green);font-weight:500}
+.ctab .dn{color:var(--red);font-weight:500}
+.ctab .nc{color:var(--muted)}
+
+/* nav */
+hr{border:none;border-top:1px solid var(--border);margin:1.5rem 0}
+.nav-row{display:flex;justify-content:space-between;align-items:center;margin-top:2rem;padding-top:1.3rem;border-top:1px solid var(--border)}
+.nbtn{display:flex;align-items:center;gap:.4rem;padding:.68rem 1.55rem;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.92rem;font-weight:500;cursor:pointer;transition:all .2s;border:none}
+.nbtn.back{background:var(--paper);color:var(--muted);border:1.5px solid var(--border)}
+.nbtn.back:hover{border-color:var(--navy);color:var(--navy)}
+.nbtn.next{background:var(--navy);color:#fff}
+.nbtn.next:hover{background:var(--purple)}
+.nbtn:disabled{opacity:.32;cursor:not-allowed}
+</style>
+</head>
+<body>
+
+<div class="prog">
+  <span class="prog-label" id="plabel">1 of 6</span>
+  <div class="prog-dots" id="pdots"></div>
+  <span class="prog-title" id="ptitle">Introduction</span>
+</div>
+
+<div class="page">
+
+<!-- ══ SLIDE 1 — INTRODUCTION ══ -->
+<div class="slide active" id="sl1">
+  <div class="eyebrow">Pressure Loss Analysis</div>
+  <h1 class="slide-title">Measuring and understanding head loss through <em>four network configurations</em></h1>
+
+  <p class="lead">In this activity, you will measure and understand the head loss through 4 different network configurations. For each one: set up the network, take your measurements, and follow the guided analysis.</p>
+
+  <p>You will apply some theory previously learned:</p>
+
+  <ul class="checklist">
+    <li><span class="ci">📐</span><span>
+      <span class="ct">Pipe friction — Darcy-Weisbach</span>
+      <span class="cd">\( h_f = f \cdot \frac{L}{D} \cdot \frac{V^2}{2g} = R \cdot Q^2 \) &nbsp;·&nbsp; compute \(\mathrm{Re}\), read \(f\) from Moody diagram</span>
+    </span></li>
+    <li><span class="ci">🔀</span><span>
+      <span class="ct">Minor losses at T-junctions</span>
+      <span class="cd">\( h_{m} = K \cdot \frac{V_{in}^2}{2g} \) &nbsp;where \(V_{in}\) is the inlet velocity at the T-junction (carries full \(Q_{pump}\))</span>
+    </span></li>
+    <li><span class="ci">⚙️</span><span>
+      <span class="ct">Pump behaviour</span>
+      <span class="cd">A pump does not deliver fixed flow. When network resistance changes, the operating point shifts — \(Q_{pump}\) and \(H_{pump}\) change together along the pump curve.</span>
+    </span></li>
+    <li><span class="ci">🔁</span><span>
+      <span class="ct">Hardy Cross method</span>
+      <span class="cd">Config 2: guided step-by-step iterations. Configs 3 and 4: 2-loop solution computed automatically — you interpret the result.</span>
+    </span></li>
+  </ul>
+
+  <div class="callout navy">
+    <strong>How to use this guide</strong>
+    Work through each configuration in order. Set up the network, take measurements, enter values, and follow the calculations. At the end of each configuration there is a question connecting your results to real civil engineering practice.
+  </div>
+
+  <div class="nav-row">
+    <button class="nbtn back" disabled>← Back</button>
+    <button class="nbtn next" onclick="go(2)">Start — Configuration 1 →</button>
+  </div>
+</div>
+
+<!-- ══ SLIDE 2 — CONFIGURATION 1 ══ -->
+<div class="slide" id="sl2">
+  <div class="eyebrow">Configuration 1 of 4</div>
+  <h1 class="slide-title">Configuration 1 — <em>3 pipes ‖ 3 pipes</em></h1>
+
+  <p><strong>Set up:</strong> upper branch A→B→C→F (pipes 1, 2, 3 in series) and lower branch A→D→E→F (pipes 4, 5, 6 in series). Both branches identical. Symmetric network.</p>
+
+  <div class="diagram-box">
+    <svg width="100%" viewBox="0 0 660 185" style="display:block">
+      <defs><marker id="a1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round"/></marker></defs>
+      <circle cx="40" cy="92" r="22" fill="none" stroke="#f8d88a" stroke-width="1.5"/>
+      <text x="40" y="88" text-anchor="middle" font-family="DM Sans" font-size="10" fill="#f8d88a" font-weight="500">PUMP</text>
+      <text x="40" y="100" text-anchor="middle" font-family="DM Mono" font-size="9" fill="rgba(255,255,255,.4)">Q_pump</text>
+      <line x1="62" y1="92" x2="92" y2="92" stroke="#f8d88a" stroke-width="1.5" marker-end="url(#a1)"/>
+      <circle cx="107" cy="92"  r="12" fill="#1e2f6e" stroke="#a8cfed" stroke-width="1.5"/><text x="107" y="96"  text-anchor="middle" font-family="Lora" font-size="12" fill="#fff">A</text>
+      <circle cx="257" cy="32"  r="12" fill="#6b4fa0" stroke="#c4aee8" stroke-width="1.5"/><text x="257" y="36"  text-anchor="middle" font-family="Lora" font-size="12" fill="#fff">B</text>
+      <circle cx="407" cy="32"  r="12" fill="#6b4fa0" stroke="#c4aee8" stroke-width="1.5"/><text x="407" y="36"  text-anchor="middle" font-family="Lora" font-size="12" fill="#fff">C</text>
+      <circle cx="257" cy="152" r="12" fill="#3b82c4" stroke="#a8cfed" stroke-width="1.5"/><text x="257" y="156" text-anchor="middle" font-family="Lora" font-size="12" fill="#fff">D</text>
+      <circle cx="407" cy="152" r="12" fill="#3b82c4" stroke="#a8cfed" stroke-width="1.5"/><text x="407" y="156" text-anchor="middle" font-family="Lora" font-size="12" fill="#fff">E</text>
+      <circle cx="557" cy="92"  r="12" fill="#1e2f6e" stroke="#a8cfed" stroke-width="1.5"/><text x="557" y="96"  text-anchor="middle" font-family="Lora" font-size="12" fill="#fff">F</text>
+      <line x1="119" y1="84"  x2="245" y2="40"  stroke="#c4aee8" stroke-width="2.5" marker-end="url(#a1)"/>
+      <line x1="269" y1="32"  x2="395" y2="32"  stroke="#c4aee8" stroke-width="2.5" marker-end="url(#a1)"/>
+      <line x1="419" y1="40"  x2="545" y2="84"  stroke="#c4aee8" stroke-width="2.5" marker-end="url(#a1)"/>
+      <text x="176" y="48"  text-anchor="middle" font-family="DM Mono" font-size="10" fill="#c4aee8">pipe 1  R</text>
+      <text x="332" y="20"  text-anchor="middle" font-family="DM Mono" font-size="10" fill="#c4aee8">pipe 2  R</text>
+      <text x="488" y="48"  text-anchor="middle" font-family="DM Mono" font-size="10" fill="#c4aee8">pipe 3  R</text>
+      <line x1="119" y1="100" x2="245" y2="144" stroke="#a8cfed" stroke-width="2.5" marker-end="url(#a1)"/>
+      <line x1="269" y1="152" x2="395" y2="152" stroke="#a8cfed" stroke-width="2.5" marker-end="url(#a1)"/>
+      <line x1="419" y1="144" x2="545" y2="100" stroke="#a8cfed" stroke-width="2.5" marker-end="url(#a1)"/>
+      <text x="176" y="148" text-anchor="middle" font-family="DM Mono" font-size="10" fill="#a8cfed">pipe 4  R</text>
+      <text x="332" y="168" text-anchor="middle" font-family="DM Mono" font-size="10" fill="#a8cfed">pipe 5  R</text>
+      <text x="488" y="148" text-anchor="middle" font-family="DM Mono" font-size="10" fill="#a8cfed">pipe 6  R</text>
+      <text x="332" y="95" text-anchor="middle" font-family="Lora" font-size="12" fill="rgba(255,255,255,.18)" font-style="italic">Loop I</text>
+      <line x1="569" y1="92" x2="630" y2="92" stroke="#f8d88a" stroke-width="1.5" marker-end="url(#a1)"/>
+    </svg>
+  </div>
+
+  <div class="calc-guide">
+    <div class="cg-title" style="font-size:.85rem;letter-spacing:.05em">Step 1 — Measurements</div>
+    <div class="cg-row"><span class="cg-lbl">Volume collected</span><div class="inp-wrap"><input class="cinput" type="number" id="c1V" placeholder="0.00" step="0.01" oninput="calcC1()"><span class="cunit">litres</span></div></div>
+    <div class="cg-row"><span class="cg-lbl">Collection time</span><div class="inp-wrap"><input class="cinput" type="number" id="c1t" placeholder="0.00" step="0.01" oninput="calcC1()"><span class="cunit">seconds</span></div></div>
+    <div class="cg-row"><span class="cg-lbl">Head loss — pipe 2</span><div class="inp-wrap"><input class="cinput" type="number" id="c1dp" placeholder="0.0" step="0.1" oninput="calcC1()"><span class="cunit">mmH₂O</span></div></div>
+    <div class="cg-row"><span class="cg-lbl">Head loss — A to F</span><div class="inp-wrap"><input class="cinput" type="number" id="c1dpt" placeholder="0.0" step="0.1" oninput="calcC1()"><span class="cunit">mmH₂O</span></div></div>
+    <hr style="margin:.6rem 0">
+    <div class="cg-row"><span class="cg-lbl">\( Q_{pump} = (V / t) \times 60 \)</span><span class="cres navy" id="c1-qp">—</span><span class="cunit">LPM</span></div>
+  </div>
+
+  <div id="c1-body" style="display:none">
+
+    <hr>
+
+    <!-- GUIDED QUESTIONS A and B -->
+    <div style="background:var(--paper);border:1.5px solid var(--border);border-radius:13px;padding:1.4rem;margin:1rem 0">
+      <div class="cg-title" style="font-size:.85rem;letter-spacing:.05em">Step 3 — Flow distribution in the parallel branches</div>
+
+      <p style="margin-bottom:1rem">You measured \( Q_{pump} \). The network has two identical branches in parallel. Answer the following:</p>
+
+      <!-- Question A -->
+      <div style="margin-bottom:1.2rem">
+        <div style="font-size:.95rem;font-weight:500;color:var(--ink);margin-bottom:.5rem">A. What is the flow rate in the <strong>upper branch</strong> (LPM)?</div>
+        <div style="display:flex;align-items:center;gap:.7rem;flex-wrap:wrap">
+          <div class="inp-wrap"><input class="cinput" type="number" id="c1-qa" placeholder="0.000" step="0.001" oninput="checkQA()"><span class="cunit">LPM</span></div>
+          <div id="c1-qa-status" style="font-size:.88rem"></div>
+        </div>
+        <div id="c1-qa-msg" style="display:none;margin-top:.5rem;background:var(--amber-lt);border:1.5px solid var(--amber-md);border-radius:0 9px 9px 9px;padding:.75rem 1rem;font-size:.88rem;color:#7a4a08"></div>
+        <div id="c1-qa-exp-wrap" style="display:none;margin-top:.5rem">
+          <button class="exp-btn" style="font-size:.85rem;padding:.5rem 1.1rem" onclick="showExp('c1-qa-exp')">Show explanation →</button>
+          <div class="exp-panel" id="c1-qa-exp">
+            <div class="callout navy">The two branches connect the same two nodes (A and F) and have identical resistance \( R_{branch} = 3R \). For the head loss to be equal in both branches — which it must be, since the pressure at A and F is fixed — the flow must split equally. In a symmetric parallel network: \( Q_{upper} = Q_{lower} = Q_{pump} / 2 \). This is the fundamental condition of parallel flow: equal resistance means equal flow.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Question B -->
+      <div style="margin-bottom:1.2rem">
+        <div style="font-size:.95rem;font-weight:500;color:var(--ink);margin-bottom:.5rem">B. What is the flow rate in the <strong>lower branch</strong> (LPM)?</div>
+        <div style="display:flex;align-items:center;gap:.7rem;flex-wrap:wrap">
+          <div class="inp-wrap"><input class="cinput" type="number" id="c1-qb" placeholder="0.000" step="0.001" oninput="checkQB()"><span class="cunit">LPM</span></div>
+          <div id="c1-qb-status" style="font-size:.88rem"></div>
+        </div>
+        <div id="c1-qb-msg" style="display:none;margin-top:.5rem;background:var(--amber-lt);border:1.5px solid var(--amber-md);border-radius:0 9px 9px 9px;padding:.75rem 1rem;font-size:.88rem;color:#7a4a08"></div>
+        <div id="c1-qb-exp-wrap" style="display:none;margin-top:.5rem">
+          <button class="exp-btn" style="font-size:.85rem;padding:.5rem 1.1rem" onclick="showExp('c1-qb-exp')">Show explanation →</button>
+          <div class="exp-panel" id="c1-qb-exp">
+            <div class="callout navy">The lower branch is identical to the upper branch. Both connect A to F with the same resistance. By the same argument — equal resistance, fixed pressure difference — both branches carry the same flow: \( Q_{lower} = Q_{pump} / 2 \). The flow splits equally, not because of a rule, but because symmetry forces it.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Question C -->
+      <div style="margin-bottom:1.2rem">
+        <div style="font-size:.95rem;font-weight:500;color:var(--ink);margin-bottom:.5rem">C. What is the head loss across the three pipes in series in the <strong>upper branch</strong> (mmH₂O)?</div>
+        <div style="display:flex;align-items:center;gap:.7rem;flex-wrap:wrap">
+          <div class="inp-wrap"><input class="cinput" type="number" id="c1-qc" placeholder="0.0" step="0.1" oninput="checkQC()"><span class="cunit">mmH₂O</span></div>
+          <div id="c1-qc-status" style="font-size:.88rem"></div>
+        </div>
+        <div id="c1-qc-msg" style="display:none;margin-top:.5rem;background:var(--amber-lt);border:1.5px solid var(--amber-md);border-radius:0 9px 9px 9px;padding:.75rem 1rem;font-size:.88rem;color:#7a4a08">In series the head losses add: \( H_{branch} = h_{pipe1} + h_{pipe2} + h_{pipe3} = 3 \times h_{pipe2} \). Each pipe carries the same flow and has the same resistance, so each contributes equally.</div>
+      </div>
+
+      <!-- Question D -->
+      <div>
+        <div style="font-size:.95rem;font-weight:500;color:var(--ink);margin-bottom:.5rem">D. What is the head loss across the <strong>lower branch</strong> (mmH₂O)?</div>
+        <div style="display:flex;align-items:center;gap:.7rem;flex-wrap:wrap">
+          <div class="inp-wrap"><input class="cinput" type="number" id="c1-qd" placeholder="0.0" step="0.1" oninput="checkQD()"><span class="cunit">mmH₂O</span></div>
+          <div id="c1-qd-status" style="font-size:.88rem"></div>
+        </div>
+        <div id="c1-qd-msg" style="display:none;margin-top:.5rem;background:var(--amber-lt);border:1.5px solid var(--amber-md);border-radius:0 9px 9px 9px;padding:.75rem 1rem;font-size:.88rem;color:#7a4a08">In pipes in parallel, both branches connect the same two nodes A and F. The head loss across each branch must be equal — it is the same pressure difference, whichever path you take. \( H_{lower} = H_{upper} = 3 \times h_{pipe2} \).</div>
+      </div>
+    </div>
+
+    <!-- Moody step removed as agreed — replaced by direct K calculation -->
+    <div class="calc-guide">
+      <div class="cg-title" style="font-size:.85rem;letter-spacing:.05em">Step 4 — Minor losses and K for the T-junction</div>
+      <div class="eq-box">
+        \[ H_{A \to F} = H_{friction} + H_{minor} \]
+        \[ H_{minor} = H_{A \to F} - H_{friction} = H_{A \to F} - 3h_{f,pipe2} \]
+        \[ K = \frac{H_{minor}/2}{V_{in}^2/(2g)} \qquad V_{in} = \frac{Q_{pump}}{A} \]
+      </div>
+      <div class="cg-row"><span class="cg-lbl">\( H_{friction} = 3 \times h_{f,pipe2} \)</span><span class="cres navy" id="c1-pf">—</span><span class="cunit">mmH₂O</span></div>
+      <div class="cg-row"><span class="cg-lbl">\( H_{minor} = H_{A \to F} - H_{friction} \)</span><span class="cres amber" id="c1-ml">—</span><span class="cunit">mmH₂O</span></div>
+      <div class="cg-row"><span class="cg-lbl">\( V_{in} = Q_{pump} / A \)</span><span class="cg-eq">inlet velocity — carries full \( Q_{pump} \)</span><span class="cres" id="c1-Vm">—</span><span class="cunit">m/s</span></div>
+      <div class="cg-row"><span class="cg-lbl">\( V_{in}^2 / (2g) \)</span><span class="cres" id="c1-vh">—</span><span class="cunit">m</span></div>
+      <div class="cg-row"><span class="cg-lbl">\( K = (H_{minor}/2) / (V_{in}^2/2g) \)</span><span class="cg-eq">2 T-junctions in the network</span><span class="cres amber" id="c1-KT">—</span><span class="cunit">—</span></div>
+      <div class="cg-row"><span class="cg-lbl">\( H_{friction} \) as % of \( H_{A \to F} \)</span><span class="cres" id="c1-pct">—</span><span class="cunit">%</span></div>
+    </div>
+
+    <div class="budget-wrap">
+      <div class="blabel">Where does H_{A→F} go?</div>
+      <div class="bbar">
+        <div class="seg" id="c1-barpf" style="background:var(--navy);width:25%">—</div>
+        <div class="seg" id="c1-barml" style="background:var(--amber);width:75%">—</div>
+      </div>
+      <div class="blegend">
+        <span><span class="sw" style="background:var(--navy)"></span>Pipe friction \(H_{friction}\)</span>
+        <span><span class="sw" style="background:var(--amber)"></span>Minor losses \(H_{minor}\) (T-junctions + connectors)</span>
+      </div>
+    </div>
+
+    <div id="c1-obs" class="callout navy" style="display:none">
+      <strong>Observation</strong>
+      <span id="c1-obs-text"></span>
+    </div>
+
+    <hr>
+
+    <div class="qblock">
+      <div class="ql">Question 1 — real engineering context</div>
+      <div class="qt">"Your pipes have \(L/D = 60\). A typical water supply main is 500 m long with diameter 200 mm (\(L/D = 2\,500\)). Estimate what fraction of the total head loss minor losses would represent in that main. Compare with your experiment — what changes and why?"</div>
+      <button class="exp-btn" style="margin-top:.85rem;font-size:.85rem;padding:.5rem 1.1rem" onclick="showExp('exp-q1')">Show explanation →</button>
+      <div class="exp-panel" id="exp-q1">
+        <div class="callout navy" style="margin-top:.5rem">
+          <strong>Explanation</strong>
+          Minor losses scale as \( K \cdot V^2/2g \) — a fixed energy cost per junction, independent of pipe length. Pipe friction scales as \( f \cdot (L/D) \cdot V^2/2g \) — it grows with \(L/D\). In your experiment \(L/D = 60\), so pipe friction is small and minor losses dominate (~75% of the total). In a water supply main with \(L/D = 2\,500\), the pipe friction term is ~42× larger relative to minor losses. Minor losses would represent roughly 2–5% of the total head loss — negligible in practice. The ratio of minor to pipe friction losses scales as \(1/(f \cdot L/D)\). As \(L/D\) increases, minor losses become progressively less important.
+        </div>
+      </div>
+    </div>
+
+    <div class="qblock">
+      <div class="ql">Question 2 — design priorities</div>
+      <div class="qt">"In your experiment minor losses dominate. In a real city water network pipe friction dominates. As a civil engineer designing each type of system, which losses must you prioritise — and what does this mean for how you model the network?"</div>
+      <button class="exp-btn" style="margin-top:.85rem;font-size:.85rem;padding:.5rem 1.1rem" onclick="showExp('exp-q2')">Show explanation →</button>
+      <div class="exp-panel" id="exp-q2">
+        <div class="callout navy" style="margin-top:.5rem">
+          <strong>Explanation</strong>
+          In compact systems — HVAC, laboratory networks, building services — minor losses are significant and must be modelled explicitly. Every fitting, valve and junction has a \(K\) value and contributes meaningfully to the total head loss. Neglecting them leads to undersized pumps and insufficient pressure at delivery points. In city water distribution networks, pipes are hundreds of metres long and minor losses are typically less than 5% of the total. Engineers use simplified Hardy Cross models with pipe friction only, and the results are accurate enough for design purposes. The key skill is knowing which regime you are in — and your experiment makes that distinction physically tangible.
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /c1-body -->
+
+  <div class="nav-row">
+    <button class="nbtn back" onclick="go(1)">← Back</button>
+    <button class="nbtn next" onclick="go(3)">Configuration 2 →</button>
+  </div>
+</div>
+
+<!-- ══ SLIDE 3 — CONFIGURATION 2 ══ -->
+<div class="slide" id="sl3">
+  <div class="eyebrow">Configuration 2 of 4</div>
+  <h1 class="slide-title">Configuration 2 — <em>3 pipes ‖ 1 pipe</em></h1>
+
+  <p><strong>Rearrange:</strong> keep the upper branch (pipes 1, 2, 3) and replace the lower branch with a single pipe (pipe 4) from A directly to F.</p>
+
+  <div class="diagram-box">
+    <svg width="100%" viewBox="0 0 660 185" style="display:block">
+      <defs><marker id="a2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round"/></marker></defs>
+      <circle cx="40" cy="92" r="22" fill="none" stroke="#f8d88a" stroke-width="1.5"/>
+      <text x="40" y="88" text-anchor="middle" font-family="DM Sans" font-size="10" fill="#f8d88a" font-weight="500">PUMP</text>
+      <text x="40" y="100" text-anchor="middle" font-family="DM Mono" font-size="9" fill="rgba(255,255,255,.4)">Q_pump</text>
+      <line x1="62" y1="92" x2="92" y2="92" stroke="#f8d88a" stroke-width="1.5" marker-end="url(#a2)"/>
+      <circle cx="107" cy="92" r="12" fill="#1e2f6e" stroke="#a8cfed" stroke-width="1.5"/><text x="107" y="96" text-anchor="middle" font-family="Lora" font-size="12" fill="#fff">A</text>
+      <circle cx="257" cy="32" r="12" fill="#6b4fa0" stroke="#c4aee8" stroke-width="1.5"/><text x="257" y="36" text-anchor="middle" font-family="Lora" font-size="12" fill="#fff">B</text>
+      <circle cx="407" cy="32" r="12" fill="#6b4fa0" stroke="#c4aee8" stroke-width="1.5"/><text x="407" y="36" text-anchor="middle" font-family="Lora" font-size="12" fill="#fff">C</text>
+      <circle cx="557" cy="92" r="12" fill="#1e2f6e" stroke="#a8cfed" stroke-width="1.5"/><text x="557" y="96" text-anchor="middle" font-family="Lora" font-size="12" fill="#fff">F</text>
+      <line x1="119" y1="84" x2="245" y2="40" stroke="#c4aee8" stroke-width="2.5" marker-end="url(#a2)"/>
+      <line x1="269" y1="32" x2="395" y2="32" stroke="#c4aee8" stroke-width="2.5" marker-end="url(#a2)"/>
+      <line x1="419" y1="40" x2="545" y2="84" stroke="#c4aee8" stroke-width="2.5" marker-end="url(#a2)"/>
+      <text x="176" y="48" text-anchor="middle" font-family="DM Mono" font-size="10" fill="#c4aee8">pipe 1  R</text>
+      <text x="332" y="20" text-anchor="middle" font-family="DM Mono" font-size="10" fill="#c4aee8">pipe 2  R</text>
+      <text x="488" y="48" text-anchor="middle" font-family="DM Mono" font-size="10" fill="#c4aee8">pipe 3  R</text>
+      <text x="332" y="68" text-anchor="middle" font-family="DM Sans" font-size="11" fill="#f8d88a" opacity=".8">R_upper = 3R</text>
+      <path d="M119 100 Q332 178 545 100" fill="none" stroke="#a8cfed" stroke-width="3" marker-end="url(#a2)"/>
+      <text x="332" y="174" text-anchor="middle" font-family="DM Mono" font-size="10" fill="#a8cfed">pipe 4  R</text>
+      <text x="332" y="148" text-anchor="middle" font-family="DM Sans" font-size="11" fill="#f8d88a" opacity=".8">R_lower = R</text>
+      <line x1="569" y1="92" x2="630" y2="92" stroke="#f8d88a" stroke-width="1.5" marker-end="url(#a2)"/>
+    </svg>
+  </div>
+
+  <!-- PREDICTION QUESTIONS -->
+  <div class="pred-wrap">
+    <div class="pred-q">Compared to Configuration 1, what do you expect to happen to the <strong>total head loss</strong>?</div>
+    <div class="pred-options">
+      <div class="pred-opt" id="p2h-inc" onclick="setPredKeep('p2h','inc',this)"><span class="pred-opt-icon">↑</span><span class="pred-opt-title">Total head loss increases</span></div>
+      <div class="pred-opt" id="p2h-dec" onclick="setPredKeep('p2h','dec',this)"><span class="pred-opt-icon">↓</span><span class="pred-opt-title">Total head loss decreases</span></div>
+      <div class="pred-opt" id="p2h-same" onclick="setPredKeep('p2h','same',this)"><span class="pred-opt-icon">=</span><span class="pred-opt-title">Total head loss stays the same</span></div>
+    </div>
+    <div id="keep-p2h" class="callout purple" style="display:none;margin-top:.6rem">
+      <strong>Noted</strong>
+      We will come back to this later — keep your prediction in mind.
+    </div>
+  </div>
+
+  <div class="pred-wrap">
+    <div class="pred-q">Compared to Configuration 1, what do you expect to happen to the <strong>pump flow rate \(Q_{pump}\)</strong>?</div>
+    <div class="pred-options">
+      <div class="pred-opt" id="p2q-inc" onclick="setPredKeep('p2q','inc',this)"><span class="pred-opt-icon">↑</span><span class="pred-opt-title">\(Q_{pump}\) increases</span></div>
+      <div class="pred-opt" id="p2q-dec" onclick="setPredKeep('p2q','dec',this)"><span class="pred-opt-icon">↓</span><span class="pred-opt-title">\(Q_{pump}\) decreases</span></div>
+      <div class="pred-opt" id="p2q-same" onclick="setPredKeep('p2q','same',this)"><span class="pred-opt-icon">=</span><span class="pred-opt-title">\(Q_{pump}\) stays the same</span></div>
+    </div>
+    <div id="keep-p2q" class="callout purple" style="display:none;margin-top:.6rem">
+      <strong>Noted</strong>
+      We will come back to this later — keep your prediction in mind.
+    </div>
+  </div>
+
+  <div class="verify-line">Now let's verify with the experiment.</div>
+
+  <div class="calc-guide">
+    <div class="cg-title" style="font-size:.85rem;letter-spacing:.05em">Step 1 — Measurements</div>
+    <div class="cg-row"><span class="cg-lbl">Volume collected</span><div class="inp-wrap"><input class="cinput" type="number" id="c2V" placeholder="0.00" step="0.01" oninput="calcC2()"><span class="cunit">litres</span></div></div>
+    <div class="cg-row"><span class="cg-lbl">Collection time</span><div class="inp-wrap"><input class="cinput" type="number" id="c2t" placeholder="0.00" step="0.01" oninput="calcC2()"><span class="cunit">seconds</span></div></div>
+    <div class="cg-row"><span class="cg-lbl">Head loss — pipe 2 (upper branch)</span><div class="inp-wrap"><input class="cinput" type="number" id="c2dp" placeholder="0.0" step="0.1" oninput="calcC2()"><span class="cunit">mmH₂O</span></div></div>
+    <div class="cg-row"><span class="cg-lbl">Head loss — A to F</span><div class="inp-wrap"><input class="cinput" type="number" id="c2dpt" placeholder="0.0" step="0.1" oninput="calcC2()"><span class="cunit">mmH₂O</span></div></div>
+    <hr style="margin:.6rem 0">
+    <div class="cg-row"><span class="cg-lbl">\( Q_{pump} = (V/t) \times 60 \)</span><span class="cres navy" id="c2-qp">—</span><span class="cunit">LPM</span></div>
+  </div>
+
+  <div id="c2-body" style="display:none">
+
+    <!-- Prediction outcome — appears immediately after measurements -->
+    <div id="c2-pred-outcome" class="callout purple" style="display:none">
+      <strong>Your predictions</strong>
+      <span id="c2-pred-outcome-text"></span>
+    </div>
+
+    <!-- Step 2 — Hardy Cross -->
+    <div class="calc-guide" style="margin-top:1rem">
+      <div class="cg-title" style="font-size:.85rem;letter-spacing:.05em">Step 2 — Hardy Cross (guided iterations)</div>
+      <p style="margin:.5rem 0 .9rem;font-size:.93rem;color:#2d2840">In Configuration 1 the two branches were identical, so flow split equally by symmetry — no calculation was needed. Here the lower branch has resistance \(R\) while the upper has \(3R\). The split is no longer obvious. We use the Hardy Cross method to find the flow rate in each branch — it iteratively adjusts the flow until the head loss is equal in both branches and continuity is satisfied at every node.</p>
+      <div class="eq-box">
+        \[ \Delta Q = -\frac{R_{upper} \cdot Q_{upper}|Q_{upper}| - R_{lower} \cdot Q_{lower}|Q_{lower}|}{2R_{upper}|Q_{upper}| + 2R_{lower}|Q_{lower}|} \]
+        \[ Q_{upper} \leftarrow Q_{upper} + \Delta Q \qquad Q_{lower} \leftarrow Q_{lower} - \Delta Q \]
+      </div>
+      <div class="cg-row"><span class="cg-lbl">\( R_{upper} = 3R \) (from Config 1)</span><span class="cres" id="c2-Ru">—</span><span class="cunit">m/LPM²</span></div>
+      <div class="cg-row"><span class="cg-lbl">\( R_{lower} = R \) (single pipe)</span><span class="cres" id="c2-Rl">—</span><span class="cunit">m/LPM²</span></div>
+      <div class="cg-row">
+        <span class="cg-lbl">Initial guess \(Q_{upper}\)</span>
+        <span class="cg-eq">choose any non-zero value, e.g. half of \(Q_{pump}\)</span>
+        <div class="inp-wrap"><input class="cinput" type="number" id="c2q0" placeholder="e.g. 1.5" step="0.1" oninput="setupHC2()"><span class="cunit">LPM</span></div>
+      </div>
+      <div class="cg-row"><span class="cg-lbl">\( Q_{lower} = Q_{pump} - Q_{upper} \)</span><span class="cres" id="c2-ql0">—</span><span class="cunit">LPM</span></div>
+    </div>
+
+    <div id="hc2-stepper" style="display:none">
+      <div class="iter-nav" id="hc2-nav"></div>
+      <div id="hc2-panels"></div>
+    </div>
+
+    <!-- Step 3 and beyond shown after HC converges -->
+    <div id="c2-budget" style="display:none">
+
+      <!-- Step 3 — Re and Moody -->
+      <div class="calc-guide">
+        <div class="cg-title" style="font-size:.85rem;letter-spacing:.05em">Step 3 — Reynolds number and Moody diagram</div>
+        <p style="margin:.5rem 0 .9rem;font-size:.93rem;color:#2d2840">Now that you know \(Q_{upper}\) from Hardy Cross, calculate \(Re\) for the upper branch pipes and use the Moody diagram to find \(f\). Then predict the head loss across one pipe and compare with your measurement.</p>
+        <div class="eq-box">
+          \[ Re = \frac{V_{upper} \cdot D}{\nu} \qquad V_{upper} = \frac{Q_{upper}}{A} \qquad h_{f,pred} = f \cdot \frac{L}{D} \cdot \frac{V_{upper}^2}{2g} \]
+        </div>
+        <div class="cg-row"><span class="cg-lbl">\( V_{upper} = Q_{upper} / A \)</span><span class="cg-eq">\( Q_{upper} \) in m³/s = LPM / 60000</span><span class="cres" id="c2-Vup">—</span><span class="cunit">m/s</span></div>
+        <div class="cg-row"><span class="cg-lbl">\( Re_{upper} \)</span><span class="cg-eq">\( D = 0.005 \) m, \( \nu = 1\times10^{-6} \) m²/s</span><span class="cres amber" id="c2-Re">—</span><span class="cunit">—</span></div>
+        <div class="cg-row">
+          <span class="cg-lbl">\( f \) from Moody diagram</span>
+          <span class="cg-eq">smooth pipe (\( \varepsilon/D = 0 \)), at your \( Re \)</span>
+          <div class="inp-wrap"><input class="cinput" type="number" id="c2f" placeholder="0.000" step="0.001" oninput="calcC2moody()"><span class="cunit">—</span></div>
+        </div>
+        <div class="cg-row"><span class="cg-lbl">\( h_{f,pred} = f \cdot (L/D) \cdot V_{upper}^2 / (2g) \times 1000 \)</span><span class="cres navy" id="c2-hfpred">—</span><span class="cunit">mmH₂O</span></div>
+        <div class="cg-row"><span class="cg-lbl">\( h_{f,measured} \) — pipe 2 (your data)</span><span class="cres" id="c2-hfmeas">—</span><span class="cunit">mmH₂O</span></div>
+        <div class="cg-row"><span class="cg-lbl">Difference</span><span class="cres" id="c2-hfdiff">—</span><span class="cunit">%</span></div>
+        <hr style="margin:.6rem 0">
+        <div class="cg-row"><span class="cg-lbl">\( 3 \times h_{f,pred} \) — full upper branch (Moody)</span><span class="cres navy" id="c2-3hfpred">—</span><span class="cunit">mmH₂O</span></div>
+        <div class="cg-row"><span class="cg-lbl">\( 3 \times h_{f,measured} \) — full upper branch (experimental)</span><span class="cres" id="c2-3hfmeas">—</span><span class="cunit">mmH₂O</span></div>
+      </div>
+
+      <div class="qblock">
+        <div class="ql">Discuss with your group</div>
+        <div class="qt">"How does your Moody prediction compare with your measured head loss across pipe 2? Are they close? What could explain any difference?"</div>
+        <button class="exp-btn" style="margin-top:.85rem;font-size:.85rem;padding:.5rem 1.1rem" onclick="showExp('exp-moody-c2')">Show hint →</button>
+        <div class="exp-panel" id="exp-moody-c2">
+          <div class="callout amber" style="margin-top:.5rem">
+            <strong>Hint</strong>
+            Your \(Re\) is likely in the turbulent transition zone (roughly 3 000–10 000) where the Moody diagram curve is steep — a small reading error in \(f\) produces a meaningful change in the predicted \(h_f\). Also note that \(Q_{upper}\) in Config 2 is lower than in Config 1, so \(Re\) is lower and \(f\) is slightly higher than before. If your prediction is close to the measurement, the method is working well. A small discrepancy is expected given the sensitivity of \(f\) in the transition zone.
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4 — Head loss budget and K comparison -->
+      <div class="calc-guide">
+        <div class="cg-title" style="font-size:.85rem;letter-spacing:.05em">Step 4 — Head loss budget and K comparison</div>
+        <div class="eq-box">
+          \[ H_{friction} = 3 \times h_{f,pipe2} \quad \text{(both branches equal — parallel condition)} \]
+          \[ H_{minor} = H_{A \to F} - H_{friction} \qquad K = \frac{H_{minor}/2}{V_{in}^2/(2g)} \]
+        </div>
+        <div class="cg-row"><span class="cg-lbl">\( H_{friction} = 3 \times h_{f,pipe2} \)</span><span class="cres navy" id="c2-pf">—</span><span class="cunit">mmH₂O</span></div>
+        <div class="cg-row"><span class="cg-lbl">\( H_{minor} = H_{A \to F} - H_{friction} \)</span><span class="cres amber" id="c2-ml">—</span><span class="cunit">mmH₂O</span></div>
+        <div class="cg-row"><span class="cg-lbl">\( V_{in} = Q_{pump} / A \)</span><span class="cres" id="c2-Vin">—</span><span class="cunit">m/s</span></div>
+        <div class="cg-row"><span class="cg-lbl">\( V_{in}^2 / (2g) \)</span><span class="cres" id="c2-vh2">—</span><span class="cunit">m</span></div>
+        <div class="cg-row"><span class="cg-lbl">\( K \) — Config 2</span><span class="cres amber" id="c2-K">—</span><span class="cunit">—</span></div>
+        <div class="cg-row"><span class="cg-lbl">\( K \) — Config 1 (for comparison)</span><span class="cres" id="c2-K1">—</span><span class="cunit">—</span></div>
+        <div class="cg-row"><span class="cg-lbl">\( H_{friction} \) as % of \( H_{A \to F} \)</span><span class="cres" id="c2-pct">—</span><span class="cunit">%</span></div>
+      </div>
+
+      <!-- Budget bars -->
+      <div class="budget-wrap">
+        <div class="blabel">Config 1 — head loss budget</div>
+        <div class="bbar">
+          <div class="seg" id="c2-b1pf" style="background:var(--navy);width:25%">—</div>
+          <div class="seg" id="c2-b1ml" style="background:var(--amber);width:75%">—</div>
+        </div>
+        <div class="blabel" style="margin-top:.75rem">Config 2 — head loss budget</div>
+        <div class="bbar">
+          <div class="seg" id="c2-b2pf" style="background:var(--navy);width:15%">—</div>
+          <div class="seg" id="c2-b2ml" style="background:var(--amber);width:85%">—</div>
+        </div>
+        <div class="blegend">
+          <span><span class="sw" style="background:var(--navy)"></span>\(H_{friction}\)</span>
+          <span><span class="sw" style="background:var(--amber)"></span>\(H_{minor}\)</span>
+        </div>
+      </div>
+
+      <table class="ctab" id="c2-table"></table>
+
+      <div class="callout navy" id="c2-obs"><strong>Observation</strong><span id="c2-obs-text"></span></div>
+
+      <button class="exp-btn" onclick="showExp('exp-c2')">Show explanation →</button>
+      <div class="exp-panel" id="exp-c2">
+        <div class="callout navy">
+          <strong>What changed — H_friction</strong>
+          The lower branch now has resistance \(R\) instead of \(3R\), so it carries more flow. Pipe friction in each branch dropped — there is less resistance and less energy dissipated by friction. \(H_{friction}\) decreased.
+        </div>
+        <div class="callout amber">
+          <strong>The pump response</strong>
+          \(Q_{pump}\) increased slightly — lower network resistance shifts the pump operating point along its curve to higher flow and lower head. The change is small because the pump curve is relatively flat in this range.
+        </div>
+        <div class="callout green">
+          <strong>The key insight</strong>
+          \(H_{minor}\) depends on \(V_{in} = Q_{pump}/A\) — which barely changed between configurations. \(H_{friction}\) changed because the pipe resistance of one branch changed. The total head loss \(H_{A \to F}\) is controlled by how much pipe friction changes — \(H_{minor}\) is the approximately constant background.
+        </div>
+      </div>
+
+      <hr>
+
+      <!-- Multiple choice question -->
+      <div style="background:var(--paper);border:2px solid var(--purple);border-radius:13px;padding:1.3rem 1.4rem;margin:1.5rem 0">
+        <div style="font-size:.69rem;font-weight:500;letter-spacing:.09em;text-transform:uppercase;color:var(--purple);margin-bottom:.45rem">Question — pump behaviour</div>
+        <div style="font-family:'Lora',serif;font-size:1rem;font-style:italic;color:var(--ink);line-height:1.65;margin-bottom:1rem">"What is one reason a pump delivers <strong>less flow</strong> compared to another operating condition?"</div>
+        <div style="display:flex;flex-direction:column;gap:.55rem" id="mc-pump-opts">
+          <div class="pred-opt" onclick="answerMC(0)"><span class="pred-opt-icon">A</span><span class="pred-opt-title">The pipe network has lower resistance</span></div>
+          <div class="pred-opt" onclick="answerMC(1)"><span class="pred-opt-icon">B</span><span class="pred-opt-title">The pipe network has higher resistance</span></div>
+          <div class="pred-opt" onclick="answerMC(2)"><span class="pred-opt-icon">C</span><span class="pred-opt-title">The pump speed increases</span></div>
+          <div class="pred-opt" onclick="answerMC(3)"><span class="pred-opt-icon">D</span><span class="pred-opt-title">The pipe diameter increases</span></div>
+        </div>
+        <div id="mc-pump-result" style="display:none;margin-top:.9rem"></div>
+      </div>
+
+      <div class="qblock">
+        <div class="ql">Discuss with your group — K comparison</div>
+        <div class="qt">"Is \( K \) the same as in Configuration 1? What does this tell you about whether minor losses at a T-junction depend on how the flow is split between the branches?"</div>
+        <button class="exp-btn" style="margin-top:.85rem;font-size:.85rem;padding:.5rem 1.1rem" onclick="showExp('exp-K-c2')">Show hint →</button>
+        <div class="exp-panel" id="exp-K-c2">
+          <div class="callout amber" style="margin-top:.5rem">
+            <strong>Hint</strong>
+            In Config 1 the T-junction divided flow equally. In Config 2 the lower branch carries roughly \(\sqrt{3} \approx 1.73\) times more flow than the upper. Textbook correlations (e.g. Idelchik) show that \(K\) for a T-junction depends on the ratio of branch flow to main pipe flow. If your \(K\) changed between configurations, this is the physical reason. If it stayed approximately the same, the effect of the flow ratio is small for your particular fittings.
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /c2-budget -->
+
+  </div><!-- /c2-body -->
+
+  <div class="nav-row">
+    <button class="nbtn back" onclick="go(2)">← Back</button>
+    <button class="nbtn next" onclick="go(4)">Configuration 3 →</button>
+  </div>
+</div>
+
+<!-- ══ SLIDE 4 — CONFIGURATION 3 ══ -->
+<div class="slide" id="sl4">
+  <div class="eyebrow">Configuration 3 of 3</div>
+  <h1 class="slide-title">Configuration 3 — <em>3 pipes upper ‖ 2 pipes lower + cross-pipe D→C</em></h1>
+
+  <p><strong>Set up:</strong> upper branch A→B→C→F (3 pipes). Lower branch A→D→F (2 pipes — remove pipe D→E). Add a T-connector at D and at C, then connect them with one pipe. This is the cross-pipe D→C. The network now has 2 loops.</p>
+
+  <div class="diagram-box">
+    <svg width="100%" viewBox="0 0 660 200" style="display:block">
+      <defs><marker id="a3" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round"/></marker></defs>
+      <circle cx="40"  cy="100" r="22" fill="none" stroke="#f8d88a" stroke-width="1.5"/>
+      <text x="40" y="96"  text-anchor="middle" font-family="DM Sans" font-size="10" fill="#f8d88a" font-weight="500">PUMP</text>
+      <text x="40" y="108" text-anchor="middle" font-family="DM Mono" font-size="9"  fill="rgba(255,255,255,.4)">Q_pump</text>
+      <line x1="62" y1="100" x2="90" y2="100" stroke="#f8d88a" stroke-width="1.5" marker-end="url(#a3)"/>
+      <!-- nodes -->
+      <circle cx="105" cy="100" r="12" fill="#1e2f6e" stroke="#a8cfed" stroke-width="1.5"/><text x="105" y="104" text-anchor="middle" font-family="Lora" font-size="12" fill="#fff">A</text>
+      <circle cx="255" cy="38"  r="12" fill="#6b4fa0" stroke="#c4aee8" stroke-width="1.5"/><text x="255" y="42"  text-anchor="middle" font-family="Lora" font-size="12" fill="#fff">B</text>
+      <circle cx="405" cy="38"  r="12" fill="#6b4fa0" stroke="#c4aee8" stroke-width="1.5"/><text x="405" y="42"  text-anchor="middle" font-family="Lora" font-size="12" fill="#fff">C</text>
+      <circle cx="255" cy="162" r="12" fill="#3b82c4" stroke="#a8cfed" stroke-width="1.5"/><text x="255" y="166" text-anchor="middle" font-family="Lora" font-size="12" fill="#fff">D</text>
+      <circle cx="555" cy="100" r="12" fill="#1e2f6e" stroke="#a8cfed" stroke-width="1.5"/><text x="555" y="104" text-anchor="middle" font-family="Lora" font-size="12" fill="#fff">F</text>
+      <!-- upper branch A→B→C→F (3 pipes) -->
+      <line x1="117" y1="92"  x2="243" y2="46"  stroke="#c4aee8" stroke-width="2.5" marker-end="url(#a3)"/>
+      <line x1="267" y1="38"  x2="393" y2="38"  stroke="#c4aee8" stroke-width="2.5" marker-end="url(#a3)"/>
+      <line x1="417" y1="46"  x2="543" y2="92"  stroke="#c4aee8" stroke-width="2.5" marker-end="url(#a3)"/>
+      <text x="174" y="54"  text-anchor="middle" font-family="DM Mono" font-size="10" fill="#c4aee8">A→B  R</text>
+      <text x="330" y="26"  text-anchor="middle" font-family="DM Mono" font-size="10" fill="#c4aee8">B→C  R</text>
+      <text x="486" y="54"  text-anchor="middle" font-family="DM Mono" font-size="10" fill="#c4aee8">C→F  R</text>
+      <!-- lower branch A→D→F (2 pipes) -->
+      <line x1="117" y1="108" x2="243" y2="154" stroke="#a8cfed" stroke-width="2.5" marker-end="url(#a3)"/>
+      <path d="M267 162 Q420 196 543 108" fill="none" stroke="#a8cfed" stroke-width="2.5" marker-end="url(#a3)"/>
+      <text x="174" y="148" text-anchor="middle" font-family="DM Mono" font-size="10" fill="#a8cfed">A→D  R</text>
+      <text x="420" y="194" text-anchor="middle" font-family="DM Mono" font-size="10" fill="#a8cfed">D→F  R</text>
+      <!-- cross-pipe D→C (dashed amber) -->
+      <line x1="267" y1="154" x2="393" y2="50"  stroke="#f8d88a" stroke-width="2.5" stroke-dasharray="6 3" marker-end="url(#a3)"/>
+      <text x="315" y="118" text-anchor="middle" font-family="DM Mono" font-size="10" fill="#f8d88a" transform="rotate(-36,315,118)">D→C  R</text>
+      <!-- loop labels -->
+      <text x="210" y="105" text-anchor="middle" font-family="Lora" font-size="11" fill="rgba(255,255,255,.18)" font-style="italic">Loop I</text>
+      <text x="450" y="105" text-anchor="middle" font-family="Lora" font-size="11" fill="rgba(255,255,255,.18)" font-style="italic">Loop II</text>
+      <line x1="567" y1="100" x2="625" y2="100" stroke="#f8d88a" stroke-width="1.5" marker-end="url(#a3)"/>
+    </svg>
+  </div>
+
+  <!-- Prediction questions -->
+  <div class="pred-wrap">
+    <div class="pred-q">Compared to Configuration 2, what do you expect to happen to the <strong>total head loss \(H_{A \to F}\)</strong>?</div>
+    <div class="pred-options">
+      <div class="pred-opt" id="p3h-inc" onclick="setPredKeep('p3h','inc',this)"><span class="pred-opt-icon">↑</span><span class="pred-opt-title">Total head loss increases</span></div>
+      <div class="pred-opt" id="p3h-dec" onclick="setPredKeep('p3h','dec',this)"><span class="pred-opt-icon">↓</span><span class="pred-opt-title">Total head loss decreases</span></div>
+      <div class="pred-opt" id="p3h-same" onclick="setPredKeep('p3h','same',this)"><span class="pred-opt-icon">=</span><span class="pred-opt-title">Total head loss stays the same</span></div>
+    </div>
+    <div id="keep-p3h" class="callout purple" style="display:none;margin-top:.6rem"><strong>Noted</strong> We will come back to this later — keep your prediction in mind.</div>
+  </div>
+
+  <div class="pred-wrap">
+    <div class="pred-q">The cross-pipe D→C connects the midpoint of the lower branch to the midpoint of the upper branch. What do you expect to happen to the flow through that pipe?</div>
+    <div class="pred-options">
+      <div class="pred-opt" id="p3dc-zero" onclick="setPredKeep('p3dc','zero',this)"><span class="pred-opt-icon">=</span><span class="pred-opt-title">Zero — D and C are at equal pressure</span></div>
+      <div class="pred-opt" id="p3dc-flow" onclick="setPredKeep('p3dc','flow',this)"><span class="pred-opt-icon">≠</span><span class="pred-opt-title">Non-zero — D and C are at different pressures</span></div>
+    </div>
+    <div id="keep-p3dc" class="callout purple" style="display:none;margin-top:.6rem"><strong>Noted</strong> We will come back to this later — keep your prediction in mind.</div>
+  </div>
+
+  <div class="verify-line">Now let's verify with the experiment.</div>
+
+  <div class="calc-guide">
+    <div class="cg-title" style="font-size:.85rem;letter-spacing:.05em">Step 1 — Measurements</div>
+    <div class="cg-row"><span class="cg-lbl">Volume collected</span><div class="inp-wrap"><input class="cinput" type="number" id="c3V" placeholder="0.00" step="0.01" oninput="calcC3()"><span class="cunit">litres</span></div></div>
+    <div class="cg-row"><span class="cg-lbl">Collection time</span><div class="inp-wrap"><input class="cinput" type="number" id="c3t" placeholder="0.00" step="0.01" oninput="calcC3()"><span class="cunit">seconds</span></div></div>
+    <div class="cg-row"><span class="cg-lbl">Head loss — A to F</span><div class="inp-wrap"><input class="cinput" type="number" id="c3dpt" placeholder="0.0" step="0.1" oninput="calcC3()"><span class="cunit">mmH₂O</span></div></div>
+    <hr style="margin:.6rem 0">
+    <div class="cg-row"><span class="cg-lbl">\( Q_{pump} = (V/t) \times 60 \)</span><span class="cres navy" id="c3-qp">—</span><span class="cunit">LPM</span></div>
+  </div>
+
+  <div id="c3-body" style="display:none">
+
+    <!-- Prediction outcome -->
+    <div id="c3-pred-outcome" class="callout purple" style="display:none">
+      <strong>Your predictions</strong>
+      <span id="c3-pred-outcome-text"></span>
+    </div>
+
+    <!-- Step 2 — Hardy Cross -->
+    <div class="calc-guide" style="margin-top:1rem">
+      <div class="cg-title" style="font-size:.85rem;letter-spacing:.05em">Step 2 — Hardy Cross 2-loop solution</div>
+      <p style="margin:.5rem 0 .9rem;font-size:.93rem;color:#2d2840">The network has 5 pipes each with its own flow rate. Hardy Cross solves both loops simultaneously — adjusting all flow rates until head loss is balanced in every loop and continuity is satisfied at every node.</p>
+      <p style="margin:.5rem 0 .9rem;font-size:.93rem;color:#2d2840"><strong>Initial guess:</strong> to start, we assume no cross-pipe flow (\(Q_{DC} = 0\)) and split \(Q_{pump}\) between the two branches. The direction we assign to each pipe in the guess is important — it tells Hardy Cross which way to try first. The method will correct the directions automatically if the guess is wrong, as long as continuity is satisfied at every node.</p>
+      <div class="cg-row"><span class="cg-lbl">Initial \(Q_{AB} = Q_{BC} = Q_{CF}\)</span><span class="cres" id="c3-ig-upper">—</span><span class="cunit">LPM (A→B→C→F)</span></div>
+      <div class="cg-row"><span class="cg-lbl">Initial \(Q_{AD} = Q_{DF}\)</span><span class="cres" id="c3-ig-lower">—</span><span class="cunit">LPM (A→D→F)</span></div>
+      <div class="cg-row"><span class="cg-lbl">Initial \(Q_{DC}\)</span><span class="cres" id="c3-ig-dc">0.000</span><span class="cunit">LPM (assumed zero — no cross flow yet)</span></div>
+      <div class="cg-row"><span class="cg-lbl">Continuity check at A</span><span class="cres green" id="c3-ig-check">—</span><span class="cunit">\(Q_{upper} + Q_{lower} = Q_{pump}\) ✓</span></div>
+      <hr style="margin:.6rem 0">
+      <p style="margin:.5rem 0 .9rem;font-size:.93rem;color:#2d2840"><strong>After convergence:</strong></p>
+      <div class="cg-row"><span class="cg-lbl">\( Q_{AB} \) (pipe A→B)</span><span class="cres navy" id="c3-qab">—</span><span class="cunit">LPM</span></div>
+      <div class="cg-row"><span class="cg-lbl">\( Q_{BC} \) (pipe B→C)</span><span class="cres navy" id="c3-qbc">—</span><span class="cunit">LPM</span></div>
+      <div class="cg-row"><span class="cg-lbl">\( Q_{CF} \) (pipe C→F)</span><span class="cres navy" id="c3-qcf">—</span><span class="cunit">LPM</span></div>
+      <div class="cg-row"><span class="cg-lbl">\( Q_{AD} \) (pipe A→D)</span><span class="cres teal" id="c3-qad">—</span><span class="cunit">LPM</span></div>
+      <div class="cg-row"><span class="cg-lbl">\( Q_{DF} \) (pipe D→F)</span><span class="cres teal" id="c3-qdf">—</span><span class="cunit">LPM</span></div>
+      <div class="cg-row"><span class="cg-lbl">\( Q_{DC} \) (cross-pipe D→C, with direction)</span><span class="cres amber" id="c3-qdc">—</span><span class="cunit">LPM</span></div>
+    </div>
+
+    <!-- Step 3 — Path calculation -->
+    <div class="calc-guide">
+      <div class="cg-title" style="font-size:.85rem;letter-spacing:.05em">Step 3 — Head loss estimate from Hardy Cross flow rates</div>
+      <p style="margin:.5rem 0 .9rem;font-size:.93rem;color:#2d2840">Hardy Cross enforces equal head loss through every path — so all three paths give the same result. This is the H_friction estimate from your Hardy Cross solution, using R from Configuration 1.</p>
+      <div class="eq-box">
+        \[ H_{friction,HC} = R \cdot (Q_{AB}^2 + Q_{BC}^2 + Q_{CF}^2) \times 1000 \]
+      </div>
+      <div class="cg-row"><span class="cg-lbl">\( H_{friction} \) — from Hardy Cross (path 1)</span><span class="cres navy" id="c3-hp1">—</span><span class="cunit">mmH₂O</span></div>
+    </div>
+
+    <!-- Step 4 — Minor losses and H_friction from measurement -->
+    <div class="calc-guide">
+      <div class="cg-title" style="font-size:.85rem;letter-spacing:.05em">Step 4 — Minor losses and experimental \(H_{friction}\)</div>
+      <div class="eq-box">
+        \[ K_{avg} = \frac{K_1 + K_2}{2} \qquad H_{minor} = 2 \cdot K_{avg} \cdot \frac{V_{in}^2}{2g} \times 1000 \]
+        \[ H_{friction} = H_{A \to F} - H_{minor} \]
+      </div>
+      <div class="cg-row"><span class="cg-lbl">\( K_1 \) (Config 1)</span><span class="cres" id="c3-k1">—</span><span class="cunit">—</span></div>
+      <div class="cg-row"><span class="cg-lbl">\( K_2 \) (Config 2)</span><span class="cres" id="c3-k2">—</span><span class="cunit">—</span></div>
+      <div class="cg-row"><span class="cg-lbl">\( K_{avg} = (K_1 + K_2)/2 \)</span><span class="cres amber" id="c3-kavg">—</span><span class="cunit">—</span></div>
+      <div class="cg-row"><span class="cg-lbl">\( V_{in} = Q_{pump}/A \)</span><span class="cres" id="c3-vin">—</span><span class="cunit">m/s</span></div>
+      <div class="cg-row"><span class="cg-lbl">\( H_{minor} = 2 K_{avg} \cdot V_{in}^2/(2g) \times 1000 \)</span><span class="cres amber" id="c3-hminor">—</span><span class="cunit">mmH₂O</span></div>
+      <div class="cg-row"><span class="cg-lbl">\( H_{friction} = H_{A \to F} - H_{minor} \)</span><span class="cres navy" id="c3-hfriction">—</span><span class="cunit">mmH₂O</span></div>
+    </div>
+
+    <!-- Step 5 — Comparison -->
+    <div class="calc-guide">
+      <div class="cg-title" style="font-size:.85rem;letter-spacing:.05em">Step 5 — Hardy Cross estimate vs experimental \(H_{friction}\)</div>
+      <p style="margin:.5rem 0 .9rem;font-size:.93rem;color:#2d2840">How well does the Hardy Cross estimate match the \(H_{friction}\) derived from your measurement? Any difference reveals the effect of \(R\) varying between configurations.</p>
+      <div class="cg-row"><span class="cg-lbl">\( H_{friction,HC} \) — from Hardy Cross</span><span class="cres navy" id="c3-hp1b">—</span><span class="cunit">mmH₂O</span></div>
+      <div class="cg-row"><span class="cg-lbl">\( H_{friction,exp} \) — from measurement</span><span class="cres teal" id="c3-hfrictionb">—</span><span class="cunit">mmH₂O</span></div>
+      <div class="cg-row"><span class="cg-lbl">Difference</span><span class="cres" id="c3-diffavg">—</span><span class="cunit">%</span></div>
+    </div>
+
+    <div class="callout navy" id="c3-obs"><strong>Observation</strong><span id="c3-obs-text"></span></div>
+
+    <hr>
+
+    <div class="qblock">
+      <div class="ql">Discuss with your group</div>
+      <div class="qt">"The Hardy Cross method uses a fixed \(R\) for every pipe — the same \(R\) you measured in Configuration 1. Your network now has pipes carrying different flow rates. How confident are you that \(R\) is the same for every pipe? What does the comparison between your path estimate and your experimental \(H_{friction}\) tell you about this assumption?"</div>
+      <button class="exp-btn" style="margin-top:.85rem;font-size:.85rem;padding:.5rem 1.1rem" onclick="showExp('exp-c3-paths')">Show hint →</button>
+      <div class="exp-panel" id="exp-c3-paths">
+        <div class="callout amber" style="margin-top:.5rem">
+          <strong>Hint</strong>
+          Hardy Cross enforces equal head loss through all paths — so the three path calculations give the same answer by definition. They all use the same \(R\). The real question is whether that \(R\) — measured in Config 1 at a specific flow rate — is still valid at the different flow rates in Config 3. \(R = f \cdot L / (2g \cdot D \cdot A^2)\), and \(f\) depends on \(Re\), which depends on \(Q\). If the flow rates in Config 3 differ significantly from Config 1, \(f\) will differ slightly, and so will \(R\). The gap between your path estimate and your experimental \(H_{friction}\) is a direct measure of this effect. In real water distribution networks with large \(L/D\) and fully turbulent flow, \(f\) is nearly constant — which is why Hardy Cross works so well there.
+        </div>
+      </div>
+    </div>
+
+    <div class="qblock" style="margin-top:1rem">
+      <div class="ql">Question — real network design</div>
+      <div class="qt">"In your experiment the cross-pipe D→C carried flow in a specific direction. As a civil engineer designing a water distribution network, why is it important to know the flow direction in every pipe — and what could go wrong if you assumed the wrong direction when sizing a pipe?"</div>
+    </div>
+
+  </div><!-- /c3-body -->
+
+  <div class="nav-row">
+    <button class="nbtn back" onclick="go(3)">← Back</button>
+    <button class="nbtn next" onclick="go(5)">Summary →</button>
+  </div>
+</div>
+
+<!-- ══ SLIDE 5 — SUMMARY ══ -->
+<div class="slide" id="sl5">
+  <div class="eyebrow">Summary</div>
+  <h1 class="slide-title">Results across all three <em>configurations</em></h1>
+
+  <table class="ctab" id="sum-tab">
+    <thead><tr><th>Configuration</th><th>\(Q_{pump}\) (LPM)</th><th>\(H_{A\to F}\) measured (mmH₂O)</th><th>\(H_{friction}\) %</th><th>Cross-pipe</th></tr></thead>
+    <tbody id="sum-body"></tbody>
+  </table>
+
+  <hr>
+
+  <div class="callout purple">
+    <strong>Minor losses dominate this experiment</strong>
+    In all configurations \(H_{minor}\) accounts for the majority of \(H_{A \to F}\). Your pipes have \(L/D = 60\). A real water main has \(L/D \approx 2\,500\text{–}83\,000\). In a real network pipe friction dominates and minor losses are safely neglected. Your experiment sits in the opposite regime — and that is what makes it physically interesting.
+  </div>
+
+  <div class="callout navy">
+    <strong>What changes between configurations</strong>
+    \(H_{minor}\) stays approximately constant — it depends on \(V_{in} = Q_{pump}/A\), which barely changed. \(H_{A \to F}\) changed because \(H_{friction}\) changed. Fewer pipes in series means less resistance and less friction. Hardy Cross was the only way to find the flow rate in each pipe once symmetry was broken.
+  </div>
+
+  <div class="callout amber">
+    <strong>The constant-R assumption in Hardy Cross</strong>
+    Hardy Cross assumes \(R\) is fixed for each pipe. In reality \(R\) depends on \(f\), which varies with \(Re\), which varies with \(Q\). In Configuration 3 every pipe carries a different flow rate — so strictly each pipe has a slightly different \(R\). The comparison between the path estimate (using \(R\) from Config 1) and the experimental \(H_{friction}\) shows you how significant this effect is in your network. In real water distribution networks with large \(L/D\) and fully turbulent flow, \(f\) is nearly constant and Hardy Cross is highly accurate.
+  </div>
+
+  <div class="nav-row">
+    <button class="nbtn back" onclick="go(4)">← Back</button>
+    <button class="nbtn next" disabled>Complete ✓</button>
+  </div>
+</div>
+
+</div><!-- /page -->
+
+<script>
+const TITLES=['Introduction','Configuration 1','Configuration 2','Configuration 3','Summary'];
+const g=9.81,nu=1e-6,Ap=Math.PI*0.005*0.005/4,Lpipe=0.30,D=0.005;
+let cur=1;
+const G={R:0,K:0,vin1:0,vh1:0,Qp1:0,Qpipe1:0,dp1:0,pf1:0,ml1:0,pct1:0};
+const SUMDATA=[{},{},{}];
+const PREDS={};
+
+(function(){
+  const pd=document.getElementById('pdots');
+  TITLES.forEach((_,i)=>{const d=document.createElement('div');d.className='dot'+(i===0?' active':'');pd.appendChild(d);});
+})();
+function updProg(n){
+  document.getElementById('plabel').textContent=n+' of 5';
+  document.getElementById('ptitle').textContent=TITLES[n-1];
+  document.querySelectorAll('.dot').forEach((d,i)=>{d.classList.remove('active','done');if(i===n-1)d.classList.add('active');else if(i<n-1)d.classList.add('done');});
+}
+function go(n){
+  document.getElementById('sl'+cur).classList.remove('active');
+  cur=n;
+  const target=document.getElementById('sl'+n);
+  target.classList.add('active');
+  updProg(n);
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(n===5)buildSummary();
+  setTimeout(()=>{if(window.MathJax)MathJax.typesetPromise();},100);
+}
+function sv(id,val,cls){const el=document.getElementById(id);if(!el)return;el.textContent=val;if(cls)el.className='cres '+cls;}
+function setPredKeep(key,val,btn){
+  btn.closest('.pred-wrap').querySelectorAll('.pred-opt').forEach(o=>o.classList.remove('selected'));
+  btn.classList.add('selected');
+  PREDS[key]=val;
+  const keepEl=document.getElementById('keep-'+key);
+  if(keepEl)keepEl.style.display='block';
+}
+function setPred(key,val,btn){
+  btn.closest('.pred-wrap').querySelectorAll('.pred-opt').forEach(o=>o.classList.remove('selected'));
+  btn.classList.add('selected');PREDS[key]=val;
+}
+function showExp(id){
+  document.getElementById(id).classList.add('open');
+  setTimeout(()=>{if(window.MathJax)MathJax.typesetPromise();},50);
+}
+
+// HC 1-loop with rows
+function hc1rows(Qp,Ru,Rl,Qu0){
+  let Qu=Qu0,rows=[];
+  for(let i=0;i<30;i++){
+    const Ql=Qp-Qu,sH=Ru*Qu*Math.abs(Qu)-Rl*Ql*Math.abs(Ql);
+    const dn=2*Ru*Math.abs(Qu)+2*Rl*Math.abs(Ql);if(dn===0)break;
+    const dq=-sH/dn;Qu+=dq;
+    rows.push({i:i+1,Qu,Ql:Qp-Qu,sumH:sH,dq:Math.abs(dq)});
+    if(Math.abs(dq)<1e-10)break;
+  }
+  return{Qu,Ql:Qp-Qu,rows};
+}
+// HC 2-loop
+function hc2(pipes,loops,Q0){
+  let Q=[...Q0];
+  for(let it=0;it<60;it++){
+    const dQ=new Array(Q.length).fill(0);let mx=0;
+    loops.forEach(lp=>{
+      const sH=lp.pipes.reduce((s,pi,i)=>s+lp.signs[i]*pipes[pi].R*Q[pi]*Math.abs(Q[pi]),0);
+      const dn=lp.pipes.reduce((s,pi)=>s+2*pipes[pi].R*Math.abs(Q[pi]),0);
+      if(dn===0)return;const dq=-sH/dn;mx=Math.max(mx,Math.abs(dq));
+      lp.pipes.forEach((pi,i)=>{dQ[pi]+=lp.signs[i]*dq;});
+    });
+    Q=Q.map((q,i)=>q+dQ[i]);if(mx<1e-10)break;
+  }
+  return Q;
+}
+
+// ── CONFIG 1 ──
+function calcC1(){
+  const V=+document.getElementById('c1V').value,t=+document.getElementById('c1t').value;
+  const dp=+document.getElementById('c1dp').value,dpt=+document.getElementById('c1dpt').value;
+  if([V,t,dp,dpt].some(isNaN)||t===0||V===0)return;
+  const Qp=(V/t)*60,Qpipe=Qp/2,HL=dp/1000,R=HL/(Qpipe*Qpipe);
+  const Vin=(Qp/60000)/Ap,vh=Vin*Vin/(2*g);
+  const pf=3*dp,ml=dpt-pf,K=(ml/1000/2)/vh;
+  G.R=R;G.K=K;G.vin1=Vin;G.vh1=vh;G.Qp1=Qp;G.pf1=pf;G.ml1=ml;G.pct1=pf/dpt*100;
+  G.Qpipe1=Qpipe;G.dp1=dp;
+  // Step 1 — show Q_pump immediately
+  sv('c1-qp',Qp.toFixed(3),'navy');
+  // Step 4
+  sv('c1-pf',pf.toFixed(1),'navy');sv('c1-ml',ml.toFixed(1),'amber');
+  sv('c1-Vm',Vin.toFixed(4));sv('c1-vh',vh.toFixed(5));
+  sv('c1-KT',K.toFixed(3),'amber');sv('c1-pct',(pf/dpt*100).toFixed(1));
+  const pct=pf/dpt*100,mpct=100-pct;
+  document.getElementById('c1-barpf').style.width=pct.toFixed(1)+'%';document.getElementById('c1-barpf').textContent=pct.toFixed(0)+'%';
+  document.getElementById('c1-barml').style.width=mpct.toFixed(1)+'%';document.getElementById('c1-barml').textContent=mpct.toFixed(0)+'%';
+  document.getElementById('c1-obs-text').textContent=`H_friction accounts for ${pct.toFixed(0)}% of H_{A→F}. H_minor accounts for ${mpct.toFixed(0)}%. With L/D = ${(Lpipe/D).toFixed(0)}, minor losses dominate because the pipes are short relative to their diameter.`;
+  document.getElementById('c1-obs').style.display='block';
+  SUMDATA[0]={Qp,dpt,pf,pct:pct.toFixed(0),cross:'—'};
+  document.getElementById('c1-body').style.display='block';
+  setTimeout(()=>{if(window.MathJax)MathJax.typesetPromise();},100);
+}
+
+// ── CHECKPOINT FUNCTIONS ──
+function checkQA(){
+  const val=+document.getElementById('c1-qa').value;
+  if(isNaN(val)||val===0||!G.Qp1)return;
+  const expected=G.Qp1/2;
+  const ok=Math.abs(val-expected)/expected<0.05;
+  const st=document.getElementById('c1-qa-status');
+  const msg=document.getElementById('c1-qa-msg');
+  const expWrap=document.getElementById('c1-qa-exp-wrap');
+  if(ok){
+    st.innerHTML='<span style="color:var(--green);font-weight:500">✓ Correct — '+val.toFixed(3)+' LPM</span>';
+    msg.style.display='none';
+    expWrap.style.display='block';
+  } else {
+    st.innerHTML='<span style="color:var(--red)">✗ Check your reasoning</span>';
+    msg.innerHTML='In a symmetric parallel network the flow splits equally between identical branches. The flow in each branch = \( Q_{pump} / 2 \) = '+expected.toFixed(3)+' LPM.';
+    msg.style.display='block';
+    expWrap.style.display='block';
+    setTimeout(()=>{if(window.MathJax)MathJax.typesetPromise();},50);
+  }
+}
+function checkQB(){
+  const val=+document.getElementById('c1-qb').value;
+  if(isNaN(val)||val===0||!G.Qp1)return;
+  const expected=G.Qp1/2;
+  const ok=Math.abs(val-expected)/expected<0.05;
+  const st=document.getElementById('c1-qb-status');
+  const msg=document.getElementById('c1-qb-msg');
+  const expWrap=document.getElementById('c1-qb-exp-wrap');
+  if(ok){
+    st.innerHTML='<span style="color:var(--green);font-weight:500">✓ Correct — '+val.toFixed(3)+' LPM</span>';
+    msg.style.display='none';
+    expWrap.style.display='block';
+  } else {
+    st.innerHTML='<span style="color:var(--red)">✗ Check your reasoning</span>';
+    msg.innerHTML='The lower branch is identical to the upper branch. \( Q_{lower} = Q_{pump} / 2 \) = '+expected.toFixed(3)+' LPM.';
+    msg.style.display='block';
+    expWrap.style.display='block';
+    setTimeout(()=>{if(window.MathJax)MathJax.typesetPromise();},50);
+  }
+}
+function checkQC(){
+  const val=+document.getElementById('c1-qc').value;
+  if(isNaN(val)||val===0||!G.dp1)return;
+  const expected=3*G.dp1;
+  const ok=Math.abs(val-expected)/expected<0.05;
+  const st=document.getElementById('c1-qc-status');
+  const msg=document.getElementById('c1-qc-msg');
+  if(ok){
+    st.innerHTML='<span style="color:var(--green);font-weight:500">✓ Correct — '+val.toFixed(1)+' mmH₂O</span>';
+    msg.style.display='none';
+  } else {
+    st.innerHTML='<span style="color:var(--red)">✗ Check your reasoning</span>';
+    msg.style.display='block';
+    setTimeout(()=>{if(window.MathJax)MathJax.typesetPromise();},50);
+  }
+}
+function checkQD(){
+  const val=+document.getElementById('c1-qd').value;
+  if(isNaN(val)||val===0||!G.dp1)return;
+  const expected=3*G.dp1;
+  const ok=Math.abs(val-expected)/expected<0.05;
+  const st=document.getElementById('c1-qd-status');
+  const msg=document.getElementById('c1-qd-msg');
+  if(ok){
+    st.innerHTML='<span style="color:var(--green);font-weight:500">✓ Correct — '+val.toFixed(1)+' mmH₂O</span>';
+    msg.style.display='none';
+  } else {
+    st.innerHTML='<span style="color:var(--red)">✗ Check your reasoning</span>';
+    msg.style.display='block';
+    setTimeout(()=>{if(window.MathJax)MathJax.typesetPromise();},50);
+  }
+}
+
+// ── CONFIG 2 ──
+function calcC2(){
+  const V=+document.getElementById('c2V').value,t=+document.getElementById('c2t').value;
+  const dp2=+document.getElementById('c2dp').value;
+  const dpt=+document.getElementById('c2dpt').value;
+  if([V,t].some(isNaN)||t===0||V===0||!G.R)return;
+  const Qp=(V/t)*60;
+  sv('c2-qp',Qp.toFixed(3),'navy');
+  sv('c2-Ru',(3*G.R).toFixed(5));sv('c2-Rl',G.R.toFixed(5));
+  SUMDATA[1].Qp=Qp;
+  if(dpt>0)SUMDATA[1].dpt=dpt;
+  if(dp2>0){SUMDATA[1].dp2=dp2;sv('c2-hfmeas',dp2.toFixed(2));}
+  // show prediction outcome immediately if both measurements are in
+  if(Qp>0&&dpt>0){
+    const actH=dpt<(G.pf1+G.ml1)-5?'dec':dpt>(G.pf1+G.ml1)+5?'inc':'same';
+    const actQ=Qp>G.Qp1+0.02?'inc':Qp<G.Qp1-0.02?'dec':'same';
+    const selH=PREDS['p2h'],selQ=PREDS['p2q'];
+    const okH=selH===actH,okQ=selQ===actQ;
+    let msg='',tone='purple';
+    if(okH&&okQ){msg='Both your predictions were correct.';tone='green';}
+    else if(okH||okQ){msg='One of your predictions was correct — '+(okH?'H_{A\u2192F}':'Q_{pump}')+' matched. Keep the other in mind as you work through the analysis.';tone='amber';}
+    else if(!selH&&!selQ){msg='Make your predictions above before proceeding.';}
+    else{msg='Neither prediction matched — that is fine. Work through the analysis to understand why.';tone='amber';}
+    const el=document.getElementById('c2-pred-outcome');
+    const txt=document.getElementById('c2-pred-outcome-text');
+    if(el&&txt){txt.textContent=msg;el.className='callout '+tone;el.style.display='block';}
+  }
+  document.getElementById('c2-body').style.display='block';
+  setTimeout(()=>{if(window.MathJax)MathJax.typesetPromise();},100);
+}
+
+function answerMC(idx){
+  const opts=document.getElementById('mc-pump-opts').querySelectorAll('.pred-opt');
+  opts.forEach((o,i)=>{
+    o.classList.remove('selected','correct','wrong');
+    if(i===1)o.classList.add('correct');
+    else if(i===idx&&idx!==1)o.classList.add('wrong');
+  });
+  const res=document.getElementById('mc-pump-result');
+  const correct=idx===1;
+  res.innerHTML='<div class="callout '+(correct?'green':'amber')+'">'
+    +'<strong>'+(correct?'Correct!':'Not quite — the answer is B.')+'</strong>'
+    +(correct
+      ?'Higher network resistance means the pump must work harder against greater head loss. On the pump curve, higher resistance shifts the operating point to the left — lower flow and higher head. You saw this in Config 1 vs Config 2 in reverse: lower resistance in Config 2 shifted the operating point to slightly higher flow.'
+      :'A pump delivers less flow when the network resistance is higher — not lower. Higher resistance means greater head loss at any given flow rate. The pump operating point moves left along its curve to a lower flow rate. Options A, C and D would all increase flow: lower resistance, higher speed, or larger diameter all reduce head loss and shift the operating point to the right.')
+    +'</div>';
+  res.style.display='block';
+  setTimeout(()=>{if(window.MathJax)MathJax.typesetPromise();},50);
+}
+function calcC2moody(){
+  const f=+document.getElementById('c2f').value;
+  if(!f||!G.Qu_c2)return;
+  const Vup=(G.Qu_c2/60000)/Ap;
+  const hfpred=f*(Lpipe/D)*Vup*Vup/(2*g)*1000;
+  sv('c2-hfpred',hfpred.toFixed(2),'navy');
+  sv('c2-3hfpred',(3*hfpred).toFixed(1),'navy');
+  const dp2=+document.getElementById('c2dp').value;
+  if(dp2>0){
+    const err=Math.abs((hfpred-dp2)/dp2)*100;
+    sv('c2-hfdiff',err.toFixed(1)+'%',err<10?'green':err<20?'amber':'red');
+    sv('c2-3hfmeas',(3*dp2).toFixed(1));
+  }
+}
+function setupHC2(){
+  const q0=+document.getElementById('c2q0').value;
+  const Qp=+document.getElementById('c2-qp').textContent;
+  if(!q0||!Qp||!G.R)return;
+  sv('c2-ql0',(Qp-q0).toFixed(3));
+  const{Qu,Ql,rows}=hc1rows(Qp,3*G.R,G.R,q0);
+  buildStepper(rows,Qp,G.R,Qu,Ql,+document.getElementById('c2dpt').value,+document.getElementById('c2dp').value);
+}
+function buildStepper(rows,Qp,R,QuFinal,QlFinal,dpt,dp2){
+  const nav=document.getElementById('hc2-nav'),pan=document.getElementById('hc2-panels');
+  nav.innerHTML='';pan.innerHTML='';
+  document.getElementById('hc2-stepper').style.display='block';
+  const Ru=3*R,Rl=R,q0=+document.getElementById('c2q0').value,ql0=Qp-q0;
+  const H0u=Ru*q0*q0,H0l=Rl*ql0*ql0,sH0=H0u-H0l;
+  const mk=(lbl,idx)=>{const b=document.createElement('button');b.className='ibtn';b.textContent=lbl;b.onclick=()=>{nav.querySelectorAll('.ibtn').forEach((x,i)=>x.classList.toggle('on',i===idx));pan.querySelectorAll('.ipanel').forEach((p,i)=>p.classList.toggle('on',i===idx));};return b;};
+  const gb=mk('Initial guess',0);gb.classList.add('on');nav.appendChild(gb);
+  const gp=document.createElement('div');gp.className='ipanel on';
+  gp.innerHTML='<div class="calc-guide"><div class="cg-title">Initial guess — continuity &#10003;, loop equation not yet satisfied</div>'
+    +'<div class="cg-row"><span class="cg-lbl">Q_upper</span><span class="cres navy">'+q0.toFixed(4)+'</span><span class="cunit">LPM</span></div>'
+    +'<div class="cg-row"><span class="cg-lbl">Q_lower</span><span class="cres teal">'+ql0.toFixed(4)+'</span><span class="cunit">LPM</span></div>'
+    +'<div class="cg-row"><span class="cg-lbl">H_upper = 3R x Q_u²</span><span class="cres">'+H0u.toFixed(5)+'</span><span class="cunit">m</span></div>'
+    +'<div class="cg-row"><span class="cg-lbl">H_lower = R x Q_l²</span><span class="cres">'+H0l.toFixed(5)+'</span><span class="cunit">m</span></div>'
+    +'<div class="cg-row"><span class="cg-lbl">&#931; H = H_upper - H_lower</span><span class="cres '+(Math.abs(sH0)>0.001?'amber':'green')+'">'+sH0.toFixed(5)+'</span><span class="cunit">m</span></div>'
+    +'</div><div class="callout amber">Loop imbalance = '+Math.abs(sH0).toFixed(4)+' m. Press Iteration 1.</div>';
+  pan.appendChild(gp);
+  let pQu=q0,pQl=ql0;
+  rows.forEach((r,idx)=>{
+    const b=mk('Iteration '+(idx+1),idx+1);nav.appendChild(b);
+    const Hup=Ru*pQu*pQu,Hlp=Rl*pQl*pQl,sH=Hup-Hlp,dn=2*Ru*pQu+2*Rl*pQl,dqS=-(sH/dn);
+    const conv=r.dq<0.001;
+    const ip=document.createElement('div');ip.className='ipanel';
+    ip.innerHTML='<div class="calc-guide"><div class="cg-title">Iteration '+(idx+1)+'</div>'
+      +'<div class="cg-row"><span class="cg-lbl">Numerator: 3R&#183;Qu&#183;|Qu| - R&#183;Ql&#183;|Ql|</span><span class="cres '+(Math.abs(sH)>0.001?'amber':'green')+'">'+sH.toFixed(5)+'</span><span class="cunit">m</span></div>'
+      +'<div class="cg-row"><span class="cg-lbl">Denominator: 2&#183;3R&#183;|Qu| + 2R&#183;|Ql|</span><span class="cres">'+dn.toFixed(4)+'</span><span class="cunit">m/LPM</span></div>'
+      +'<div class="cg-row"><span class="cg-lbl">&#916;Q</span><span class="cres amber">'+dqS.toFixed(5)+'</span><span class="cunit">LPM</span></div>'
+      +'<hr style="margin:.4rem 0">'
+      +'<div class="cg-row"><span class="cg-lbl">Q_upper &larr; '+pQu.toFixed(4)+' + &Delta;Q</span><span class="cres navy">'+r.Qu.toFixed(5)+'</span><span class="cunit">LPM</span></div>'
+      +'<div class="cg-row"><span class="cg-lbl">Q_lower &larr; '+pQl.toFixed(4)+' - &Delta;Q</span><span class="cres teal">'+r.Ql.toFixed(5)+'</span><span class="cunit">LPM</span></div>'
+      +'<div class="cg-row"><span class="cg-lbl">&#931; H_L</span><span class="cres '+(conv?'green':'amber')+'">'+r.sumH.toFixed(6)+'</span><span class="cunit">m</span></div>'
+      +'<div class="cg-row"><span class="cg-lbl">|&#916;Q|</span><span class="cres '+(conv?'green':'amber')+'">'+r.dq.toFixed(6)+'</span><span class="cunit">LPM '+(conv?'&#10003; converged':'')+'</span></div>'
+      +'</div>'+(conv?'<div class="callout green"><strong>Converged</strong>Q_upper = '+r.Qu.toFixed(4)+' LPM &nbsp;&middot;&nbsp; Q_lower = '+r.Ql.toFixed(4)+' LPM &nbsp;&middot;&nbsp; Q_l/Q_u = '+(r.Ql/r.Qu).toFixed(4)+' &nbsp;(&radic;3 = 1.7321)</div>':'<div class="callout navy">|&#916;Q| = '+r.dq.toFixed(4)+' LPM &mdash; press next iteration.</div>');
+    pan.appendChild(ip);
+    pQu=r.Qu;pQl=r.Ql;
+    if(conv)showC2Budget(QuFinal,QlFinal,Qp,dpt,dp2);
+  });
+}
+
+function showC2Budget(Qu,Ql,Qp,dpt,dp2){
+  G.Qu_c2=Qu;
+  const R=G.R,Vin2=(Qp/60000)/Ap,vh2=Vin2*Vin2/(2*g);
+  const Vup=(Qu/60000)/Ap,Re2=Vup*D/nu;
+  // Use measured h_pipe2 for friction budget
+  const pf2=dp2>0?3*dp2:3*R*Qu*Qu*1000;
+  const ml2=dpt>0?dpt-pf2:2*G.K*vh2*1000;
+  const tot2=dpt>0?dpt:pf2+ml2;
+  const pct2=pf2/tot2*100,mpct2=ml2/tot2*100;
+  const K2=(ml2/1000/2)/vh2;
+  sv('c2-Vup',Vup.toFixed(4));sv('c2-Re',Re2.toFixed(0),'amber');
+  sv('c2-hfmeas',dp2>0?dp2.toFixed(2):'—');
+  sv('c2-pf',pf2.toFixed(1),'navy');sv('c2-ml',ml2.toFixed(1),'amber');
+  sv('c2-Vin',Vin2.toFixed(4));sv('c2-vh2',vh2.toFixed(5));
+  sv('c2-K',K2.toFixed(3),'amber');sv('c2-K1',G.K.toFixed(3));
+  sv('c2-pct',pct2.toFixed(1));
+  const p1=G.pct1,m1=100-p1;
+  document.getElementById('c2-b1pf').style.width=p1.toFixed(1)+'%';document.getElementById('c2-b1pf').textContent=p1.toFixed(0)+'%';
+  document.getElementById('c2-b1ml').style.width=m1.toFixed(1)+'%';document.getElementById('c2-b1ml').textContent=m1.toFixed(0)+'%';
+  document.getElementById('c2-b2pf').style.width=pct2.toFixed(1)+'%';document.getElementById('c2-b2pf').textContent=pct2.toFixed(0)+'%';
+  document.getElementById('c2-b2ml').style.width=mpct2.toFixed(1)+'%';document.getElementById('c2-b2ml').textContent=mpct2.toFixed(0)+'%';
+  const cls=v=>v<0?'dn':v>0?'up':'nc';
+  const pfCh=pf2-G.pf1,mlCh=ml2-G.ml1,totCh=tot2-(G.pf1+G.ml1),qpCh=Qp-G.Qp1;
+  document.getElementById('c2-table').innerHTML='<thead><tr><th>Quantity</th><th>Config 1</th><th>Config 2</th><th>Change</th></tr></thead><tbody>'
+    +'<tr><td>Q_pump (LPM)</td><td>'+G.Qp1.toFixed(3)+'</td><td>'+Qp.toFixed(3)+'</td><td class="'+cls(qpCh)+'">'+(qpCh>=0?'+':'')+qpCh.toFixed(3)+'</td></tr>'
+    +'<tr><td>H_friction (mmH&#8322;O)</td><td>'+G.pf1.toFixed(1)+'</td><td>'+pf2.toFixed(1)+'</td><td class="'+cls(pfCh)+'">'+(pfCh>=0?'+':'')+pfCh.toFixed(1)+'</td></tr>'
+    +'<tr><td>H_minor (mmH&#8322;O)</td><td>'+G.ml1.toFixed(1)+'</td><td>'+ml2.toFixed(1)+'</td><td class="'+cls(mlCh)+'">'+(mlCh>=0?'+':'')+mlCh.toFixed(1)+'</td></tr>'
+    +'<tr><td>H_A&#8594;F (mmH&#8322;O)</td><td>'+(G.pf1+G.ml1).toFixed(1)+'</td><td>'+tot2.toFixed(1)+'</td><td class="'+cls(totCh)+'">'+(totCh>=0?'+':'')+totCh.toFixed(1)+'</td></tr>'
+    +'<tr><td>K (T-junction)</td><td>'+G.K.toFixed(3)+'</td><td>'+K2.toFixed(3)+'</td><td class="nc">compare</td></tr>'
+    +'</tbody>';
+  document.getElementById('c2-obs-text').textContent=' H_friction dropped because the lower branch now has less resistance — less pipe friction, less energy dissipated. H_minor stayed approximately the same. K may differ slightly from Config 1 depending on how the T-junction responds to the asymmetric flow split — compare and discuss with your group.';
+  document.getElementById('c2-pred-reveal') && (document.getElementById('c2-pred-reveal').style.display='none');
+  SUMDATA[1]={Qp,dpt:tot2,pf:pf2,K2:K2,pct:pct2.toFixed(0),cross:'—'};
+  document.getElementById('c2-budget').style.display='block';
+  setTimeout(()=>{if(window.MathJax)MathJax.typesetPromise();},100);
+}
+
+// ── CONFIG 3 ──
+function calcC3(){
+  const V=+document.getElementById('c3V').value,t=+document.getElementById('c3t').value;
+  const dpt=+document.getElementById('c3dpt').value;
+  if([V,t].some(isNaN)||t===0||V===0)return;
+  const Qp=(V/t)*60;
+  sv('c3-qp',Qp.toFixed(3),'navy');
+  // need R from Config 1 to proceed
+  if(!G.R){
+    document.getElementById('c3-body').innerHTML='<div class="callout amber"><strong>Complete Configuration 1 first</strong>R is needed from Config 1 before the analysis can run.</div>';
+    document.getElementById('c3-body').style.display='block';
+    return;
+  }
+  // show prediction outcome as soon as dpt is entered
+  if(dpt>0){
+    const c2tot=SUMDATA[1].dpt||(G.pf1+G.ml1)||0;
+    const actH=c2tot>0?(dpt<c2tot-5?'dec':dpt>c2tot+5?'inc':'same'):'same';
+    const selH=PREDS['p3h'];
+    let msg='',tone='purple';
+    if(!selH){msg='Make your predictions above before proceeding.';}
+    else if(selH===actH){msg='Your prediction for total head loss was correct.';tone='green';}
+    else{msg='The total head loss was different from your prediction. Work through the analysis to understand why.';tone='amber';}
+    const el=document.getElementById('c3-pred-outcome');
+    const txt=document.getElementById('c3-pred-outcome-text');
+    if(el&&txt){txt.textContent=msg;el.className='callout '+tone;el.style.display='block';}
+  }
+  const R=G.R;
+  const Q0upper=Qp*0.55,Q0lower=Qp*0.45;
+  sv('c3-ig-upper',Q0upper.toFixed(3));
+  sv('c3-ig-lower',Q0lower.toFixed(3));
+  sv('c3-ig-check',(Q0upper+Q0lower).toFixed(3)+' = '+Qp.toFixed(3),'green');
+  const pipes=[{R},{R},{R},{R},{R},{R}];
+  const loops=[{pipes:[0,1,5,3],signs:[1,1,-1,-1]},{pipes:[5,2,4],signs:[1,1,-1]}];
+  const Q=hc2(pipes,loops,[Q0upper,Q0upper,Q0upper,Q0lower,Q0lower,0.001]);
+  const Qab=Q[0],Qbc=Q[1],Qcf=Q[2],Qad=Q[3],Qdf=Q[4],Qdc=Q[5];
+  const dir=Qdc>0.002?'D \u2192 C':Qdc<-0.002?'C \u2192 D':'\u2248 0';
+  const K2val=SUMDATA[1].K2||G.K;
+  const Kavg=(G.K+K2val)/2;
+  const Vin3=(Qp/60000)/Ap,vh3=Vin3*Vin3/(2*g);
+  const hp1=R*(Qab*Qab+Qbc*Qbc+Qcf*Qcf)*1000;
+  const Hminor=2*Kavg*vh3*1000;
+  const Hfriction=dpt>0?dpt-Hminor:0;
+  sv('c3-qab',Qab.toFixed(4),'navy');sv('c3-qbc',Qbc.toFixed(4),'navy');sv('c3-qcf',Qcf.toFixed(4),'navy');
+  sv('c3-qad',Qad.toFixed(4),'teal');sv('c3-qdf',Qdf.toFixed(4),'teal');
+  sv('c3-qdc',Math.abs(Qdc).toFixed(4)+' LPM ('+dir+')','amber');
+  sv('c3-hp1',hp1.toFixed(1),'navy');
+  sv('c3-k1',G.K.toFixed(3));sv('c3-k2',K2val.toFixed(3));
+  sv('c3-kavg',Kavg.toFixed(3),'amber');
+  sv('c3-vin',Vin3.toFixed(4));
+  sv('c3-hminor',Hminor.toFixed(1),'amber');
+  sv('c3-hfriction',dpt>0?Hfriction.toFixed(1):'enter H above',dpt>0?'navy':'');
+  sv('c3-hp1b',hp1.toFixed(1),'navy');
+  sv('c3-hfrictionb',dpt>0?Hfriction.toFixed(1):'—',dpt>0?'teal':'');
+  if(dpt>0&&Hfriction>0){const dp=Math.abs(hp1-Hfriction)/Hfriction*100;sv('c3-diffavg',dp.toFixed(1)+'%',dp<5?'green':dp<15?'amber':'red');}
+  const actDC=Math.abs(Qdc)>0.002?'flow':'zero';
+  const selDC=PREDS['p3dc'];
+  const okDC=selDC===actDC;
+  let obsText='Q_DC = '+Math.abs(Qdc).toFixed(4)+' LPM ('+dir+'). ';
+  obsText+=okDC?'Your prediction was correct. ':'The cross-pipe carried '+(actDC==='flow'?'non-zero':'approximately zero')+' flow. ';
+  obsText+=actDC==='flow'
+    ?'The network is asymmetric — the upper branch has 3 pipes (resistance 3R) and the lower has 2 pipes (resistance 2R). The pressure at D and C differs, driving flow through the cross-pipe.'
+    :'The pressures at D and C happen to be approximately equal in this configuration.';
+  document.getElementById('c3-obs-text').textContent=obsText;
+  SUMDATA[2]={Qp,dpt:dpt||0,pf:dpt>0?Hfriction:hpavg,pct:dpt>0?(Hfriction/dpt*100).toFixed(0):'—',cross:Math.abs(Qdc).toFixed(4)+' LPM ('+dir+')'};
+  document.getElementById('c3-body').style.display='block';
+  setTimeout(()=>{if(window.MathJax)MathJax.typesetPromise();},100);
+}
+
+// ── SUMMARY ──
+function buildSummary(){
+  const labels=[
+    'Config 1 — 3 pipes ‖ 3 pipes',
+    'Config 2 — 3 pipes ‖ 1 pipe',
+    'Config 3 — 3 upper, 2 lower + cross D\u2192C'
+  ];
+  document.getElementById('sum-body').innerHTML=labels.map((lbl,i)=>{
+    const d=SUMDATA[i];
+    return'<tr>'
+      +'<td style="font-family:\'DM Sans\',sans-serif">'+lbl+'</td>'
+      +'<td>'+(d.Qp?d.Qp.toFixed(3):'—')+'</td>'
+      +'<td>'+(d.dpt?d.dpt.toFixed(0):'—')+'</td>'
+      +'<td>'+(d.pct||'—')+'</td>'
+      +'<td style="font-family:\'DM Sans\',sans-serif;font-size:.82rem;color:'+(i>=2?'var(--purple)':'var(--muted)')+'">'+( d.cross||'—')+'</td>'
+      +'</tr>';
+  }).join('');
+  setTimeout(()=>{if(window.MathJax)MathJax.typesetPromise();},100);
+}
+
+updProg(1);
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+</body>
+</html>
