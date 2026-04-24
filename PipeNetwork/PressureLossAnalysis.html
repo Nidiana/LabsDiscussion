@@ -5,13 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pipe Network — Pressure Loss Analysis</title>
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script>
-MathJax = {
-  tex: { inlineMath: [['\\(','\\)'], ['$','$']], displayMath: [['\\[','\\]']] },
-  options: { skipHtmlTags: ['script','noscript','style','textarea'] },
-  startup: { typeset: false }
-};
-</script>
 <style>
 :root{
   --bg:#f0eeff;--paper:#fdfcff;--ink:#1e1a2e;--muted:#6e6a80;--border:#d4cfe8;
@@ -155,6 +148,17 @@ hr{border:none;border-top:1px solid var(--border);margin:1.5rem 0}
 .nbtn.next{background:var(--navy);color:#fff}
 .nbtn.next:hover{background:var(--purple)}
 .nbtn:disabled{opacity:.32;cursor:not-allowed}
+
+/* ── Math rendering ── */
+.meq{font-family:'DM Mono',monospace;font-size:.9em;color:var(--ink);white-space:nowrap}
+.meq-block{background:var(--navy);color:#e8e4f8;border-radius:11px;padding:1rem 1.6rem;margin:1rem 0;font-family:'DM Mono',monospace;font-size:.92rem;line-height:2.2}
+.meq-row{display:block;margin:.15rem 0}
+.mfrac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 .15em;font-size:.88em;line-height:1.2}
+.mnum{border-bottom:1px solid currentColor;padding:0 .2em;text-align:center}
+.mden{padding:0 .2em;text-align:center}
+sub{font-size:.72em;vertical-align:sub}
+sup{font-size:.72em;vertical-align:super}
+
 </style>
 </head>
 <body>
@@ -179,15 +183,15 @@ hr{border:none;border-top:1px solid var(--border);margin:1.5rem 0}
   <ul class="checklist">
     <li><span class="ci">📐</span><span>
       <span class="ct">Pipe friction — Darcy-Weisbach</span>
-      <span class="cd">\( h_f = f \cdot \frac{L}{D} \cdot \frac{V^2}{2g} = R \cdot Q^2 \) &nbsp;·&nbsp; compute \(\mathrm{Re}\), read \(f\) from Moody diagram</span>
+      <span class="cd"><span class="meq">h<sub>f</sub> = f · <span class="mfrac"><span class="mnum">L</span><span class="mden">D</span></span> · <span class="mfrac"><span class="mnum">V<sup>2</sup></span><span class="mden">2g</span></span> = R · Q<sup>2</sup></span> &nbsp;·&nbsp; compute <span class="meq">Re</span>, read <span class="meq">f</span> from Moody diagram</span>
     </span></li>
     <li><span class="ci">🔀</span><span>
       <span class="ct">Minor losses at T-junctions</span>
-      <span class="cd">\( h_{m} = K \cdot \frac{V_{in}^2}{2g} \) &nbsp;where \(V_{in}\) is the inlet velocity at the T-junction (carries full \(Q_{pump}\))</span>
+      <span class="cd"><span class="meq">h<sub>m</sub> = K · V<sub>in</sub><sup>2</sup>2g</span> &nbsp;where <span class="meq">V<sub>in</sub></span> is the inlet velocity at the T-junction (carries full <span class="meq">Q<sub>pump</sub></span>)</span>
     </span></li>
     <li><span class="ci">⚙️</span><span>
       <span class="ct">Pump behaviour</span>
-      <span class="cd">A pump does not deliver fixed flow. When network resistance changes, the operating point shifts — \(Q_{pump}\) and \(H_{pump}\) change together along the pump curve.</span>
+      <span class="cd">A pump does not deliver fixed flow. When network resistance changes, the operating point shifts — <span class="meq">Q<sub>pump</sub></span> and <span class="meq">H<sub>pump</sub></span> change together along the pump curve.</span>
     </span></li>
     <li><span class="ci">🔁</span><span>
       <span class="ct">Hardy Cross method</span>
@@ -211,7 +215,20 @@ hr{border:none;border-top:1px solid var(--border);margin:1.5rem 0}
   <div class="eyebrow">Configuration 1 of 4</div>
   <h1 class="slide-title">Configuration 1 — <em>3 pipes ‖ 3 pipes</em></h1>
 
-  <p><strong>Set up:</strong> upper branch A→B→C→F (pipes 1, 2, 3 in series) and lower branch A→D→E→F (pipes 4, 5, 6 in series). Both branches identical. Symmetric network.</p>
+  <div class="callout navy" style="margin-bottom:1.2rem">
+    <strong>Set up the network</strong>
+    Using the pipes and fittings provided, assemble Configuration 1: upper branch A→B→C→F (pipes 1, 2, 3 in series) and lower branch A→D→E→F (pipes 4, 5, 6 in series). Both branches identical. Symmetric network. See picture below.
+  </div>
+
+  <div style="text-align:center;margin:1.2rem 0">
+    <img src="https://raw.githubusercontent.com/Nidiana/LabsDiscussion/main/PipeNetwork/configuration1.png"
+         alt="Configuration 1 — 3 pipes parallel 3 pipes"
+         style="max-width:100%;border-radius:12px;border:1.5px solid var(--border);box-shadow:0 2px 12px rgba(0,0,0,.08)"
+         onerror="this.style.display='none';document.getElementById('c1-img-err').style.display='block'">
+    <div id="c1-img-err" style="display:none;color:var(--muted);font-size:.85rem;margin-top:.5rem">
+      Image not available — check your internet connection or refer to the printed lab guide.
+    </div>
+  </div>
 
   <div class="diagram-box">
     <svg width="100%" viewBox="0 0 660 185" style="display:block">
@@ -250,7 +267,7 @@ hr{border:none;border-top:1px solid var(--border);margin:1.5rem 0}
     <div class="cg-row"><span class="cg-lbl">Head loss — pipe 2</span><div class="inp-wrap"><input class="cinput" type="number" id="c1dp" placeholder="0.0" step="0.1" oninput="calcC1()"><span class="cunit">mmH₂O</span></div></div>
     <div class="cg-row"><span class="cg-lbl">Head loss — A to F</span><div class="inp-wrap"><input class="cinput" type="number" id="c1dpt" placeholder="0.0" step="0.1" oninput="calcC1()"><span class="cunit">mmH₂O</span></div></div>
     <hr style="margin:.6rem 0">
-    <div class="cg-row"><span class="cg-lbl">\( Q_{pump} = (V / t) \times 60 \)</span><span class="cres navy" id="c1-qp">—</span><span class="cunit">LPM</span></div>
+    <div class="cg-row"><span class="cg-lbl"><span class="meq">Q<sub>pump</sub> = (V / t) × 60</span></span><span class="cres navy" id="c1-qp">—</span><span class="cunit">LPM</span></div>
   </div>
 
   <div id="c1-body" style="display:none">
@@ -261,7 +278,7 @@ hr{border:none;border-top:1px solid var(--border);margin:1.5rem 0}
     <div style="background:var(--paper);border:1.5px solid var(--border);border-radius:13px;padding:1.4rem;margin:1rem 0">
       <div class="cg-title" style="font-size:.85rem;letter-spacing:.05em">Step 3 — Flow distribution in the parallel branches</div>
 
-      <p style="margin-bottom:1rem">You measured \( Q_{pump} \). The network has two identical branches in parallel. Answer the following:</p>
+      <p style="margin-bottom:1rem">You measured <span class="meq">Q<sub>pump</sub></span>. The network has two identical branches in parallel. Answer the following:</p>
 
       <!-- Question A -->
       <div style="margin-bottom:1.2rem">
@@ -274,7 +291,7 @@ hr{border:none;border-top:1px solid var(--border);margin:1.5rem 0}
         <div id="c1-qa-exp-wrap" style="display:none;margin-top:.5rem">
           <button class="exp-btn" style="font-size:.85rem;padding:.5rem 1.1rem" onclick="showExp('c1-qa-exp')">Show explanation →</button>
           <div class="exp-panel" id="c1-qa-exp">
-            <div class="callout navy">The two branches connect the same two nodes (A and F) and have identical resistance \( R_{branch} = 3R \). For the head loss to be equal in both branches — which it must be, since the pressure at A and F is fixed — the flow must split equally. In a symmetric parallel network: \( Q_{upper} = Q_{lower} = Q_{pump} / 2 \). This is the fundamental condition of parallel flow: equal resistance means equal flow.</div>
+            <div class="callout navy">The two branches connect the same two nodes (A and F) and have identical resistance <span class="meq">R<sub>branch</sub> = 3R</span>. For the head loss to be equal in both branches — which it must be, since the pressure at A and F is fixed — the flow must split equally. In a symmetric parallel network: <span class="meq">Q<sub>upper</sub> = Q<sub>lower</sub> = Q<sub>pump</sub> / 2</span>. This is the fundamental condition of parallel flow: equal resistance means equal flow.</div>
           </div>
         </div>
       </div>
@@ -290,7 +307,7 @@ hr{border:none;border-top:1px solid var(--border);margin:1.5rem 0}
         <div id="c1-qb-exp-wrap" style="display:none;margin-top:.5rem">
           <button class="exp-btn" style="font-size:.85rem;padding:.5rem 1.1rem" onclick="showExp('c1-qb-exp')">Show explanation →</button>
           <div class="exp-panel" id="c1-qb-exp">
-            <div class="callout navy">The lower branch is identical to the upper branch. Both connect A to F with the same resistance. By the same argument — equal resistance, fixed pressure difference — both branches carry the same flow: \( Q_{lower} = Q_{pump} / 2 \). The flow splits equally, not because of a rule, but because symmetry forces it.</div>
+            <div class="callout navy">The lower branch is identical to the upper branch. Both connect A to F with the same resistance. By the same argument — equal resistance, fixed pressure difference — both branches carry the same flow: <span class="meq">Q<sub>lower</sub> = Q<sub>pump</sub> / 2</span>. The flow splits equally, not because of a rule, but because symmetry forces it.</div>
           </div>
         </div>
       </div>
@@ -302,7 +319,7 @@ hr{border:none;border-top:1px solid var(--border);margin:1.5rem 0}
           <div class="inp-wrap"><input class="cinput" type="number" id="c1-qc" placeholder="0.0" step="0.1" oninput="checkQC()"><span class="cunit">mmH₂O</span></div>
           <div id="c1-qc-status" style="font-size:.88rem"></div>
         </div>
-        <div id="c1-qc-msg" style="display:none;margin-top:.5rem;background:var(--amber-lt);border:1.5px solid var(--amber-md);border-radius:0 9px 9px 9px;padding:.75rem 1rem;font-size:.88rem;color:#7a4a08">In series the head losses add: \( H_{branch} = h_{pipe1} + h_{pipe2} + h_{pipe3} = 3 \times h_{pipe2} \). Each pipe carries the same flow and has the same resistance, so each contributes equally.</div>
+        <div id="c1-qc-msg" style="display:none;margin-top:.5rem;background:var(--amber-lt);border:1.5px solid var(--amber-md);border-radius:0 9px 9px 9px;padding:.75rem 1rem;font-size:.88rem;color:#7a4a08">In series the head losses add: <span class="meq">H<sub>branch</sub> = h<sub>pipe1</sub> + h<sub>pipe2</sub> + h<sub>pipe3</sub> = 3 × h<sub>pipe2</sub></span>. Each pipe carries the same flow and has the same resistance, so each contributes equally.</div>
       </div>
 
       <!-- Question D -->
@@ -312,7 +329,7 @@ hr{border:none;border-top:1px solid var(--border);margin:1.5rem 0}
           <div class="inp-wrap"><input class="cinput" type="number" id="c1-qd" placeholder="0.0" step="0.1" oninput="checkQD()"><span class="cunit">mmH₂O</span></div>
           <div id="c1-qd-status" style="font-size:.88rem"></div>
         </div>
-        <div id="c1-qd-msg" style="display:none;margin-top:.5rem;background:var(--amber-lt);border:1.5px solid var(--amber-md);border-radius:0 9px 9px 9px;padding:.75rem 1rem;font-size:.88rem;color:#7a4a08">In pipes in parallel, both branches connect the same two nodes A and F. The head loss across each branch must be equal — it is the same pressure difference, whichever path you take. \( H_{lower} = H_{upper} = 3 \times h_{pipe2} \).</div>
+        <div id="c1-qd-msg" style="display:none;margin-top:.5rem;background:var(--amber-lt);border:1.5px solid var(--amber-md);border-radius:0 9px 9px 9px;padding:.75rem 1rem;font-size:.88rem;color:#7a4a08">In pipes in parallel, both branches connect the same two nodes A and F. The head loss across each branch must be equal — it is the same pressure difference, whichever path you take. <span class="meq">H<sub>lower</sub> = H<sub>upper</sub> = 3 × h<sub>pipe2</sub></span>.</div>
       </div>
     </div>
 
@@ -320,16 +337,16 @@ hr{border:none;border-top:1px solid var(--border);margin:1.5rem 0}
     <div class="calc-guide">
       <div class="cg-title" style="font-size:.85rem;letter-spacing:.05em">Step 4 — Minor losses and K for the T-junction</div>
       <div class="eq-box">
-        \[ H_{A \to F} = H_{friction} + H_{minor} \]
-        \[ H_{minor} = H_{A \to F} - H_{friction} = H_{A \to F} - 3h_{f,pipe2} \]
-        \[ K = \frac{H_{minor}/2}{V_{in}^2/(2g)} \qquad V_{in} = \frac{Q_{pump}}{A} \]
+        <div class="meq-block"><div class="meq-row">H<sub>A → F</sub> = H<sub>friction</sub> + H<sub>minor</sub></div></div>
+        <div class="meq-block"><div class="meq-row">H<sub>minor</sub> = H<sub>A → F</sub> - H<sub>friction</sub> = H<sub>A → F</sub> - 3h<sub>f,pipe2</sub></div></div>
+        <div class="meq-block"><div class="meq-row">K = H<sub>minor</sub>/2V<sub>in</sub><sup>2</sup>/(2g)    V<sub>in</sub> = Q<sub>pump</sub>A</div></div>
       </div>
-      <div class="cg-row"><span class="cg-lbl">\( H_{friction} = 3 \times h_{f,pipe2} \)</span><span class="cres navy" id="c1-pf">—</span><span class="cunit">mmH₂O</span></div>
-      <div class="cg-row"><span class="cg-lbl">\( H_{minor} = H_{A \to F} - H_{friction} \)</span><span class="cres amber" id="c1-ml">—</span><span class="cunit">mmH₂O</span></div>
-      <div class="cg-row"><span class="cg-lbl">\( V_{in} = Q_{pump} / A \)</span><span class="cg-eq">inlet velocity — carries full \( Q_{pump} \)</span><span class="cres" id="c1-Vm">—</span><span class="cunit">m/s</span></div>
-      <div class="cg-row"><span class="cg-lbl">\( V_{in}^2 / (2g) \)</span><span class="cres" id="c1-vh">—</span><span class="cunit">m</span></div>
-      <div class="cg-row"><span class="cg-lbl">\( K = (H_{minor}/2) / (V_{in}^2/2g) \)</span><span class="cg-eq">2 T-junctions in the network</span><span class="cres amber" id="c1-KT">—</span><span class="cunit">—</span></div>
-      <div class="cg-row"><span class="cg-lbl">\( H_{friction} \) as % of \( H_{A \to F} \)</span><span class="cres" id="c1-pct">—</span><span class="cunit">%</span></div>
+      <div class="cg-row"><span class="cg-lbl"><span class="meq">H<sub>friction</sub> = 3 × h<sub>f,pipe2</sub></span></span><span class="cres navy" id="c1-pf">—</span><span class="cunit">mmH₂O</span></div>
+      <div class="cg-row"><span class="cg-lbl"><span class="meq">H<sub>minor</sub> = H<sub>A → F</sub> - H<sub>friction</sub></span></span><span class="cres amber" id="c1-ml">—</span><span class="cunit">mmH₂O</span></div>
+      <div class="cg-row"><span class="cg-lbl"><span class="meq">V<sub>in</sub> = Q<sub>pump</sub> / A</span></span><span class="cg-eq">inlet velocity — carries full <span class="meq">Q<sub>pump</sub></span></span><span class="cres" id="c1-Vm">—</span><span class="cunit">m/s</span></div>
+      <div class="cg-row"><span class="cg-lbl"><span class="meq">V<sub>in</sub><sup>2</sup> / (2g)</span></span><span class="cres" id="c1-vh">—</span><span class="cunit">m</span></div>
+      <div class="cg-row"><span class="cg-lbl"><span class="meq">K = (H<sub>minor</sub>/2) / (V<sub>in</sub><sup>2</sup>/2g)</span></span><span class="cg-eq">2 T-junctions in the network</span><span class="cres amber" id="c1-KT">—</span><span class="cunit">—</span></div>
+      <div class="cg-row"><span class="cg-lbl"><span class="meq">H<sub>friction</sub></span> as % of <span class="meq">H<sub>A → F</sub></span></span><span class="cres" id="c1-pct">—</span><span class="cunit">%</span></div>
     </div>
 
     <div class="budget-wrap">
@@ -339,8 +356,8 @@ hr{border:none;border-top:1px solid var(--border);margin:1.5rem 0}
         <div class="seg" id="c1-barml" style="background:var(--amber);width:75%">—</div>
       </div>
       <div class="blegend">
-        <span><span class="sw" style="background:var(--navy)"></span>Pipe friction \(H_{friction}\)</span>
-        <span><span class="sw" style="background:var(--amber)"></span>Minor losses \(H_{minor}\) (T-junctions + connectors)</span>
+        <span><span class="sw" style="background:var(--navy)"></span>Pipe friction <span class="meq">H<sub>friction</sub></span></span>
+        <span><span class="sw" style="background:var(--amber)"></span>Minor losses <span class="meq">H<sub>minor</sub></span> (T-junctions + connectors)</span>
       </div>
     </div>
 
@@ -353,12 +370,12 @@ hr{border:none;border-top:1px solid var(--border);margin:1.5rem 0}
 
     <div class="qblock">
       <div class="ql">Question 1 — real engineering context</div>
-      <div class="qt">"Your pipes have \(L/D = 60\). A typical water supply main is 500 m long with diameter 200 mm (\(L/D = 2\,500\)). Estimate what fraction of the total head loss minor losses would represent in that main. Compare with your experiment — what changes and why?"</div>
+      <div class="qt">"Your pipes have <span class="meq">L/D = 60</span>. A typical water supply main is 500 m long with diameter 200 mm (<span class="meq">L/D = 2 500</span>). Estimate what fraction of the total head loss minor losses would represent in that main. Compare with your experiment — what changes and why?"</div>
       <button class="exp-btn" style="margin-top:.85rem;font-size:.85rem;padding:.5rem 1.1rem" onclick="showExp('exp-q1')">Show explanation →</button>
       <div class="exp-panel" id="exp-q1">
         <div class="callout navy" style="margin-top:.5rem">
           <strong>Explanation</strong>
-          Minor losses scale as \( K \cdot V^2/2g \) — a fixed energy cost per junction, independent of pipe length. Pipe friction scales as \( f \cdot (L/D) \cdot V^2/2g \) — it grows with \(L/D\). In your experiment \(L/D = 60\), so pipe friction is small and minor losses dominate (~75% of the total). In a water supply main with \(L/D = 2\,500\), the pipe friction term is ~42× larger relative to minor losses. Minor losses would represent roughly 2–5% of the total head loss — negligible in practice. The ratio of minor to pipe friction losses scales as \(1/(f \cdot L/D)\). As \(L/D\) increases, minor losses become progressively less important.
+          Minor losses scale as <span class="meq">K · V<sup>2</sup>/2g</span> — a fixed energy cost per junction, independent of pipe length. Pipe friction scales as <span class="meq">f · (L/D) · V<sup>2</sup>/2g</span> — it grows with <span class="meq">L/D</span>. In your experiment <span class="meq">L/D = 60</span>, so pipe friction is small and minor losses dominate (~75% of the total). In a water supply main with <span class="meq">L/D = 2 500</span>, the pipe friction term is ~42× larger relative to minor losses. Minor losses would represent roughly 2–5% of the total head loss — negligible in practice. The ratio of minor to pipe friction losses scales as <span class="meq">1/(f · L/D)</span>. As <span class="meq">L/D</span> increases, minor losses become progressively less important.
         </div>
       </div>
     </div>
@@ -370,7 +387,7 @@ hr{border:none;border-top:1px solid var(--border);margin:1.5rem 0}
       <div class="exp-panel" id="exp-q2">
         <div class="callout navy" style="margin-top:.5rem">
           <strong>Explanation</strong>
-          In compact systems — HVAC, laboratory networks, building services — minor losses are significant and must be modelled explicitly. Every fitting, valve and junction has a \(K\) value and contributes meaningfully to the total head loss. Neglecting them leads to undersized pumps and insufficient pressure at delivery points. In city water distribution networks, pipes are hundreds of metres long and minor losses are typically less than 5% of the total. Engineers use simplified Hardy Cross models with pipe friction only, and the results are accurate enough for design purposes. The key skill is knowing which regime you are in — and your experiment makes that distinction physically tangible.
+          In compact systems — HVAC, laboratory networks, building services — minor losses are significant and must be modelled explicitly. Every fitting, valve and junction has a <span class="meq">K</span> value and contributes meaningfully to the total head loss. Neglecting them leads to undersized pumps and insufficient pressure at delivery points. In city water distribution networks, pipes are hundreds of metres long and minor losses are typically less than 5% of the total. Engineers use simplified Hardy Cross models with pipe friction only, and the results are accurate enough for design purposes. The key skill is knowing which regime you are in — and your experiment makes that distinction physically tangible.
         </div>
       </div>
     </div>
@@ -430,11 +447,11 @@ hr{border:none;border-top:1px solid var(--border);margin:1.5rem 0}
   </div>
 
   <div class="pred-wrap">
-    <div class="pred-q">Compared to Configuration 1, what do you expect to happen to the <strong>pump flow rate \(Q_{pump}\)</strong>?</div>
+    <div class="pred-q">Compared to Configuration 1, what do you expect to happen to the <strong>pump flow rate <span class="meq">Q<sub>pump</sub></span></strong>?</div>
     <div class="pred-options">
-      <div class="pred-opt" id="p2q-inc" onclick="setPredKeep('p2q','inc',this)"><span class="pred-opt-icon">↑</span><span class="pred-opt-title">\(Q_{pump}\) increases</span></div>
-      <div class="pred-opt" id="p2q-dec" onclick="setPredKeep('p2q','dec',this)"><span class="pred-opt-icon">↓</span><span class="pred-opt-title">\(Q_{pump}\) decreases</span></div>
-      <div class="pred-opt" id="p2q-same" onclick="setPredKeep('p2q','same',this)"><span class="pred-opt-icon">=</span><span class="pred-opt-title">\(Q_{pump}\) stays the same</span></div>
+      <div class="pred-opt" id="p2q-inc" onclick="setPredKeep('p2q','inc',this)"><span class="pred-opt-icon">↑</span><span class="pred-opt-title"><span class="meq">Q<sub>pump</sub></span> increases</span></div>
+      <div class="pred-opt" id="p2q-dec" onclick="setPredKeep('p2q','dec',this)"><span class="pred-opt-icon">↓</span><span class="pred-opt-title"><span class="meq">Q<sub>pump</sub></span> decreases</span></div>
+      <div class="pred-opt" id="p2q-same" onclick="setPredKeep('p2q','same',this)"><span class="pred-opt-icon">=</span><span class="pred-opt-title"><span class="meq">Q<sub>pump</sub></span> stays the same</span></div>
     </div>
     <div id="keep-p2q" class="callout purple" style="display:none;margin-top:.6rem">
       <strong>Noted</strong>
@@ -451,7 +468,7 @@ hr{border:none;border-top:1px solid var(--border);margin:1.5rem 0}
     <div class="cg-row"><span class="cg-lbl">Head loss — pipe 2 (upper branch)</span><div class="inp-wrap"><input class="cinput" type="number" id="c2dp" placeholder="0.0" step="0.1" oninput="calcC2()"><span class="cunit">mmH₂O</span></div></div>
     <div class="cg-row"><span class="cg-lbl">Head loss — A to F</span><div class="inp-wrap"><input class="cinput" type="number" id="c2dpt" placeholder="0.0" step="0.1" oninput="calcC2()"><span class="cunit">mmH₂O</span></div></div>
     <hr style="margin:.6rem 0">
-    <div class="cg-row"><span class="cg-lbl">\( Q_{pump} = (V/t) \times 60 \)</span><span class="cres navy" id="c2-qp">—</span><span class="cunit">LPM</span></div>
+    <div class="cg-row"><span class="cg-lbl"><span class="meq">Q<sub>pump</sub> = (V/t) × 60</span></span><span class="cres navy" id="c2-qp">—</span><span class="cunit">LPM</span></div>
   </div>
 
   <div id="c2-body" style="display:none">
@@ -465,19 +482,19 @@ hr{border:none;border-top:1px solid var(--border);margin:1.5rem 0}
     <!-- Step 2 — Hardy Cross -->
     <div class="calc-guide" style="margin-top:1rem">
       <div class="cg-title" style="font-size:.85rem;letter-spacing:.05em">Step 2 — Hardy Cross (guided iterations)</div>
-      <p style="margin:.5rem 0 .9rem;font-size:.93rem;color:#2d2840">In Configuration 1 the two branches were identical, so flow split equally by symmetry — no calculation was needed. Here the lower branch has resistance \(R\) while the upper has \(3R\). The split is no longer obvious. We use the Hardy Cross method to find the flow rate in each branch — it iteratively adjusts the flow until the head loss is equal in both branches and continuity is satisfied at every node.</p>
+      <p style="margin:.5rem 0 .9rem;font-size:.93rem;color:#2d2840">In Configuration 1 the two branches were identical, so flow split equally by symmetry — no calculation was needed. Here the lower branch has resistance <span class="meq">R</span> while the upper has <span class="meq">3R</span>. The split is no longer obvious. We use the Hardy Cross method to find the flow rate in each branch — it iteratively adjusts the flow until the head loss is equal in both branches and continuity is satisfied at every node.</p>
       <div class="eq-box">
-        \[ \Delta Q = -\frac{R_{upper} \cdot Q_{upper}|Q_{upper}| - R_{lower} \cdot Q_{lower}|Q_{lower}|}{2R_{upper}|Q_{upper}| + 2R_{lower}|Q_{lower}|} \]
-        \[ Q_{upper} \leftarrow Q_{upper} + \Delta Q \qquad Q_{lower} \leftarrow Q_{lower} - \Delta Q \]
+        <div class="meq-block"><div class="meq-row">Δ Q = -R<sub>upper</sub> · Q<sub>upper</sub>|Q<sub>upper</sub>| - R<sub>lower</sub> · Q<sub>lower</sub>|Q<sub>lower</sub>|2R<sub>upper</sub>|Q<sub>upper</sub>| + 2R<sub>lower</sub>|Q<sub>lower</sub>|</div></div>
+        <div class="meq-block"><div class="meq-row">Q<sub>upper</sub> ← Q<sub>upper</sub> + Δ Q    Q<sub>lower</sub> ← Q<sub>lower</sub> - Δ Q</div></div>
       </div>
-      <div class="cg-row"><span class="cg-lbl">\( R_{upper} = 3R \) (from Config 1)</span><span class="cres" id="c2-Ru">—</span><span class="cunit">m/LPM²</span></div>
-      <div class="cg-row"><span class="cg-lbl">\( R_{lower} = R \) (single pipe)</span><span class="cres" id="c2-Rl">—</span><span class="cunit">m/LPM²</span></div>
+      <div class="cg-row"><span class="cg-lbl"><span class="meq">R<sub>upper</sub> = 3R</span> (from Config 1)</span><span class="cres" id="c2-Ru">—</span><span class="cunit">m/LPM²</span></div>
+      <div class="cg-row"><span class="cg-lbl"><span class="meq">R<sub>lower</sub> = R</span> (single pipe)</span><span class="cres" id="c2-Rl">—</span><span class="cunit">m/LPM²</span></div>
       <div class="cg-row">
-        <span class="cg-lbl">Initial guess \(Q_{upper}\)</span>
-        <span class="cg-eq">choose any non-zero value, e.g. half of \(Q_{pump}\)</span>
+        <span class="cg-lbl">Initial guess <span class="meq">Q<sub>upper</sub></span></span>
+        <span class="cg-eq">choose any non-zero value, e.g. half of <span class="meq">Q<sub>pump</sub></span></span>
         <div class="inp-wrap"><input class="cinput" type="number" id="c2q0" placeholder="e.g. 1.5" step="0.1" oninput="setupHC2()"><span class="cunit">LPM</span></div>
       </div>
-      <div class="cg-row"><span class="cg-lbl">\( Q_{lower} = Q_{pump} - Q_{upper} \)</span><span class="cres" id="c2-ql0">—</span><span class="cunit">LPM</span></div>
+      <div class="cg-row"><span class="cg-lbl"><span class="meq">Q<sub>lower</sub> = Q<sub>pump</sub> - Q<sub>upper</sub></span></span><span class="cres" id="c2-ql0">—</span><span class="cunit">LPM</span></div>
     </div>
 
     <div id="hc2-stepper" style="display:none">
@@ -491,23 +508,23 @@ hr{border:none;border-top:1px solid var(--border);margin:1.5rem 0}
       <!-- Step 3 — Re and Moody -->
       <div class="calc-guide">
         <div class="cg-title" style="font-size:.85rem;letter-spacing:.05em">Step 3 — Reynolds number and Moody diagram</div>
-        <p style="margin:.5rem 0 .9rem;font-size:.93rem;color:#2d2840">Now that you know \(Q_{upper}\) from Hardy Cross, calculate \(Re\) for the upper branch pipes and use the Moody diagram to find \(f\). Then predict the head loss across one pipe and compare with your measurement.</p>
+        <p style="margin:.5rem 0 .9rem;font-size:.93rem;color:#2d2840">Now that you know <span class="meq">Q<sub>upper</sub></span> from Hardy Cross, calculate <span class="meq">Re</span> for the upper branch pipes and use the Moody diagram to find <span class="meq">f</span>. Then predict the head loss across one pipe and compare with your measurement.</p>
         <div class="eq-box">
-          \[ Re = \frac{V_{upper} \cdot D}{\nu} \qquad V_{upper} = \frac{Q_{upper}}{A} \qquad h_{f,pred} = f \cdot \frac{L}{D} \cdot \frac{V_{upper}^2}{2g} \]
+          <div class="meq-block"><div class="meq-row">Re = V<sub>upper</sub> · Dν    V<sub>upper</sub> = Q<sub>upper</sub>A    h<sub>f,pred</sub> = f · <span class="mfrac"><span class="mnum">L</span><span class="mden">D</span></span> · V<sub>upper</sub><sup>2</sup>2g</div></div>
         </div>
-        <div class="cg-row"><span class="cg-lbl">\( V_{upper} = Q_{upper} / A \)</span><span class="cg-eq">\( Q_{upper} \) in m³/s = LPM / 60000</span><span class="cres" id="c2-Vup">—</span><span class="cunit">m/s</span></div>
-        <div class="cg-row"><span class="cg-lbl">\( Re_{upper} \)</span><span class="cg-eq">\( D = 0.005 \) m, \( \nu = 1\times10^{-6} \) m²/s</span><span class="cres amber" id="c2-Re">—</span><span class="cunit">—</span></div>
+        <div class="cg-row"><span class="cg-lbl"><span class="meq">V<sub>upper</sub> = Q<sub>upper</sub> / A</span></span><span class="cg-eq"><span class="meq">Q<sub>upper</sub></span> in m³/s = LPM / 60000</span><span class="cres" id="c2-Vup">—</span><span class="cunit">m/s</span></div>
+        <div class="cg-row"><span class="cg-lbl"><span class="meq">Re<sub>upper</sub></span></span><span class="cg-eq"><span class="meq">D = 0.005</span> m, <span class="meq">ν = 1×10<sup>-6</sup></span> m²/s</span><span class="cres amber" id="c2-Re">—</span><span class="cunit">—</span></div>
         <div class="cg-row">
-          <span class="cg-lbl">\( f \) from Moody diagram</span>
-          <span class="cg-eq">smooth pipe (\( \varepsilon/D = 0 \)), at your \( Re \)</span>
+          <span class="cg-lbl"><span class="meq">f</span> from Moody diagram</span>
+          <span class="cg-eq">smooth pipe (<span class="meq">ε/D = 0</span>), at your <span class="meq">Re</span></span>
           <div class="inp-wrap"><input class="cinput" type="number" id="c2f" placeholder="0.000" step="0.001" oninput="calcC2moody()"><span class="cunit">—</span></div>
         </div>
-        <div class="cg-row"><span class="cg-lbl">\( h_{f,pred} = f \cdot (L/D) \cdot V_{upper}^2 / (2g) \times 1000 \)</span><span class="cres navy" id="c2-hfpred">—</span><span class="cunit">mmH₂O</span></div>
-        <div class="cg-row"><span class="cg-lbl">\( h_{f,measured} \) — pipe 2 (your data)</span><span class="cres" id="c2-hfmeas">—</span><span class="cunit">mmH₂O</span></div>
+        <div class="cg-row"><span class="cg-lbl"><span class="meq">h<sub>f,pred</sub> = f · (L/D) · V<sub>upper</sub><sup>2</sup> / (2g) </span></span><span class="cres navy" id="c2-hfpred">—</span><span class="cunit">mmH₂O</span></div>
+        <div class="cg-row"><span class="cg-lbl"><span class="meq">h<sub>f,measured</sub></span> — pipe 2 (your data)</span><span class="cres" id="c2-hfmeas">—</span><span class="cunit">mmH₂O</span></div>
         <div class="cg-row"><span class="cg-lbl">Difference</span><span class="cres" id="c2-hfdiff">—</span><span class="cunit">%</span></div>
         <hr style="margin:.6rem 0">
-        <div class="cg-row"><span class="cg-lbl">\( 3 \times h_{f,pred} \) — full upper branch (Moody)</span><span class="cres navy" id="c2-3hfpred">—</span><span class="cunit">mmH₂O</span></div>
-        <div class="cg-row"><span class="cg-lbl">\( 3 \times h_{f,measured} \) — full upper branch (experimental)</span><span class="cres" id="c2-3hfmeas">—</span><span class="cunit">mmH₂O</span></div>
+        <div class="cg-row"><span class="cg-lbl"><span class="meq">3 × h<sub>f,pred</sub></span> — full upper branch (Moody)</span><span class="cres navy" id="c2-3hfpred">—</span><span class="cunit">mmH₂O</span></div>
+        <div class="cg-row"><span class="cg-lbl"><span class="meq">3 × h<sub>f,measured</sub></span> — full upper branch (experimental)</span><span class="cres" id="c2-3hfmeas">—</span><span class="cunit">mmH₂O</span></div>
       </div>
 
       <div class="qblock">
@@ -517,7 +534,7 @@ hr{border:none;border-top:1px solid var(--border);margin:1.5rem 0}
         <div class="exp-panel" id="exp-moody-c2">
           <div class="callout amber" style="margin-top:.5rem">
             <strong>Hint</strong>
-            Your \(Re\) is likely in the turbulent transition zone (roughly 3 000–10 000) where the Moody diagram curve is steep — a small reading error in \(f\) produces a meaningful change in the predicted \(h_f\). Also note that \(Q_{upper}\) in Config 2 is lower than in Config 1, so \(Re\) is lower and \(f\) is slightly higher than before. If your prediction is close to the measurement, the method is working well. A small discrepancy is expected given the sensitivity of \(f\) in the transition zone.
+            Your <span class="meq">Re</span> is likely in the turbulent transition zone (roughly 3 000–10 000) where the Moody diagram curve is steep — a small reading error in <span class="meq">f</span> produces a meaningful change in the predicted <span class="meq">h<sub>f</sub></span>. Also note that <span class="meq">Q<sub>upper</sub></span> in Config 2 is lower than in Config 1, so <span class="meq">Re</span> is lower and <span class="meq">f</span> is slightly higher than before. If your prediction is close to the measurement, the method is working well. A small discrepancy is expected given the sensitivity of <span class="meq">f</span> in the transition zone.
           </div>
         </div>
       </div>
@@ -526,16 +543,16 @@ hr{border:none;border-top:1px solid var(--border);margin:1.5rem 0}
       <div class="calc-guide">
         <div class="cg-title" style="font-size:.85rem;letter-spacing:.05em">Step 4 — Head loss budget and K comparison</div>
         <div class="eq-box">
-          \[ H_{friction} = 3 \times h_{f,pipe2} \quad \text{(both branches equal — parallel condition)} \]
-          \[ H_{minor} = H_{A \to F} - H_{friction} \qquad K = \frac{H_{minor}/2}{V_{in}^2/(2g)} \]
+          <div class="meq-block"><div class="meq-row">H<sub>friction</sub> = 3 × h<sub>f,pipe2</sub>    (both branches equal — parallel condition)</div></div>
+          <div class="meq-block"><div class="meq-row">H<sub>minor</sub> = H<sub>A → F</sub> - H<sub>friction</sub>    K = H<sub>minor</sub>/2V<sub>in</sub><sup>2</sup>/(2g)</div></div>
         </div>
-        <div class="cg-row"><span class="cg-lbl">\( H_{friction} = 3 \times h_{f,pipe2} \)</span><span class="cres navy" id="c2-pf">—</span><span class="cunit">mmH₂O</span></div>
-        <div class="cg-row"><span class="cg-lbl">\( H_{minor} = H_{A \to F} - H_{friction} \)</span><span class="cres amber" id="c2-ml">—</span><span class="cunit">mmH₂O</span></div>
-        <div class="cg-row"><span class="cg-lbl">\( V_{in} = Q_{pump} / A \)</span><span class="cres" id="c2-Vin">—</span><span class="cunit">m/s</span></div>
-        <div class="cg-row"><span class="cg-lbl">\( V_{in}^2 / (2g) \)</span><span class="cres" id="c2-vh2">—</span><span class="cunit">m</span></div>
-        <div class="cg-row"><span class="cg-lbl">\( K \) — Config 2</span><span class="cres amber" id="c2-K">—</span><span class="cunit">—</span></div>
-        <div class="cg-row"><span class="cg-lbl">\( K \) — Config 1 (for comparison)</span><span class="cres" id="c2-K1">—</span><span class="cunit">—</span></div>
-        <div class="cg-row"><span class="cg-lbl">\( H_{friction} \) as % of \( H_{A \to F} \)</span><span class="cres" id="c2-pct">—</span><span class="cunit">%</span></div>
+        <div class="cg-row"><span class="cg-lbl"><span class="meq">H<sub>friction</sub> = 3 × h<sub>f,pipe2</sub></span></span><span class="cres navy" id="c2-pf">—</span><span class="cunit">mmH₂O</span></div>
+        <div class="cg-row"><span class="cg-lbl"><span class="meq">H<sub>minor</sub> = H<sub>A → F</sub> - H<sub>friction</sub></span></span><span class="cres amber" id="c2-ml">—</span><span class="cunit">mmH₂O</span></div>
+        <div class="cg-row"><span class="cg-lbl"><span class="meq">V<sub>in</sub> = Q<sub>pump</sub> / A</span></span><span class="cres" id="c2-Vin">—</span><span class="cunit">m/s</span></div>
+        <div class="cg-row"><span class="cg-lbl"><span class="meq">V<sub>in</sub><sup>2</sup> / (2g)</span></span><span class="cres" id="c2-vh2">—</span><span class="cunit">m</span></div>
+        <div class="cg-row"><span class="cg-lbl"><span class="meq">K</span> — Config 2</span><span class="cres amber" id="c2-K">—</span><span class="cunit">—</span></div>
+        <div class="cg-row"><span class="cg-lbl"><span class="meq">K</span> — Config 1 (for comparison)</span><span class="cres" id="c2-K1">—</span><span class="cunit">—</span></div>
+        <div class="cg-row"><span class="cg-lbl"><span class="meq">H<sub>friction</sub></span> as % of <span class="meq">H<sub>A → F</sub></span></span><span class="cres" id="c2-pct">—</span><span class="cunit">%</span></div>
       </div>
 
       <!-- Budget bars -->
@@ -551,8 +568,8 @@ hr{border:none;border-top:1px solid var(--border);margin:1.5rem 0}
           <div class="seg" id="c2-b2ml" style="background:var(--amber);width:85%">—</div>
         </div>
         <div class="blegend">
-          <span><span class="sw" style="background:var(--navy)"></span>\(H_{friction}\)</span>
-          <span><span class="sw" style="background:var(--amber)"></span>\(H_{minor}\)</span>
+          <span><span class="sw" style="background:var(--navy)"></span><span class="meq">H<sub>friction</sub></span></span>
+          <span><span class="sw" style="background:var(--amber)"></span><span class="meq">H<sub>minor</sub></span></span>
         </div>
       </div>
 
@@ -564,15 +581,15 @@ hr{border:none;border-top:1px solid var(--border);margin:1.5rem 0}
       <div class="exp-panel" id="exp-c2">
         <div class="callout navy">
           <strong>What changed — H_friction</strong>
-          The lower branch now has resistance \(R\) instead of \(3R\), so it carries more flow. Pipe friction in each branch dropped — there is less resistance and less energy dissipated by friction. \(H_{friction}\) decreased.
+          The lower branch now has resistance <span class="meq">R</span> instead of <span class="meq">3R</span>, so it carries more flow. Pipe friction in each branch dropped — there is less resistance and less energy dissipated by friction. <span class="meq">H<sub>friction</sub></span> decreased.
         </div>
         <div class="callout amber">
           <strong>The pump response</strong>
-          \(Q_{pump}\) increased slightly — lower network resistance shifts the pump operating point along its curve to higher flow and lower head. The change is small because the pump curve is relatively flat in this range.
+          <span class="meq">Q<sub>pump</sub></span> increased slightly — lower network resistance shifts the pump operating point along its curve to higher flow and lower head. The change is small because the pump curve is relatively flat in this range.
         </div>
         <div class="callout green">
           <strong>The key insight</strong>
-          \(H_{minor}\) depends on \(V_{in} = Q_{pump}/A\) — which barely changed between configurations. \(H_{friction}\) changed because the pipe resistance of one branch changed. The total head loss \(H_{A \to F}\) is controlled by how much pipe friction changes — \(H_{minor}\) is the approximately constant background.
+          <span class="meq">H<sub>minor</sub></span> depends on <span class="meq">V<sub>in</sub> = Q<sub>pump</sub>/A</span> — which barely changed between configurations. <span class="meq">H<sub>friction</sub></span> changed because the pipe resistance of one branch changed. The total head loss <span class="meq">H<sub>A → F</sub></span> is controlled by how much pipe friction changes — <span class="meq">H<sub>minor</sub></span> is the approximately constant background.
         </div>
       </div>
 
@@ -593,12 +610,12 @@ hr{border:none;border-top:1px solid var(--border);margin:1.5rem 0}
 
       <div class="qblock">
         <div class="ql">Discuss with your group — K comparison</div>
-        <div class="qt">"Is \( K \) the same as in Configuration 1? What does this tell you about whether minor losses at a T-junction depend on how the flow is split between the branches?"</div>
+        <div class="qt">"Is <span class="meq">K</span> the same as in Configuration 1? What does this tell you about whether minor losses at a T-junction depend on how the flow is split between the branches?"</div>
         <button class="exp-btn" style="margin-top:.85rem;font-size:.85rem;padding:.5rem 1.1rem" onclick="showExp('exp-K-c2')">Show hint →</button>
         <div class="exp-panel" id="exp-K-c2">
           <div class="callout amber" style="margin-top:.5rem">
             <strong>Hint</strong>
-            In Config 1 the T-junction divided flow equally. In Config 2 the lower branch carries roughly \(\sqrt{3} \approx 1.73\) times more flow than the upper. Textbook correlations (e.g. Idelchik) show that \(K\) for a T-junction depends on the ratio of branch flow to main pipe flow. If your \(K\) changed between configurations, this is the physical reason. If it stayed approximately the same, the effect of the flow ratio is small for your particular fittings.
+            In Config 1 the T-junction divided flow equally. In Config 2 the lower branch carries roughly <span class="meq">√(3) ≈ 1.73</span> times more flow than the upper. Textbook correlations (e.g. Idelchik) show that <span class="meq">K</span> for a T-junction depends on the ratio of branch flow to main pipe flow. If your <span class="meq">K</span> changed between configurations, this is the physical reason. If it stayed approximately the same, the effect of the flow ratio is small for your particular fittings.
           </div>
         </div>
       </div>
@@ -657,7 +674,7 @@ hr{border:none;border-top:1px solid var(--border);margin:1.5rem 0}
 
   <!-- Prediction questions -->
   <div class="pred-wrap">
-    <div class="pred-q">Compared to Configuration 2, what do you expect to happen to the <strong>total head loss \(H_{A \to F}\)</strong>?</div>
+    <div class="pred-q">Compared to Configuration 2, what do you expect to happen to the <strong>total head loss <span class="meq">H<sub>A → F</sub></span></strong>?</div>
     <div class="pred-options">
       <div class="pred-opt" id="p3h-inc" onclick="setPredKeep('p3h','inc',this)"><span class="pred-opt-icon">↑</span><span class="pred-opt-title">Total head loss increases</span></div>
       <div class="pred-opt" id="p3h-dec" onclick="setPredKeep('p3h','dec',this)"><span class="pred-opt-icon">↓</span><span class="pred-opt-title">Total head loss decreases</span></div>
@@ -683,7 +700,7 @@ hr{border:none;border-top:1px solid var(--border);margin:1.5rem 0}
     <div class="cg-row"><span class="cg-lbl">Collection time</span><div class="inp-wrap"><input class="cinput" type="number" id="c3t" placeholder="0.00" step="0.01" oninput="calcC3()"><span class="cunit">seconds</span></div></div>
     <div class="cg-row"><span class="cg-lbl">Head loss — A to F</span><div class="inp-wrap"><input class="cinput" type="number" id="c3dpt" placeholder="0.0" step="0.1" oninput="calcC3()"><span class="cunit">mmH₂O</span></div></div>
     <hr style="margin:.6rem 0">
-    <div class="cg-row"><span class="cg-lbl">\( Q_{pump} = (V/t) \times 60 \)</span><span class="cres navy" id="c3-qp">—</span><span class="cunit">LPM</span></div>
+    <div class="cg-row"><span class="cg-lbl"><span class="meq">Q<sub>pump</sub> = (V/t) × 60</span></span><span class="cres navy" id="c3-qp">—</span><span class="cunit">LPM</span></div>
   </div>
 
   <div id="c3-body" style="display:none">
@@ -698,19 +715,19 @@ hr{border:none;border-top:1px solid var(--border);margin:1.5rem 0}
     <div class="calc-guide" style="margin-top:1rem">
       <div class="cg-title" style="font-size:.85rem;letter-spacing:.05em">Step 2 — Hardy Cross 2-loop solution</div>
       <p style="margin:.5rem 0 .9rem;font-size:.93rem;color:#2d2840">The network has 5 pipes each with its own flow rate. Hardy Cross solves both loops simultaneously — adjusting all flow rates until head loss is balanced in every loop and continuity is satisfied at every node.</p>
-      <p style="margin:.5rem 0 .9rem;font-size:.93rem;color:#2d2840"><strong>Initial guess:</strong> to start, we assume no cross-pipe flow (\(Q_{DC} = 0\)) and split \(Q_{pump}\) between the two branches. The direction we assign to each pipe in the guess is important — it tells Hardy Cross which way to try first. The method will correct the directions automatically if the guess is wrong, as long as continuity is satisfied at every node.</p>
-      <div class="cg-row"><span class="cg-lbl">Initial \(Q_{AB} = Q_{BC} = Q_{CF}\)</span><span class="cres" id="c3-ig-upper">—</span><span class="cunit">LPM (A→B→C→F)</span></div>
-      <div class="cg-row"><span class="cg-lbl">Initial \(Q_{AD} = Q_{DF}\)</span><span class="cres" id="c3-ig-lower">—</span><span class="cunit">LPM (A→D→F)</span></div>
-      <div class="cg-row"><span class="cg-lbl">Initial \(Q_{DC}\)</span><span class="cres" id="c3-ig-dc">0.000</span><span class="cunit">LPM (assumed zero — no cross flow yet)</span></div>
-      <div class="cg-row"><span class="cg-lbl">Continuity check at A</span><span class="cres green" id="c3-ig-check">—</span><span class="cunit">\(Q_{upper} + Q_{lower} = Q_{pump}\) ✓</span></div>
+      <p style="margin:.5rem 0 .9rem;font-size:.93rem;color:#2d2840"><strong>Initial guess:</strong> to start, we assume no cross-pipe flow (<span class="meq">Q<sub>DC</sub> = 0</span>) and split <span class="meq">Q<sub>pump</sub></span> between the two branches. The direction we assign to each pipe in the guess is important — it tells Hardy Cross which way to try first. The method will correct the directions automatically if the guess is wrong, as long as continuity is satisfied at every node.</p>
+      <div class="cg-row"><span class="cg-lbl">Initial <span class="meq">Q<sub>AB</sub> = Q<sub>BC</sub> = Q<sub>CF</sub></span></span><span class="cres" id="c3-ig-upper">—</span><span class="cunit">LPM (A→B→C→F)</span></div>
+      <div class="cg-row"><span class="cg-lbl">Initial <span class="meq">Q<sub>AD</sub> = Q<sub>DF</sub></span></span><span class="cres" id="c3-ig-lower">—</span><span class="cunit">LPM (A→D→F)</span></div>
+      <div class="cg-row"><span class="cg-lbl">Initial <span class="meq">Q<sub>DC</sub></span></span><span class="cres" id="c3-ig-dc">0.000</span><span class="cunit">LPM (assumed zero — no cross flow yet)</span></div>
+      <div class="cg-row"><span class="cg-lbl">Continuity check at A</span><span class="cres green" id="c3-ig-check">—</span><span class="cunit"><span class="meq">Q<sub>upper</sub> + Q<sub>lower</sub> = Q<sub>pump</sub></span> ✓</span></div>
       <hr style="margin:.6rem 0">
       <p style="margin:.5rem 0 .9rem;font-size:.93rem;color:#2d2840"><strong>After convergence:</strong></p>
-      <div class="cg-row"><span class="cg-lbl">\( Q_{AB} \) (pipe A→B)</span><span class="cres navy" id="c3-qab">—</span><span class="cunit">LPM</span></div>
-      <div class="cg-row"><span class="cg-lbl">\( Q_{BC} \) (pipe B→C)</span><span class="cres navy" id="c3-qbc">—</span><span class="cunit">LPM</span></div>
-      <div class="cg-row"><span class="cg-lbl">\( Q_{CF} \) (pipe C→F)</span><span class="cres navy" id="c3-qcf">—</span><span class="cunit">LPM</span></div>
-      <div class="cg-row"><span class="cg-lbl">\( Q_{AD} \) (pipe A→D)</span><span class="cres teal" id="c3-qad">—</span><span class="cunit">LPM</span></div>
-      <div class="cg-row"><span class="cg-lbl">\( Q_{DF} \) (pipe D→F)</span><span class="cres teal" id="c3-qdf">—</span><span class="cunit">LPM</span></div>
-      <div class="cg-row"><span class="cg-lbl">\( Q_{DC} \) (cross-pipe D→C, with direction)</span><span class="cres amber" id="c3-qdc">—</span><span class="cunit">LPM</span></div>
+      <div class="cg-row"><span class="cg-lbl"><span class="meq">Q<sub>AB</sub></span> (pipe A→B)</span><span class="cres navy" id="c3-qab">—</span><span class="cunit">LPM</span></div>
+      <div class="cg-row"><span class="cg-lbl"><span class="meq">Q<sub>BC</sub></span> (pipe B→C)</span><span class="cres navy" id="c3-qbc">—</span><span class="cunit">LPM</span></div>
+      <div class="cg-row"><span class="cg-lbl"><span class="meq">Q<sub>CF</sub></span> (pipe C→F)</span><span class="cres navy" id="c3-qcf">—</span><span class="cunit">LPM</span></div>
+      <div class="cg-row"><span class="cg-lbl"><span class="meq">Q<sub>AD</sub></span> (pipe A→D)</span><span class="cres teal" id="c3-qad">—</span><span class="cunit">LPM</span></div>
+      <div class="cg-row"><span class="cg-lbl"><span class="meq">Q<sub>DF</sub></span> (pipe D→F)</span><span class="cres teal" id="c3-qdf">—</span><span class="cunit">LPM</span></div>
+      <div class="cg-row"><span class="cg-lbl"><span class="meq">Q<sub>DC</sub></span> (cross-pipe D→C, with direction)</span><span class="cres amber" id="c3-qdc">—</span><span class="cunit">LPM</span></div>
     </div>
 
     <!-- Step 3 — Path calculation -->
@@ -718,33 +735,56 @@ hr{border:none;border-top:1px solid var(--border);margin:1.5rem 0}
       <div class="cg-title" style="font-size:.85rem;letter-spacing:.05em">Step 3 — Head loss estimate from Hardy Cross flow rates</div>
       <p style="margin:.5rem 0 .9rem;font-size:.93rem;color:#2d2840">Hardy Cross enforces equal head loss through every path — so all three paths give the same result. This is the H_friction estimate from your Hardy Cross solution, using R from Configuration 1.</p>
       <div class="eq-box">
-        \[ H_{friction,HC} = R \cdot (Q_{AB}^2 + Q_{BC}^2 + Q_{CF}^2) \times 1000 \]
+        <div class="meq-block"><div class="meq-row">H<sub>friction,HC</sub> = R · (Q<sub>AB</sub><sup>2</sup> + Q<sub>BC</sub><sup>2</sup> + Q<sub>CF</sub><sup>2</sup>) </div></div>
       </div>
-      <div class="cg-row"><span class="cg-lbl">\( H_{friction} \) — from Hardy Cross (path 1)</span><span class="cres navy" id="c3-hp1">—</span><span class="cunit">mmH₂O</span></div>
+      <div class="cg-row"><span class="cg-lbl"><span class="meq">H<sub>friction</sub></span> — from Hardy Cross (path 1)</span><span class="cres navy" id="c3-hp1">—</span><span class="cunit">mmH₂O</span></div>
     </div>
 
     <!-- Step 4 — Minor losses and H_friction from measurement -->
     <div class="calc-guide">
-      <div class="cg-title" style="font-size:.85rem;letter-spacing:.05em">Step 4 — Minor losses and experimental \(H_{friction}\)</div>
+      <div class="cg-title" style="font-size:.85rem;letter-spacing:.05em">Step 4 — Minor losses and experimental <span class="meq">H<sub>friction</sub></span></div>
       <div class="eq-box">
-        \[ K_{avg} = \frac{K_1 + K_2}{2} \qquad H_{minor} = 2 \cdot K_{avg} \cdot \frac{V_{in}^2}{2g} \times 1000 \]
-        \[ H_{friction} = H_{A \to F} - H_{minor} \]
+        <div class="meq-block"><div class="meq-row">K<sub>avg</sub> = <span class="mfrac"><span class="mnum">K<sub>1</sub> + K<sub>2</sub></span><span class="mden">2</span></span>    H<sub>minor</sub> = 2 · K<sub>avg</sub> · V<sub>in</sub><sup>2</sup>2g </div></div>
+        <div class="meq-block"><div class="meq-row">H<sub>friction</sub> = H<sub>A → F</sub> - H<sub>minor</sub></div></div>
       </div>
-      <div class="cg-row"><span class="cg-lbl">\( K_1 \) (Config 1)</span><span class="cres" id="c3-k1">—</span><span class="cunit">—</span></div>
-      <div class="cg-row"><span class="cg-lbl">\( K_2 \) (Config 2)</span><span class="cres" id="c3-k2">—</span><span class="cunit">—</span></div>
-      <div class="cg-row"><span class="cg-lbl">\( K_{avg} = (K_1 + K_2)/2 \)</span><span class="cres amber" id="c3-kavg">—</span><span class="cunit">—</span></div>
-      <div class="cg-row"><span class="cg-lbl">\( V_{in} = Q_{pump}/A \)</span><span class="cres" id="c3-vin">—</span><span class="cunit">m/s</span></div>
-      <div class="cg-row"><span class="cg-lbl">\( H_{minor} = 2 K_{avg} \cdot V_{in}^2/(2g) \times 1000 \)</span><span class="cres amber" id="c3-hminor">—</span><span class="cunit">mmH₂O</span></div>
-      <div class="cg-row"><span class="cg-lbl">\( H_{friction} = H_{A \to F} - H_{minor} \)</span><span class="cres navy" id="c3-hfriction">—</span><span class="cunit">mmH₂O</span></div>
+      <div class="cg-row"><span class="cg-lbl"><span class="meq">K<sub>1</sub></span> (Config 1)</span><span class="cres" id="c3-k1">—</span><span class="cunit">—</span></div>
+      <div class="cg-row"><span class="cg-lbl"><span class="meq">K<sub>2</sub></span> (Config 2)</span><span class="cres" id="c3-k2">—</span><span class="cunit">—</span></div>
+      <div class="cg-row"><span class="cg-lbl"><span class="meq">K<sub>avg</sub> = (K<sub>1</sub> + K<sub>2</sub>)/2</span></span><span class="cres amber" id="c3-kavg">—</span><span class="cunit">—</span></div>
+      <div class="cg-row"><span class="cg-lbl"><span class="meq">V<sub>in</sub> = Q<sub>pump</sub>/A</span></span><span class="cres" id="c3-vin">—</span><span class="cunit">m/s</span></div>
+      <div class="cg-row"><span class="cg-lbl"><span class="meq">H<sub>minor</sub> = 2 K<sub>avg</sub> · V<sub>in</sub><sup>2</sup>/(2g)</span></span><span class="cres amber" id="c3-hminor">—</span><span class="cunit">mmH₂O</span></div>
+      <div class="cg-row"><span class="cg-lbl"><span class="meq">H<sub>friction</sub> = H<sub>A → F</sub> - H<sub>minor</sub></span></span><span class="cres navy" id="c3-hfriction">—</span><span class="cunit">mmH₂O</span></div>
     </div>
 
     <!-- Step 5 — Comparison -->
     <div class="calc-guide">
-      <div class="cg-title" style="font-size:.85rem;letter-spacing:.05em">Step 5 — Hardy Cross estimate vs experimental \(H_{friction}\)</div>
-      <p style="margin:.5rem 0 .9rem;font-size:.93rem;color:#2d2840">How well does the Hardy Cross estimate match the \(H_{friction}\) derived from your measurement? Any difference reveals the effect of \(R\) varying between configurations.</p>
-      <div class="cg-row"><span class="cg-lbl">\( H_{friction,HC} \) — from Hardy Cross</span><span class="cres navy" id="c3-hp1b">—</span><span class="cunit">mmH₂O</span></div>
-      <div class="cg-row"><span class="cg-lbl">\( H_{friction,exp} \) — from measurement</span><span class="cres teal" id="c3-hfrictionb">—</span><span class="cunit">mmH₂O</span></div>
+      <div class="cg-title" style="font-size:.85rem;letter-spacing:.05em">Step 5 — Hardy Cross estimate vs experimental <span class="meq">H<sub>friction</sub></span></div>
+      <p style="margin:.5rem 0 .9rem;font-size:.93rem;color:#2d2840">How well does the Hardy Cross estimate match the <span class="meq">H<sub>friction</sub></span> derived from your measurement? Any difference reveals the effect of <span class="meq">f</span> varying with flow rate in this network.</p>
+      <div class="cg-row"><span class="cg-lbl"><span class="meq">H<sub>friction,HC</sub></span> — from Hardy Cross</span><span class="cres navy" id="c3-hp1b">—</span><span class="cunit">mmH₂O</span></div>
+      <div class="cg-row"><span class="cg-lbl"><span class="meq">H<sub>friction,exp</sub></span> — from measurement</span><span class="cres teal" id="c3-hfrictionb">—</span><span class="cunit">mmH₂O</span></div>
       <div class="cg-row"><span class="cg-lbl">Difference</span><span class="cres" id="c3-diffavg">—</span><span class="cunit">%</span></div>
+    </div>
+
+    <!-- Budget bar Config 3 -->
+    <div class="budget-wrap">
+      <div class="blabel">Config 1 — head loss budget</div>
+      <div class="bbar">
+        <div class="seg" id="c3-b1pf" style="background:var(--navy);width:25%">—</div>
+        <div class="seg" id="c3-b1ml" style="background:var(--amber);width:75%">—</div>
+      </div>
+      <div class="blabel" style="margin-top:.75rem">Config 2 — head loss budget</div>
+      <div class="bbar">
+        <div class="seg" id="c3-b2pf" style="background:var(--navy);width:15%">—</div>
+        <div class="seg" id="c3-b2ml" style="background:var(--amber);width:85%">—</div>
+      </div>
+      <div class="blabel" style="margin-top:.75rem">Config 3 — head loss budget</div>
+      <div class="bbar">
+        <div class="seg" id="c3-b3pf" style="background:var(--navy);width:15%">—</div>
+        <div class="seg" id="c3-b3ml" style="background:var(--amber);width:85%">—</div>
+      </div>
+      <div class="blegend">
+        <span><span class="sw" style="background:var(--navy)"></span><span class="meq">H<sub>friction</sub></span></span>
+        <span><span class="sw" style="background:var(--amber)"></span><span class="meq">H<sub>minor</sub></span></span>
+      </div>
     </div>
 
     <div class="callout navy" id="c3-obs"><strong>Observation</strong><span id="c3-obs-text"></span></div>
@@ -753,12 +793,12 @@ hr{border:none;border-top:1px solid var(--border);margin:1.5rem 0}
 
     <div class="qblock">
       <div class="ql">Discuss with your group</div>
-      <div class="qt">"The Hardy Cross method uses a fixed \(R\) for every pipe — the same \(R\) you measured in Configuration 1. Your network now has pipes carrying different flow rates. How confident are you that \(R\) is the same for every pipe? What does the comparison between your path estimate and your experimental \(H_{friction}\) tell you about this assumption?"</div>
+      <div class="qt">"Hardy Cross assumes <span class="meq">f</span> is unchanged throughout the iterations — it is calculated once and held fixed. This is a very good assumption in real water mains where flow is fully turbulent and <span class="meq">f</span> depends only on pipe roughness. In your experiment the flow is in the transition zone. How does this affect the result? What does the comparison between your Hardy Cross estimate and your experimental <span class="meq">H<sub>friction</sub></span> tell you?"</div>
       <button class="exp-btn" style="margin-top:.85rem;font-size:.85rem;padding:.5rem 1.1rem" onclick="showExp('exp-c3-paths')">Show hint →</button>
       <div class="exp-panel" id="exp-c3-paths">
         <div class="callout amber" style="margin-top:.5rem">
           <strong>Hint</strong>
-          Hardy Cross enforces equal head loss through all paths — so the three path calculations give the same answer by definition. They all use the same \(R\). The real question is whether that \(R\) — measured in Config 1 at a specific flow rate — is still valid at the different flow rates in Config 3. \(R = f \cdot L / (2g \cdot D \cdot A^2)\), and \(f\) depends on \(Re\), which depends on \(Q\). If the flow rates in Config 3 differ significantly from Config 1, \(f\) will differ slightly, and so will \(R\). The gap between your path estimate and your experimental \(H_{friction}\) is a direct measure of this effect. In real water distribution networks with large \(L/D\) and fully turbulent flow, \(f\) is nearly constant — which is why Hardy Cross works so well there.
+          Hardy Cross assumes <span class="meq">f</span> is constant for each pipe throughout the iterations — it does not re-compute <span class="meq">f</span> as <span class="meq">Q</span> changes. In fully turbulent flow (real water mains, rough pipes, high Re) <span class="meq">f</span> genuinely is constant — it depends only on <span class="meq">ε/D</span> and is independent of Re. So the assumption is exact. In your experiment, the pipes are smooth and flow is in the transition zone where <span class="meq">f</span> depends strongly on Re. Each pipe in Config 3 carries a different <span class="meq">Q</span>, so each has a slightly different Re and therefore a slightly different <span class="meq">f</span>. The <span class="meq">f</span> used in the Hardy Cross calculation was measured in Config 1 at a different flow rate — this is the source of any discrepancy you observe.
         </div>
       </div>
     </div>
@@ -782,7 +822,7 @@ hr{border:none;border-top:1px solid var(--border);margin:1.5rem 0}
   <h1 class="slide-title">Results across all three <em>configurations</em></h1>
 
   <table class="ctab" id="sum-tab">
-    <thead><tr><th>Configuration</th><th>\(Q_{pump}\) (LPM)</th><th>\(H_{A\to F}\) measured (mmH₂O)</th><th>\(H_{friction}\) %</th><th>Cross-pipe</th></tr></thead>
+    <thead><tr><th>Configuration</th><th><span class="meq">Q<sub>pump</sub></span> (LPM)</th><th><span class="meq">H<sub>A→ F</sub></span> measured (mmH₂O)</th><th><span class="meq">H<sub>friction</sub></span> %</th><th>Cross-pipe</th></tr></thead>
     <tbody id="sum-body"></tbody>
   </table>
 
@@ -790,17 +830,17 @@ hr{border:none;border-top:1px solid var(--border);margin:1.5rem 0}
 
   <div class="callout purple">
     <strong>Minor losses dominate this experiment</strong>
-    In all configurations \(H_{minor}\) accounts for the majority of \(H_{A \to F}\). Your pipes have \(L/D = 60\). A real water main has \(L/D \approx 2\,500\text{–}83\,000\). In a real network pipe friction dominates and minor losses are safely neglected. Your experiment sits in the opposite regime — and that is what makes it physically interesting.
+    In all configurations <span class="meq">H<sub>minor</sub></span> accounts for the majority of <span class="meq">H<sub>A → F</sub></span>. Your pipes have <span class="meq">L/D = 60</span>. A real water main has <span class="meq">L/D ≈ 2 500–83 000</span>. In a real network pipe friction dominates and minor losses are safely neglected. Your experiment sits in the opposite regime — and that is what makes it physically interesting.
   </div>
 
   <div class="callout navy">
     <strong>What changes between configurations</strong>
-    \(H_{minor}\) stays approximately constant — it depends on \(V_{in} = Q_{pump}/A\), which barely changed. \(H_{A \to F}\) changed because \(H_{friction}\) changed. Fewer pipes in series means less resistance and less friction. Hardy Cross was the only way to find the flow rate in each pipe once symmetry was broken.
+    <span class="meq">H<sub>minor</sub></span> stays approximately constant — it depends on <span class="meq">V<sub>in</sub> = Q<sub>pump</sub>/A</span>, which barely changed. <span class="meq">H<sub>A → F</sub></span> changed because <span class="meq">H<sub>friction</sub></span> changed. Fewer pipes in series means less resistance and less friction. Hardy Cross was the only way to find the flow rate in each pipe once symmetry was broken.
   </div>
 
   <div class="callout amber">
     <strong>The constant-R assumption in Hardy Cross</strong>
-    Hardy Cross assumes \(R\) is fixed for each pipe. In reality \(R\) depends on \(f\), which varies with \(Re\), which varies with \(Q\). In Configuration 3 every pipe carries a different flow rate — so strictly each pipe has a slightly different \(R\). The comparison between the path estimate (using \(R\) from Config 1) and the experimental \(H_{friction}\) shows you how significant this effect is in your network. In real water distribution networks with large \(L/D\) and fully turbulent flow, \(f\) is nearly constant and Hardy Cross is highly accurate.
+    Hardy Cross assumes <span class="meq">R</span> is fixed for each pipe. In reality <span class="meq">R</span> depends on <span class="meq">f</span>, which varies with <span class="meq">Re</span>, which varies with <span class="meq">Q</span>. In Configuration 3 every pipe carries a different flow rate — so strictly each pipe has a slightly different <span class="meq">R</span>. The comparison between the path estimate (using <span class="meq">R</span> from Config 1) and the experimental <span class="meq">H<sub>friction</sub></span> shows you how significant this effect is in your network. In real water distribution networks with large <span class="meq">L/D</span> and fully turbulent flow, <span class="meq">f</span> is nearly constant and Hardy Cross is highly accurate.
   </div>
 
   <div class="nav-row">
@@ -836,7 +876,7 @@ function go(n){
   updProg(n);
   window.scrollTo({top:0,behavior:'smooth'});
   if(n===5)buildSummary();
-  setTimeout(()=>{if(window.MathJax)MathJax.typesetPromise();},100);
+  setTimeout(()=>{},100);
 }
 function sv(id,val,cls){const el=document.getElementById(id);if(!el)return;el.textContent=val;if(cls)el.className='cres '+cls;}
 function setPredKeep(key,val,btn){
@@ -852,7 +892,7 @@ function setPred(key,val,btn){
 }
 function showExp(id){
   document.getElementById(id).classList.add('open');
-  setTimeout(()=>{if(window.MathJax)MathJax.typesetPromise();},50);
+  setTimeout(()=>{},50);
 }
 
 // HC 1-loop with rows
@@ -906,7 +946,7 @@ function calcC1(){
   document.getElementById('c1-obs').style.display='block';
   SUMDATA[0]={Qp,dpt,pf,pct:pct.toFixed(0),cross:'—'};
   document.getElementById('c1-body').style.display='block';
-  setTimeout(()=>{if(window.MathJax)MathJax.typesetPromise();},100);
+  setTimeout(()=>{},100);
 }
 
 // ── CHECKPOINT FUNCTIONS ──
@@ -924,10 +964,10 @@ function checkQA(){
     expWrap.style.display='block';
   } else {
     st.innerHTML='<span style="color:var(--red)">✗ Check your reasoning</span>';
-    msg.innerHTML='In a symmetric parallel network the flow splits equally between identical branches. The flow in each branch = \( Q_{pump} / 2 \) = '+expected.toFixed(3)+' LPM.';
+    msg.innerHTML='In a symmetric parallel network the flow splits equally between identical branches. The flow in each branch = <span class="meq">Q<sub>pump</sub> / 2</span> = '+expected.toFixed(3)+' LPM.';
     msg.style.display='block';
     expWrap.style.display='block';
-    setTimeout(()=>{if(window.MathJax)MathJax.typesetPromise();},50);
+    setTimeout(()=>{},50);
   }
 }
 function checkQB(){
@@ -944,10 +984,10 @@ function checkQB(){
     expWrap.style.display='block';
   } else {
     st.innerHTML='<span style="color:var(--red)">✗ Check your reasoning</span>';
-    msg.innerHTML='The lower branch is identical to the upper branch. \( Q_{lower} = Q_{pump} / 2 \) = '+expected.toFixed(3)+' LPM.';
+    msg.innerHTML='The lower branch is identical to the upper branch. <span class="meq">Q<sub>lower</sub> = Q<sub>pump</sub> / 2</span> = '+expected.toFixed(3)+' LPM.';
     msg.style.display='block';
     expWrap.style.display='block';
-    setTimeout(()=>{if(window.MathJax)MathJax.typesetPromise();},50);
+    setTimeout(()=>{},50);
   }
 }
 function checkQC(){
@@ -963,7 +1003,7 @@ function checkQC(){
   } else {
     st.innerHTML='<span style="color:var(--red)">✗ Check your reasoning</span>';
     msg.style.display='block';
-    setTimeout(()=>{if(window.MathJax)MathJax.typesetPromise();},50);
+    setTimeout(()=>{},50);
   }
 }
 function checkQD(){
@@ -979,7 +1019,7 @@ function checkQD(){
   } else {
     st.innerHTML='<span style="color:var(--red)">✗ Check your reasoning</span>';
     msg.style.display='block';
-    setTimeout(()=>{if(window.MathJax)MathJax.typesetPromise();},50);
+    setTimeout(()=>{},50);
   }
 }
 
@@ -1011,7 +1051,7 @@ function calcC2(){
     if(el&&txt){txt.textContent=msg;el.className='callout '+tone;el.style.display='block';}
   }
   document.getElementById('c2-body').style.display='block';
-  setTimeout(()=>{if(window.MathJax)MathJax.typesetPromise();},100);
+  setTimeout(()=>{},100);
 }
 
 function answerMC(idx){
@@ -1030,7 +1070,7 @@ function answerMC(idx){
       :'A pump delivers less flow when the network resistance is higher — not lower. Higher resistance means greater head loss at any given flow rate. The pump operating point moves left along its curve to a lower flow rate. Options A, C and D would all increase flow: lower resistance, higher speed, or larger diameter all reduce head loss and shift the operating point to the right.')
     +'</div>';
   res.style.display='block';
-  setTimeout(()=>{if(window.MathJax)MathJax.typesetPromise();},50);
+  setTimeout(()=>{},50);
 }
 function calcC2moody(){
   const f=+document.getElementById('c2f').value;
@@ -1127,7 +1167,7 @@ function showC2Budget(Qu,Ql,Qp,dpt,dp2){
   document.getElementById('c2-pred-reveal') && (document.getElementById('c2-pred-reveal').style.display='none');
   SUMDATA[1]={Qp,dpt:tot2,pf:pf2,K2:K2,pct:pct2.toFixed(0),cross:'—'};
   document.getElementById('c2-budget').style.display='block';
-  setTimeout(()=>{if(window.MathJax)MathJax.typesetPromise();},100);
+  setTimeout(()=>{},100);
 }
 
 // ── CONFIG 3 ──
@@ -1183,7 +1223,27 @@ function calcC3(){
   sv('c3-hfriction',dpt>0?Hfriction.toFixed(1):'enter H above',dpt>0?'navy':'');
   sv('c3-hp1b',hp1.toFixed(1),'navy');
   sv('c3-hfrictionb',dpt>0?Hfriction.toFixed(1):'—',dpt>0?'teal':'');
-  if(dpt>0&&Hfriction>0){const dp=Math.abs(hp1-Hfriction)/Hfriction*100;sv('c3-diffavg',dp.toFixed(1)+'%',dp<5?'green':dp<15?'amber':'red');}
+  if(dpt>0&&Hfriction>0){
+    const dp=Math.abs(hp1-Hfriction)/Hfriction*100;
+    sv('c3-diffavg',dp.toFixed(1)+'%',dp<5?'green':dp<15?'amber':'red');
+    // budget bars
+    const pct3=Hfriction/dpt*100, mpct3=Hminor/dpt*100;
+    document.getElementById('c3-b3pf').style.width=pct3.toFixed(1)+'%';
+    document.getElementById('c3-b3pf').textContent=pct3.toFixed(0)+'%';
+    document.getElementById('c3-b3ml').style.width=mpct3.toFixed(1)+'%';
+    document.getElementById('c3-b3ml').textContent=mpct3.toFixed(0)+'%';
+  }
+  // populate Config 1 and 2 bars from stored data
+  if(G.pct1){
+    const p1=G.pct1,m1=100-p1;
+    document.getElementById('c3-b1pf').style.width=p1.toFixed(1)+'%';document.getElementById('c3-b1pf').textContent=p1.toFixed(0)+'%';
+    document.getElementById('c3-b1ml').style.width=m1.toFixed(1)+'%';document.getElementById('c3-b1ml').textContent=m1.toFixed(0)+'%';
+  }
+  if(SUMDATA[1].pct){
+    const p2=+SUMDATA[1].pct,m2=100-p2;
+    document.getElementById('c3-b2pf').style.width=p2.toFixed(1)+'%';document.getElementById('c3-b2pf').textContent=p2.toFixed(0)+'%';
+    document.getElementById('c3-b2ml').style.width=m2.toFixed(1)+'%';document.getElementById('c3-b2ml').textContent=m2.toFixed(0)+'%';
+  }
   const actDC=Math.abs(Qdc)>0.002?'flow':'zero';
   const selDC=PREDS['p3dc'];
   const okDC=selDC===actDC;
@@ -1195,7 +1255,7 @@ function calcC3(){
   document.getElementById('c3-obs-text').textContent=obsText;
   SUMDATA[2]={Qp,dpt:dpt||0,pf:dpt>0?Hfriction:hpavg,pct:dpt>0?(Hfriction/dpt*100).toFixed(0):'—',cross:Math.abs(Qdc).toFixed(4)+' LPM ('+dir+')'};
   document.getElementById('c3-body').style.display='block';
-  setTimeout(()=>{if(window.MathJax)MathJax.typesetPromise();},100);
+  setTimeout(()=>{},100);
 }
 
 // ── SUMMARY ──
@@ -1215,11 +1275,11 @@ function buildSummary(){
       +'<td style="font-family:\'DM Sans\',sans-serif;font-size:.82rem;color:'+(i>=2?'var(--purple)':'var(--muted)')+'">'+( d.cross||'—')+'</td>'
       +'</tr>';
   }).join('');
-  setTimeout(()=>{if(window.MathJax)MathJax.typesetPromise();},100);
+  setTimeout(()=>{},100);
 }
 
 updProg(1);
 </script>
-<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
 </body>
 </html>
