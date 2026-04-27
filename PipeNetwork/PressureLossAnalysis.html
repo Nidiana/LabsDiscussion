@@ -266,8 +266,13 @@ sup{font-size:.72em;vertical-align:super}
     <div class="cg-row"><span class="cg-lbl">Collection time</span><div class="inp-wrap"><input class="cinput" type="number" id="c1t" placeholder="0.00" step="0.01" oninput="calcC1()"><span class="cunit">seconds</span></div></div>
     <div class="cg-row"><span class="cg-lbl">Head loss — pipe 2</span><div class="inp-wrap"><input class="cinput" type="number" id="c1dp" placeholder="0.0" step="0.1" oninput="calcC1()"><span class="cunit">mmH₂O</span></div></div>
     <div class="cg-row"><span class="cg-lbl">Head loss — A to F</span><div class="inp-wrap"><input class="cinput" type="number" id="c1dpt" placeholder="0.0" step="0.1" oninput="calcC1()"><span class="cunit">mmH₂O</span></div></div>
+    <div id="c1-haf-warn" style="display:none;margin-top:.5rem;display:none;align-items:center;gap:.5rem">
+      <span style="color:var(--red);font-size:1.1rem;font-weight:600">✗</span>
+      <span style="color:var(--red);font-size:.88rem">Is this the total head loss through the whole network?</span>
+    </div>
     <hr style="margin:.6rem 0">
     <div class="cg-row"><span class="cg-lbl"><span class="meq">Q<sub>pump</sub> = (V / t) × 60</span></span><span class="cres navy" id="c1-qp">—</span><span class="cunit">LPM</span></div>
+    <div style="font-size:.78rem;color:var(--muted);margin-top:.5rem;padding-top:.4rem;border-top:1px solid var(--border)">All formulas use SI units (m, m³/s, Pa). Results are displayed in mmH₂O for readability — the tool handles the conversion.</div>
   </div>
 
   <div id="c1-body" style="display:none">
@@ -467,6 +472,10 @@ sup{font-size:.72em;vertical-align:super}
     <div class="cg-row"><span class="cg-lbl">Collection time</span><div class="inp-wrap"><input class="cinput" type="number" id="c2t" placeholder="0.00" step="0.01" oninput="calcC2()"><span class="cunit">seconds</span></div></div>
     <div class="cg-row"><span class="cg-lbl">Head loss — pipe 2 (upper branch)</span><div class="inp-wrap"><input class="cinput" type="number" id="c2dp" placeholder="0.0" step="0.1" oninput="calcC2()"><span class="cunit">mmH₂O</span></div></div>
     <div class="cg-row"><span class="cg-lbl">Head loss — A to F</span><div class="inp-wrap"><input class="cinput" type="number" id="c2dpt" placeholder="0.0" step="0.1" oninput="calcC2()"><span class="cunit">mmH₂O</span></div></div>
+    <div id="c2-haf-warn" style="display:none;margin-top:.5rem;align-items:center;gap:.5rem">
+      <span style="color:var(--red);font-size:1.1rem;font-weight:600">✗</span>
+      <span style="color:var(--red);font-size:.88rem">Is this the total head loss through the whole network?</span>
+    </div>
     <hr style="margin:.6rem 0">
     <div class="cg-row"><span class="cg-lbl"><span class="meq">Q<sub>pump</sub> = (V/t) × 60</span></span><span class="cres navy" id="c2-qp">—</span><span class="cunit">LPM</span></div>
   </div>
@@ -519,7 +528,7 @@ sup{font-size:.72em;vertical-align:super}
           <span class="cg-eq">smooth pipe (<span class="meq">ε/D = 0</span>), at your <span class="meq">Re</span></span>
           <div class="inp-wrap"><input class="cinput" type="number" id="c2f" placeholder="0.000" step="0.001" oninput="calcC2moody()"><span class="cunit">—</span></div>
         </div>
-        <div class="cg-row"><span class="cg-lbl"><span class="meq">h<sub>f,pred</sub> = f · (L/D) · V<sub>upper</sub><sup>2</sup> / (2g) </span></span><span class="cres navy" id="c2-hfpred">—</span><span class="cunit">mmH₂O</span></div>
+        <div class="cg-row"><span class="cg-lbl"><span class="meq">h<sub>f,pred</sub> = f · (L/D) · V<sub>upper</sub><sup>2</sup> / (2g)</span></span><span class="cres navy" id="c2-hfpred">—</span><span class="cunit">mmH₂O</span></div>
         <div class="cg-row"><span class="cg-lbl"><span class="meq">h<sub>f,measured</sub></span> — pipe 2 (your data)</span><span class="cres" id="c2-hfmeas">—</span><span class="cunit">mmH₂O</span></div>
         <div class="cg-row"><span class="cg-lbl">Difference</span><span class="cres" id="c2-hfdiff">—</span><span class="cunit">%</span></div>
         <hr style="margin:.6rem 0">
@@ -699,6 +708,10 @@ sup{font-size:.72em;vertical-align:super}
     <div class="cg-row"><span class="cg-lbl">Volume collected</span><div class="inp-wrap"><input class="cinput" type="number" id="c3V" placeholder="0.00" step="0.01" oninput="calcC3()"><span class="cunit">litres</span></div></div>
     <div class="cg-row"><span class="cg-lbl">Collection time</span><div class="inp-wrap"><input class="cinput" type="number" id="c3t" placeholder="0.00" step="0.01" oninput="calcC3()"><span class="cunit">seconds</span></div></div>
     <div class="cg-row"><span class="cg-lbl">Head loss — A to F</span><div class="inp-wrap"><input class="cinput" type="number" id="c3dpt" placeholder="0.0" step="0.1" oninput="calcC3()"><span class="cunit">mmH₂O</span></div></div>
+    <div id="c3-haf-warn" style="display:none;margin-top:.5rem;align-items:center;gap:.5rem">
+      <span style="color:var(--red);font-size:1.1rem;font-weight:600">✗</span>
+      <span style="color:var(--red);font-size:.88rem">Is this the total head loss through the whole network?</span>
+    </div>
     <hr style="margin:.6rem 0">
     <div class="cg-row"><span class="cg-lbl"><span class="meq">Q<sub>pump</sub> = (V/t) × 60</span></span><span class="cres navy" id="c3-qp">—</span><span class="cunit">LPM</span></div>
   </div>
@@ -735,7 +748,7 @@ sup{font-size:.72em;vertical-align:super}
       <div class="cg-title" style="font-size:.85rem;letter-spacing:.05em">Step 3 — Head loss estimate from Hardy Cross flow rates</div>
       <p style="margin:.5rem 0 .9rem;font-size:.93rem;color:#2d2840">Hardy Cross enforces equal head loss through every path — so all three paths give the same result. This is the H_friction estimate from your Hardy Cross solution, using R from Configuration 1.</p>
       <div class="eq-box">
-        <div class="meq-block"><div class="meq-row">H<sub>friction,HC</sub> = R · (Q<sub>AB</sub><sup>2</sup> + Q<sub>BC</sub><sup>2</sup> + Q<sub>CF</sub><sup>2</sup>) </div></div>
+        <div class="meq-block"><div class="meq-row">H<sub>friction,HC</sub> = R · (Q<sub>AB</sub><sup>2</sup> + Q<sub>BC</sub><sup>2</sup> + Q<sub>CF</sub><sup>2</sup>)</div></div>
       </div>
       <div class="cg-row"><span class="cg-lbl"><span class="meq">H<sub>friction</sub></span> — from Hardy Cross (path 1)</span><span class="cres navy" id="c3-hp1">—</span><span class="cunit">mmH₂O</span></div>
     </div>
@@ -744,7 +757,7 @@ sup{font-size:.72em;vertical-align:super}
     <div class="calc-guide">
       <div class="cg-title" style="font-size:.85rem;letter-spacing:.05em">Step 4 — Minor losses and experimental <span class="meq">H<sub>friction</sub></span></div>
       <div class="eq-box">
-        <div class="meq-block"><div class="meq-row">K<sub>avg</sub> = <span class="mfrac"><span class="mnum">K<sub>1</sub> + K<sub>2</sub></span><span class="mden">2</span></span>    H<sub>minor</sub> = 2 · K<sub>avg</sub> · V<sub>in</sub><sup>2</sup>2g </div></div>
+        <div class="meq-block"><div class="meq-row">K<sub>avg</sub> = <span class="mfrac"><span class="mnum">K<sub>1</sub> + K<sub>2</sub></span><span class="mden">2</span></span>    H<sub>minor</sub> = 2 · K<sub>avg</sub> · V<sub>in</sub><sup>2</sup>/(2g)</div></div>
         <div class="meq-block"><div class="meq-row">H<sub>friction</sub> = H<sub>A → F</sub> - H<sub>minor</sub></div></div>
       </div>
       <div class="cg-row"><span class="cg-lbl"><span class="meq">K<sub>1</sub></span> (Config 1)</span><span class="cres" id="c3-k1">—</span><span class="cunit">—</span></div>
@@ -927,7 +940,18 @@ function hc2(pipes,loops,Q0){
 function calcC1(){
   const V=+document.getElementById('c1V').value,t=+document.getElementById('c1t').value;
   const dp=+document.getElementById('c1dp').value,dpt=+document.getElementById('c1dpt').value;
-  if([V,t,dp,dpt].some(isNaN)||t===0||V===0)return;
+  if([V,t,dp].some(isNaN)||t===0||V===0||dp===0)return;
+  if(dpt===0){sv('c1-qp',((V/t)*60).toFixed(3),'navy');return;}
+  // checkpoint: H_AF must be greater than 3 × h_pipe2
+  const pf_check=3*dp;
+  const warn1=document.getElementById('c1-haf-warn');
+  if(dpt>0&&dpt<=pf_check){
+    warn1.style.display='flex';
+    document.getElementById('c1-body').style.display='none';
+    return;
+  } else {
+    warn1.style.display='none';
+  }
   const Qp=(V/t)*60,Qpipe=Qp/2,HL=dp/1000,R=HL/(Qpipe*Qpipe);
   const Vin=(Qp/60000)/Ap,vh=Vin*Vin/(2*g);
   const pf=3*dp,ml=dpt-pf,K=(ml/1000/2)/vh;
@@ -946,7 +970,9 @@ function calcC1(){
   document.getElementById('c1-obs').style.display='block';
   SUMDATA[0]={Qp,dpt,pf,pct:pct.toFixed(0),cross:'—'};
   document.getElementById('c1-body').style.display='block';
-  setTimeout(()=>{},100);
+  // cascade — if Config 2 data already entered, refresh it with new R and K
+  const c2V=+document.getElementById('c2V').value,c2t=+document.getElementById('c2t').value;
+  if(c2V>0&&c2t>0) calcC2();
 }
 
 // ── CHECKPOINT FUNCTIONS ──
@@ -1035,6 +1061,16 @@ function calcC2(){
   SUMDATA[1].Qp=Qp;
   if(dpt>0)SUMDATA[1].dpt=dpt;
   if(dp2>0){SUMDATA[1].dp2=dp2;sv('c2-hfmeas',dp2.toFixed(2));}
+  // checkpoint: H_AF must be greater than 3 × h_pipe2
+  const warn2=document.getElementById('c2-haf-warn');
+  if(dpt>0&&dp2>0&&dpt<=3*dp2){
+    warn2.style.display='flex';
+    document.getElementById('c2-body').style.display='none';
+    return;
+  } else if(warn2){
+    warn2.style.display='none';
+  }
+  if(dpt===0||dp2===0){document.getElementById('c2-body').style.display='block';return;}
   // show prediction outcome immediately if both measurements are in
   if(Qp>0&&dpt>0){
     const actH=dpt<(G.pf1+G.ml1)-5?'dec':dpt>(G.pf1+G.ml1)+5?'inc':'same';
@@ -1051,7 +1087,12 @@ function calcC2(){
     if(el&&txt){txt.textContent=msg;el.className='callout '+tone;el.style.display='block';}
   }
   document.getElementById('c2-body').style.display='block';
-  setTimeout(()=>{},100);
+  // if HC stepper was already built, rebuild it with fresh R
+  const q0=+document.getElementById('c2q0').value;
+  if(q0>0) setupHC2();
+  // cascade — if Config 3 data already entered, refresh it
+  const c3V=+document.getElementById('c3V').value,c3t=+document.getElementById('c3t').value;
+  if(c3V>0&&c3t>0) calcC3();
 }
 
 function answerMC(idx){
@@ -1167,7 +1208,9 @@ function showC2Budget(Qu,Ql,Qp,dpt,dp2){
   document.getElementById('c2-pred-reveal') && (document.getElementById('c2-pred-reveal').style.display='none');
   SUMDATA[1]={Qp,dpt:tot2,pf:pf2,K2:K2,pct:pct2.toFixed(0),cross:'—'};
   document.getElementById('c2-budget').style.display='block';
-  setTimeout(()=>{},100);
+  // cascade — if Config 3 data already entered, refresh it with updated K2
+  const c3V=+document.getElementById('c3V').value,c3t=+document.getElementById('c3t').value;
+  if(c3V>0&&c3t>0) calcC3();
 }
 
 // ── CONFIG 3 ──
@@ -1177,7 +1220,15 @@ function calcC3(){
   if([V,t].some(isNaN)||t===0||V===0)return;
   const Qp=(V/t)*60;
   sv('c3-qp',Qp.toFixed(3),'navy');
-  // need R from Config 1 to proceed
+  // checkpoint: H_AF should be plausible — warn if it looks like a single-pipe reading
+  const warn3=document.getElementById('c3-haf-warn');
+  if(dpt>0&&G.pf1>0&&dpt<G.pf1*0.5){
+    warn3.style.display='flex';
+    document.getElementById('c3-body').style.display='none';
+    return;
+  } else if(warn3){
+    warn3.style.display='none';
+  }
   if(!G.R){
     document.getElementById('c3-body').innerHTML='<div class="callout amber"><strong>Complete Configuration 1 first</strong>R is needed from Config 1 before the analysis can run.</div>';
     document.getElementById('c3-body').style.display='block';
