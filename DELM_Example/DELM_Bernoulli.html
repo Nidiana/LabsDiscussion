@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bernoulli's Theorem | Interactive Lab Experience</title>
+    
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$']],
+                displayMath: [['$$', '$$']]
+            }
+        };
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        :root {
+            --action-color: #6b21a8; 
+            --bg-neutral: #f8fafc;
+            --text-dark: #0f172a;
+            --text-muted: #475569;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: #e2e8f0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            font-size: 17px;
+            line-height: 1.7;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 0;
+            color: var(--text-dark);
+        }
+
+        #progressContainer {
+            width: 1280px;
+            background: #cbd5e1;
+            height: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        #progressBar {
+            width: 12.5%;
+            height: 100%;
+            background: var(--action-color);
+            transition: width 0.4s ease;
+        }
+
+        .slide-container {
+            width: 1280px;
+            min-height: 720px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: none; 
+            position: relative;
+            margin-bottom: 40px;
+        }
+
+        .slide-container.active { display: flex; flex-direction: column; }
+
+        .content-area {
+            padding: 50px 60px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .slide-title {
+            font-size: 38px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--text-dark);
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 40px;
+            align-items: start;
+        }
+
+        .image-placeholder {
+            border-radius: 12px;
+            height: 380px;
+            background: #f1f5f9;
+            border: 2px dashed #cbd5e1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            color: var(--text-muted);
+        }
+
+        .theory-box {
+            background: #f8fafc;
+            border-left: 5px solid var(--action-color);
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .checkbox-item input {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+        }
+
+        .quiz-container {
+            background: #f1f5f9;
+            padding: 25px;
+            border-radius: 12px;
+            margin-top: 15px;
+        }
+        
+        .quiz-option {
+            background: white;
+            padding: 12px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .quiz-option:hover { border-color: var(--action-color); }
+        .feedback { display: none; margin-top: 10px; padding: 12px; border-radius: 6px; font-weight: 500; }
+
+        .notebook-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        
+        .notebook-table th, .notebook-table td {
+            border: 1px solid #cbd5e1;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .next-btn {
+            position: absolute;
+            bottom: 40px;
+            right: 60px;
+            background: var(--action-color);
+            color: white;
+            padding: 14px 35px;
+            border-radius: 30px;
+            border: none;
+            font-weight: 600;
+            font-size: 18px;
+            cursor: pointer;
+            opacity: 0.3;
+            pointer-events: none;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .next-btn.enabled { opacity: 1; pointer-events: auto; transform: scale(1.02); cursor: pointer; }
+
+        @media (max-width: 1300px) {
+            .slide-container { width: 95vw; }
+            #progressContainer { width: 95vw; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="progressContainer"><div id="progressBar"></div></div>
+
+<div class="slide-container active" id="step1" style="background: linear-gradient(135deg, #1e1b4b 0%, #4c1d95 100%); color: white;">
+    <div class="content-area" style="justify-content: center; align-items: center; text-align: center;">
+        <h1 style="font-size: 56px; margin-bottom: 20px; font-weight: 800;">Bernoulli’s Theorem Demonstration</h1>
+        <p style="font-size: 22px; max-width: 850px; margin-bottom: 45px; color: #ddd6fe;">
+            Mastering pressure-velocity tradeoffs in fluid systems.
+        </p>
+        <button class="next-btn enabled" onclick="nextStep(1)" style="position: static; padding: 16px 45px;">
+            Begin Laboratory Session <i class="fa-solid fa-arrow-right"></i>
+        </button>
+    </div>
+</div>
+
+<div class="slide-container" id="step2">
+    <div class="content-area">
+        <h2 class="slide-title">1. Equipment Identification</h2>
+        <div class="two-column">
+            <div>
+                <p class="text-muted" style="margin-bottom: 20px;">Verify your experimental workbench layout before initializing flow lines.</p>
+                <label class="checkbox-item"><input type="checkbox" class="step2-check" onchange="evaluateStep(2)"> <span><strong>F1-10 Hydraulics Bench:</strong> Provides controlled water supply.</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="step2-check" onchange="evaluateStep(2)"> <span><strong>F1-15 Bernoulli Test Taper:</strong> Acrylic duct shifting profile.</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="step2-check" onchange="evaluateStep(2)"> <span><strong>Multi-Tube Manometer Bank:</strong> 6 vertical pressure columns.</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="step2-check" onchange="evaluateStep(2)"> <span><strong>Hypodermic Traverse Probe:</strong> Measures centerline total head.</span></label>
+            </div>
+            <div class="image-placeholder"><i class="fa-solid fa-microscope"></i><strong>📸 [PHOTO: System Setup Overview]</strong></div>
+        </div>
+        <button class="next-btn" id="next2" onclick="nextStep(2)">Next Step <i class="fa-solid fa-arrow-right"></i></button>
+    </div>
+</div>
+
+<div class="slide-container" id="step3">
+    <div class="content-area">
+        <h2 class="slide-title">2. Geometrical Alignment</h2>
+        <div class="two-column">
+            <div>
+                <p class="text-muted" style="margin-bottom: 15px;">Complete alignment tasks to satisfy horizontal baseline conditions ($z_1 = z_2$).</p>
+                <label class="checkbox-item"><input type="checkbox" class="step3-check" onchange="evaluateStep(3)"> <span>Manipulate platform feet until the <strong>spirit level</strong> is centered.</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="step3-check" onchange="evaluateStep(3)"> <span>Verify the 14° low-angle slope is oriented as the <strong>convergent entrance</strong>.</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="step3-check" onchange="evaluateStep(3)"> <span>Retract the stagnation probe completely past node $h_1$ to protect it.</span></label>
+
+                <div class="quiz-container">
+                    <p class="quiz-title">Why must the track maintain an absolute horizontal plane?</p>
+                    <div class="quiz-option step3-quiz-opt" onclick="processQuiz(3, 0, false, this)">A) To eliminate viscous friction terms entirely.</div>
+                    <div class="quiz-option step3-quiz-opt" onclick="processQuiz(3, 1, true, this)">B) To isolate structural changes to pressure and speed, forcing elevation variables $z_1 = z_2$.</div>
+                    <div id="quiz-feedback-3" class="feedback"></div>
+                </div>
+            </div>
+            <div class="image-placeholder"><i class="fa-solid fa-compass-drafting"></i><strong>📸 [DIAGRAM: Flow Geometry]</strong></div>
+        </div>
+        <button class="next-btn" id="next3" onclick="nextStep(3)">Next Step <i class="fa-solid fa-arrow-right"></i></button>
+    </div>
+</div>
+
+<div class="slide-container" id="step4">
+    <div class="content-area">
+        <h2 class="slide-title">3. Line Priming & Air Purging</h2>
+        <div class="two-column">
+            <div class="image-placeholder"><i class="fa-solid fa-faucet-drip"></i><strong>📸 [PHOTO: Air Bleed Sequence]</strong></div>
+            <div>
+                <div class="theory-box">
+                    <strong>Just-In-Time Formulation:</strong>
+                    $$ h_1 + \frac{v_1^2}{2g} = h_2 + \frac{v_2^2}{2g} $$
+                    Where static pressure head is height $h = \frac{P}{\rho g}$.
+                </div>
+                <label class="checkbox-item"><input type="checkbox" class="step4-check" onchange="evaluateStep(4)"> <span>Seal the control valve, then switch on the central supply pump.</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="step4-check" onchange="evaluateStep(4)"> <span>Slowly open primary supply line valve until columns fill.</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="step4-check" onchange="evaluateStep(4)"> <span>Open top bleeder pin until all air bubbles are swept out.</span></label>
+                
+                <div class="quiz-container">
+                    <p class="quiz-title">What happens if air blocks persist inside the manometer taps?</p>
+                    <div class="quiz-option step4-quiz-opt" onclick="processQuiz(4, 0, false, this)">A) Calculated mass balance velocities increase exponentially.</div>
+                    <div class="quiz-option step4-quiz-opt" onclick="processQuiz(4, 1, true, this)">B) Trapped gas introduces artificial height errors via pneumatic spring behavior.</div>
+                    <div id="quiz-feedback-4" class="feedback"></div>
+                </div>
+            </div>
+        </div>
+        <button class="next-btn" id="next4" onclick="nextStep(4)">Next Step <i class="fa-solid fa-arrow-right"></i></button>
+    </div>
+</div>
+
+<div class="slide-container" id="step5">
+    <div class="content-area">
+        <h2 class="slide-title">4. Position 1: Forward Evaluation Data</h2>
+        <p class="text-muted" style="margin-bottom: 15px;">Establish maximum differential state ($h_1$ high, $h_5$ low). Let system currents settle before logging.</p>
+        
+        <table class="notebook-table">
+            <thead>
+                <tr>
+                    <th>Type</th><th>$h_1$</th><th>$h_2$</th><th>$h_3$</th><th>$h_4$</th><th>$h_5$</th><th>$h_6$</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td><strong>Static Head ($h_n$, mm)</strong></td><td>____</td><td>____</td><td>____</td><td>____</td><td>____</td><td>____</td></tr>
+                <tr><td><strong>Total Head ($h_t$, mm)</strong></td><td>____</td><td>____</td><td>____</td><td>____</td><td>____</td><td>____</td></tr>
+            </tbody>
+        </table>
+
+        <div class="two-column" style="margin-top: 15px;">
+            <div>
+                <label class="checkbox-item"><input type="checkbox" class="step5-check" onchange="evaluateStep(5)"> <span>Log static profiles with probe retracted past node $h_1$.</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="step5-check" onchange="evaluateStep(5)"> <span>Advance probe step-by-step to capture total stagnation head.</span></label>
+            </div>
+            <div class="theory-box" style="margin:0; font-size:14px;">
+                <strong>Sense Check:</strong> Static track values must drop continuously from $h_1 \rightarrow h_5$, then rebound at $h_6$.
+            </div>
+        </div>
+        <button class="next-btn" id="next5" onclick="nextStep(5)">Next Step <i class="fa-solid fa-arrow-right"></i></button>
+    </div>
+</div>
+
+<div class="slide-container" id="step6">
+    <div class="content-area">
+        <h2 class="slide-title">5. Volumetric Calculation & Timing</h2>
+        <div class="two-column">
+            <div>
+                <p class="text-muted">Calculated speed profiles rely on tracking volume changes: $Q = \frac{V}{t}$.</p>
+                <label class="checkbox-item"><input type="checkbox" class="step6-check" onchange="evaluateStep(6)"> <span>Seal escape bypass valve and initiate timer concurrently.</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="step6-check" onchange="evaluateStep(6)"> <span>Accumulate fluid volume past 10L or for a full 60 seconds.</span></label>
+                
+                <div class="quiz-container">
+                    <p class="quiz-title">Why does the lab demand a minimum collection span of 60 seconds?</p>
+                    <div class="quiz-option step6-quiz-opt" onclick="processQuiz(6, 0, false, this)">A) To allow fluid viscosity coefficients to level out.</div>
+                    <div class="quiz-option step6-quiz-opt" onclick="processQuiz(6, 1, true, this)">B) To minimize the percentage impact of human reflex reaction delay on timing metrics.</div>
+                    <div id="quiz-feedback-6" class="feedback"></div>
+                </div>
+            </div>
+            <div class="image-placeholder"><i class="fa-solid fa-stopwatch"></i><strong>📸 [PHOTO: Sight Glass Level Indicator]</strong></div>
+        </div>
+        <button class="next-btn" id="next6" onclick="nextStep(6)">Next Step <i class="fa-solid fa-arrow-right"></i></button>
+    </div>
+</div>
+
+<div class="slide-container" id="step7">
+    <div class="content-area">
+        <h2 class="slide-title">6. Section Reversal: 21° to 14° Boundary Analysis</h2>
+        <div class="two-column">
+            <div>
+                <p class="text-muted">Invert assembly configuration to position the 21° slope as the convergent intake.</p>
+                <div class="theory-box" style="font-size: 14px;">
+                    <strong>Why is the downstream diffuser section longer (14°)?</strong> Exploring profiles subject fluid to adverse pressure fields. Widening channels too quickly causes boundary layer separation, driving parasitic eddy losses.
+                </div>
+                <label class="checkbox-item"><input type="checkbox" class="step7-check" onchange="evaluateStep(7)"> <span><strong>MANDATORY:</strong> Retract stagnation probe fully before breaking couplings.</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="step7-check" onchange="evaluateStep(7)"> <span>Unscrew lock rings, flip track orientation, and re-secure assemblies.</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="step7-check" onchange="evaluateStep(7)"> <span>Re-establish target flow and log metrics across the reversed setup.</span></label>
+            </div>
+            <div class="image-placeholder"><i class="fa-solid fa-shuffle"></i><strong>📸 [DIAGRAM: Reversal Schematics]</strong></div>
+        </div>
+        <button class="next-btn" id="next7" onclick="nextStep(7)">Next Step <i class="fa-solid fa-arrow-right"></i></button>
+    </div>
+</div>
+
+<div class="slide-container" id="step8">
+    <div class="content-area">
+        <h2 class="slide-title">7. Mastery Validation & Data Reporting</h2>
+        <div class="quiz-container">
+            <p class="quiz-title">As fluid enters the constriction zone, how do velocity ($v$) and static head ($h$) balance out?</p>
+            <div class="quiz-option" onclick="processQuiz(8, 0, true, this)">A) Velocity accelerates matching area compression; Static pressure falls to satisfy the total energy balance.</div>
+            <div class="quiz-option" onclick="processQuiz(8, 1, false, this)">B) Velocity increases while static pressure tracks upward symmetrically.</div>
+            <div id="quiz-feedback-8" class="feedback"></div>
+        </div>
+        <p style="text-align: center; color: var(--action-color); font-weight: 700; margin-top: 40px; font-size: 18px;">
+            🎉 Experimental Phase Concluded. Power down the pump system.
+        </p>
+        <button class="next-btn" id="next8" onclick="finishLab()">Terminate Session <i class="fa-solid fa-flag-checkered"></i></button>
+    </div>
+</div>
+
+<script>
+    // State Space
+    let activeIndex = 1;
+    const maxSteps = 8;
+    
+    // Explicit Validation Tracking Map
+    let slideMetrics = {
+        2: { checks: false },
+        3: { checks: false, quiz: false },
+        4: { checks: false, quiz: false },
+        5: { checks: false },
+        6: { checks: false, quiz: false },
+        7: { checks: false },
+        8: { quiz: false }
+    };
+
+    function evaluateStep(step) {
+        let totalChecked = document.querySelectorAll(`.step${step}-check:checked`).length;
+        let targetsNeeded = document.querySelectorAll(`.step${step}-check`).length;
+        
+        slideMetrics[step].checks = (totalChecked === targetsNeeded);
+        console.log(`Step ${step} Checkboxes: ${totalChecked}/${targetsNeeded}`);
+        updateButtonState(step);
+    }
+
+    function processQuiz(step, index, isCorrect, element) {
+        const feedback = document.getElementById(`quiz-feedback-${step}`);
+        const alternatives = element.parentNode.querySelectorAll('.quiz-option');
+        
+        alternatives.forEach(opt => opt.style.borderColor = '#e2e8f0');
+        feedback.style.display = 'block';
+
+        if (isCorrect) {
+            element.style.borderColor = '#16a34a';
+            feedback.innerHTML = "✅ <strong>Correct!</strong> Engineering rationale validated.";
+            feedback.style.background = "#dcfce7";
+            feedback.style.color = "#166534";
+            slideMetrics[step].quiz = true;
+        } else {
+            element.style.borderColor = '#dc2626';
+            feedback.innerHTML = "❌ <strong>Incorrect.</strong> Re-evaluate system configurations against energy inputs.";
+            feedback.style.background = "#fee2e2";
+            feedback.style.color = "#991b1b";
+            slideMetrics[step].quiz = false;
+        }
+        updateButtonState(step);
+    }
+
+    function updateButtonState(step) {
+        const targetBtn = document.getElementById(`next${step}`);
+        if (!targetBtn) return;
+
+        let data = slideMetrics[step];
+        let dynamicPass = false;
+
+        // Condition Trees
+        if (data.hasOwnProperty('checks') && data.hasOwnProperty('quiz')) {
+            dynamicPass = (data.checks && data.quiz);
+        } else if (data.hasOwnProperty('checks')) {
+            dynamicPass = data.checks;
+        } else if (data.hasOwnProperty('quiz')) {
+            dynamicPass = data.quiz;
+        }
+
+        if (dynamicPass) {
+            targetBtn.classList.add('enabled');
+            console.log(`%cAdvancement Condition UNLOCKED for Step ${step}`, 'color: green; font-weight: bold;');
+        } else {
+            targetBtn.classList.remove('enabled');
+        }
+    }
+
+    function nextStep(step) {
+        if (step === 1 || document.getElementById(`next${step}`).classList.contains('enabled')) {
+            document.getElementById(`step${activeIndex}`).classList.remove('active');
+            activeIndex++;
+            
+            const nextSlide = document.getElementById(`step${activeIndex}`);
+            if (nextSlide) {
+                nextSlide.classList.add('active');
+                let barPercentage = (activeIndex / maxSteps) * 100;
+                document.getElementById('progressBar').style.width = barPercentage + "%";
+                window.scrollTo(0,0);
+                console.log(`%cTransitioning to Execution Slide ${activeIndex}`, 'color: purple; font-weight: bold;');
+            }
+        }
+    }
+
+    function finishLab() {
+        if(document.getElementById('next8').classList.contains('enabled')) {
+            document.getElementById('progressBar').style.width = "100%";
+            alert("Session completed successfully.");
+        }
+    }
+</script>
+
+ <div class="copyright">
+            <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" /></a><br />
+            &copy; 2026 Nidiana Rosado Hau, University of Sheffield
+        </div>
+</body>
+</html>
