@@ -34,7 +34,7 @@ Once the paths are updated, the tool will run fully offline.
 
 Interested in building your own interactive teaching tool? Refer to the guide:
 
-📄 **[How to Build an Interactive Teaching Tool]**
+📄 * How_to_Build_an_Interactive_Teaching_Tool.pdf **
 
 This document walks you through the full process of creating your own DTL from scratch.
 
