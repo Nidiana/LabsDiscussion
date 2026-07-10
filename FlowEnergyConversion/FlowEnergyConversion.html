@@ -11,16 +11,21 @@
   --bg:#f2f4f7; --surface:#ffffff; --surface2:#f5f7fa;
   --border:#d0d8e4; --border-lt:#e2e8f0;
   --text:#1a202c; --text-md:#4a5568; --text-lt:#718096;
-  --accent:#1a56a0; --accent-h:#0f3675; --accent-bg:#ebf3fc;
-  --c-cont:#b45309; --c-throat:#1a7a4a; --c-diff:#1a56a0;
-  --ok:#1a7a4a; --ok-bg:#e6f6ee; --err:#b71c1c; --err-bg:#fdecea;
+  --accent:#1a5f96; --accent-h:#0f4570; --accent-bg:#eaf3fb;
+  --c-cont:#b3590d; --c-cont-bg:#fdf0e2; --c-cont-tx:#8a4408;
+  --c-throat:#0e8f74; --c-throat-bg:#e3f7f2; --c-throat-tx:#0b5c49;
+  --c-diff:#3b5bdb; --c-diff-bg:#ecefff; --c-diff-tx:#2c3fa8;
+  --ok:#15803d; --ok-bg:#e6f6ee; --err:#b71c1c; --err-bg:#fdecea;
   --ff:'Inter',system-ui,sans-serif;
   --serif:'Source Serif 4',Georgia,serif;
   --mono:'JetBrains Mono','Courier New',monospace;
   --r:8px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-html{font-size:18px;}
+html{font-size:16px;}
+@media(min-width:600px){html{font-size:17px;}}
+@media(min-width:900px){html{font-size:18.5px;}}
+@media(min-width:1200px){html{font-size:19px;}}
 body{font-family:var(--serif);background:var(--bg);color:var(--text);line-height:1.7;min-height:100vh;-webkit-text-size-adjust:100%;}
 .wizard{display:flex;flex-direction:column;height:100dvh;}
 .topbar{flex-shrink:0;background:#1a2e44;border-bottom:4px solid var(--accent);padding:18px 20px 14px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
@@ -47,15 +52,16 @@ body{font-family:var(--serif);background:var(--bg);color:var(--text);line-height
 .info-box .eq .ct{color:var(--c-throat);font-weight:700;}
 .info-box .eq .cd{color:var(--c-diff);font-weight:700;}
 .sec-badge{display:inline-block;font-family:var(--ff);font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;padding:3px 10px;border-radius:20px;font-weight:700;margin-bottom:4px;}
-.sec-contraction{background:#fef3e0;color:#92400e;}
-.sec-throat{background:#e6f6ee;color:#134e35;}
-.sec-diffuser{background:var(--accent-bg);color:#0f3675;}
+.sec-contraction{background:var(--c-cont-bg);color:var(--c-cont-tx);}
+.sec-throat{background:var(--c-throat-bg);color:var(--c-throat-tx);}
+.sec-diffuser{background:var(--c-diff-bg);color:var(--c-diff-tx);}
 .meas-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-bottom:16px;overflow:hidden;}
 .meas-header{padding:13px 18px 10px;border-bottom:1px solid var(--border-lt);display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
 .meas-header h3{font-family:var(--ff);font-size:0.95rem;font-weight:700;color:#1a2e44;}
 .meas-body{padding:16px 18px;}
 .tap-fld{display:flex;flex-direction:column;gap:4px;}
 .tap-fld label{font-family:var(--ff);font-size:0.7rem;letter-spacing:0.04em;text-transform:uppercase;font-weight:700;color:var(--text-md);}
+.tap-fld.f-cont label{color:var(--c-cont);}
 .tap-fld.f-throat label{color:var(--c-throat);}
 .tap-fld.f-diff label{color:var(--c-diff);}
 .tap-fld input{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-family:var(--mono);font-size:1rem;min-height:44px;transition:border-color 0.15s,box-shadow 0.15s;-webkit-appearance:none;appearance:none;}
@@ -74,9 +80,9 @@ body{font-family:var(--serif);background:var(--bg);color:var(--text);line-height
 .tap-cell.f-cont input{border-bottom-color:var(--c-cont);}
 .tap-cell.f-throat input{border-bottom-color:var(--c-throat);}
 .tap-cell.f-diff input{border-bottom-color:var(--c-diff);}
-.tap-cell.f-cont input:focus{outline:none;border-color:var(--c-cont);box-shadow:0 0 0 2px rgba(180,83,9,0.15);background:#fff;}
-.tap-cell.f-throat input:focus{outline:none;border-color:var(--c-throat);box-shadow:0 0 0 2px rgba(26,122,74,0.15);background:#fff;}
-.tap-cell.f-diff input:focus{outline:none;border-color:var(--c-diff);box-shadow:0 0 0 2px rgba(26,86,160,0.15);background:#fff;}
+.tap-cell.f-cont input:focus{outline:none;border-color:var(--c-cont);box-shadow:0 0 0 2px rgba(179,89,13,0.15);background:#fff;}
+.tap-cell.f-throat input:focus{outline:none;border-color:var(--c-throat);box-shadow:0 0 0 2px rgba(14,143,116,0.15);background:#fff;}
+.tap-cell.f-diff input:focus{outline:none;border-color:var(--c-diff);box-shadow:0 0 0 2px rgba(59,91,219,0.15);background:#fff;}
 .tap-chart-area{padding:14px 16px 16px;}
 .live-chart-hint{font-family:var(--serif);font-size:0.88rem;color:var(--text-md);font-style:italic;margin-bottom:14px;line-height:1.6;}
 .live-chart-empty{font-family:var(--serif);font-size:0.9rem;color:var(--text-lt);font-style:italic;text-align:center;padding:28px 0 18px;}
@@ -141,7 +147,7 @@ table.res-table tbody td:first-child{text-align:left;font-weight:700;}
 table.res-table tbody tr:last-child td{border-bottom:none;}
 table.res-table tbody tr:hover td{background:#f8fafc;}
 .zone-tag{display:inline-block;font-family:var(--ff);font-size:0.6rem;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;padding:2px 7px;border-radius:10px;margin-left:4px;vertical-align:middle;}
-.zt-c{background:#fef3e0;color:#92400e;}.zt-t{background:#e6f6ee;color:#134e35;}.zt-d{background:var(--accent-bg);color:#0f3675;}
+.zt-c{background:var(--c-cont-bg);color:var(--c-cont-tx);}.zt-t{background:var(--c-throat-bg);color:var(--c-throat-tx);}.zt-d{background:var(--c-diff-bg);color:var(--c-diff-tx);}
 /* QUIZ */
 .quiz-meta{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:22px;flex-wrap:wrap;}
 .q-prog-label{font-family:var(--ff);font-size:0.78rem;color:var(--text-lt);}
@@ -480,6 +486,16 @@ table.dynq-table tbody tr:hover td { background: #f8fafc; }
 .calc-hint.hint-ok  { color: var(--ok); }
 .calc-hint.hint-err { color: var(--err); }
 
+/* INTRO SLIDE — SKILL + LEARNING OUTCOMES */
+.skill-card{background:var(--surface);border:1px solid var(--border);border-left:5px solid var(--accent);border-radius:var(--r);padding:18px 20px;margin-bottom:18px;}
+.skill-eyebrow{display:inline-block;font-family:var(--ff);font-size:0.66rem;letter-spacing:0.12em;text-transform:uppercase;font-weight:700;color:var(--accent);background:var(--accent-bg);padding:3px 10px;border-radius:20px;margin-bottom:10px;}
+.skill-card p{font-family:var(--serif);font-size:0.98rem;color:var(--text);line-height:1.75;}
+.lo-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px;margin-bottom:20px;}
+.lo-card h3{font-family:var(--ff);font-size:0.92rem;font-weight:700;color:#1a2e44;margin-bottom:12px;}
+.lo-list{list-style:none;display:flex;flex-direction:column;gap:11px;}
+.lo-list li{display:flex;gap:10px;align-items:flex-start;font-family:var(--serif);font-size:0.95rem;color:var(--text-md);line-height:1.6;}
+.lo-list li::before{content:'\2713';color:var(--ok);font-weight:700;flex-shrink:0;margin-top:2px;}
+
 </style>
 </head>
 <body>
@@ -497,15 +513,42 @@ table.dynq-table tbody tr:hover td { background: #f8fafc; }
       <div class="step-pip" id="sp3" onclick="goTo(3)">3</div>
       <div class="step-connector"></div>
       <div class="step-pip" id="sp4" onclick="goTo(4)">4</div>
+      <div class="step-connector"></div>
+      <div class="step-pip" id="sp5" onclick="goTo(5)">5</div>
     </div>
   </header>
 
   <div class="slides-viewport">
 
-    <!-- SLIDE 1: STATIC PRESSURE -->
+    <!-- SLIDE 1: INTRO — SKILL RELEVANCE + LEARNING OUTCOMES -->
     <div class="slide active" id="s1">
       <div class="slide-body">
-        <div class="slide-h">Step 1 &#8212; Record static pressure readings</div>
+        <div class="slide-h">Before you begin</div>
+        <div class="slide-lead">What this activity develops, and why it matters beyond this module.</div>
+
+        <div class="skill-card">
+          <span class="skill-eyebrow">Industry-relevant skill</span>
+          <p>You will develop the ability to <strong>read, interpret, and sanity-check live sensor output</strong> &#8212; the same manometer and pitot-static instrumentation used in wind-tunnel testing, HVAC balancing, and energy-audit fieldwork. Employers consistently rank this ahead of raw calculation: a technician who can record a number is replaceable; an engineer who can judge whether that number is physically plausible, and diagnose it when it isn&#8217;t, is not.</p>
+        </div>
+
+        <div class="lo-card">
+          <h3>By the end of this activity you will be able to:</h3>
+          <ul class="lo-list">
+            <li>Apply the continuity equation and Bernoulli&#8217;s principle to predict how pressure and velocity change through a duct of varying cross-section.</li>
+            <li>Relate pitot-static pressure readings to local flow velocity in a real physical device, not just on paper.</li>
+            <li>Evaluate whether Bernoulli&#8217;s principle holds in practice, by comparing total pressure at multiple measurement stations.</li>
+            <li>Recognise where the same energy-conversion principles govern efficiency in engineered systems &#8212; HVAC ducting, wind-turbine diffusers, low-drag nozzle design &#8212; where getting this right reduces energy waste.</li>
+          </ul>
+        </div>
+
+        <button class="btn-proceed" onclick="goTo(2)">Begin activity <span class="arr">&#8594;</span></button>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: STATIC PRESSURE -->
+    <div class="slide" id="s2">
+      <div class="slide-body">
+        <div class="slide-h">Step 2 &#8212; Record static pressure readings</div>
         <div class="slide-lead">Read the gauge static pressure (mmH&#8322;O) at each wall tapping point and enter the values below. The chart will appear once you have worked through the reflection questions.</div>
 
         <div class="diagram-card">
@@ -581,18 +624,39 @@ table.dynq-table tbody tr:hover td { background: #f8fafc; }
           </div>
         </div>
 
-        <button class="btn-proceed" id="s1-proceed" style="display:none;" onclick="goTo(2)">Move to pitot readings <span class="arr">&#8594;</span></button>
+        <button class="btn-proceed" id="s1-proceed" style="display:none;" onclick="goTo(3)">Move to pitot readings <span class="arr">&#8594;</span></button>
       </div>
     </div>
 
     <!-- SLIDE 2: PITOT READINGS -->
-    <div class="slide" id="s2">
+    <div class="slide" id="s3">
       <div class="slide-body">
-        <div class="slide-h">Step 2 &#8212; Record pitot tube readings</div>
-        <div class="slide-lead">Record the following pressures on the pitot tube. First position the pitot tube at the throat, then move it to the second position in the diffuser.</div>
+        <div class="slide-h">Step 3 &#8212; Record pitot tube readings</div>
+        <div class="slide-lead">Record the pitot tube pressures at three positions along the duct: first at the inlet (near P1), then at the constant-area throat, then close to P7 in the diffuser.</div>
         <input type="hidden" id="inp-rho" value="1.225">
         <input type="hidden" id="inp-punit" value="mmH2O">
         <input type="hidden" id="inp-ptype" value="gauge">
+
+        <!-- INLET -->
+        <div class="meas-section">
+          <div class="meas-header">
+            <span class="sec-badge sec-contraction">Pitot Tube &#8212; Inlet</span>
+            <h3>Pitot Readings Close to P1 &nbsp;<span style="font-family:var(--mono);font-size:0.75rem;font-weight:400;color:var(--text-lt);">(mmH&#8322;O gauge)</span></h3>
+          </div>
+          <div class="meas-body">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+              <div class="tap-fld f-cont"><label>Total pressure P&#8320;</label>
+                <input type="number" id="inlet-p0" step="0.1" placeholder="&#8212;" inputmode="decimal" oninput="checkPitotReady()">
+              </div>
+              <div class="tap-fld f-cont"><label>Static pressure Ps</label>
+                <input type="number" id="inlet-ps" step="0.1" placeholder="&#8212;" inputmode="decimal" oninput="checkPitotReady()">
+              </div>
+              <div class="tap-fld f-cont"><label>Direct velocity (m/s)</label>
+                <input type="number" id="inlet-v" step="0.01" placeholder="&#8212;" inputmode="decimal" oninput="checkPitotReady()">
+              </div>
+            </div>
+          </div>
+        </div>
 
         <!-- THROAT -->
         <div class="meas-section">
@@ -618,7 +682,7 @@ table.dynq-table tbody tr:hover td { background: #f8fafc; }
         <!-- SECOND POSITION — fixed inputs, no add button -->
         <div class="meas-section" style="margin-bottom:8px;">
           <div class="meas-header">
-            <span class="sec-badge sec-diffuser">Pitot Tube &#8212; Second Position</span>
+            <span class="sec-badge sec-diffuser">Pitot Tube &#8212; Diffuser</span>
             <h3>Pitot Readings Close to P7 &nbsp;<span style="font-family:var(--mono);font-size:0.75rem;font-weight:400;color:var(--text-lt);">(mmH&#8322;O gauge)</span></h3>
           </div>
           <div class="meas-body">
@@ -630,7 +694,7 @@ table.dynq-table tbody tr:hover td { background: #f8fafc; }
                 <input type="number" id="d2-ps" step="0.1" placeholder="&#8212;" inputmode="decimal" oninput="checkPitotReady()">
               </div>
               <div class="tap-fld f-diff"><label>Direct velocity (m/s)</label>
-                <input type="number" id="d2-pos" step="1" placeholder="&#8212;" inputmode="decimal">
+                <input type="number" id="d2-v" step="0.01" placeholder="&#8212;" inputmode="decimal" oninput="checkPitotReady()">
               </div>
             </div>
           </div>
@@ -670,14 +734,14 @@ table.dynq-table tbody tr:hover td { background: #f8fafc; }
         </div>
 
         <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:20px;">
-          <button class="btn-back" onclick="goTo(1)"><span class="arr">&#8592;</span> Back</button>
+          <button class="btn-back" onclick="goTo(2)"><span class="arr">&#8592;</span> Back</button>
           <button class="btn-proceed" style="margin-top:0;" id="btn-analyse" onclick="runAnalysis()" disabled>Run analysis <span class="arr">&#8594;</span></button>
         </div>
       </div>
     </div>
 
-    <!-- SLIDE 3: ANALYSIS -->
-    <div class="slide" id="s3">
+    <!-- SLIDE 4: ANALYSIS -->
+    <div class="slide" id="s4">
       <div class="slide-body">
         <div class="slide-h">Step 3 &#8212; Estimate the Dynamic Pressure</div>
         <div class="slide-lead">You know the throat velocity from the pitot tube. Using the continuity equation and the cross-sectional area at each tapping, estimate the dynamic pressure at every position along the duct.</div>
@@ -732,13 +796,13 @@ table.dynq-table tbody tr:hover td { background: #f8fafc; }
         <div id="s3-charts" style="display:none;">
           <div id="traverse-results" style="display:none;">
             <div class="chart-card" style="margin-bottom:16px;">
-              <h3>Pitot reading &#8212; close to P7</h3>
-              <div class="ch-note">Local velocity from &Delta;P = P&#8320; &#8722; Ps compared with continuity estimate.</div>
+              <h3>Pitot readings &#8212; inlet and diffuser</h3>
+              <div class="ch-note">Measured velocity (pitot) compared with the continuity-equation prediction at each station.</div>
               <canvas id="traverseChart" height="180"></canvas>
             </div>
             <div class="res-table-wrap">
               <table class="res-table">
-                <thead><tr><th>Reading</th><th>Position (mm)</th><th>P&#8320; (Pa)</th><th>Ps (Pa)</th><th>&Delta;P (Pa)</th><th>V pitot (m/s)</th><th>Cp</th></tr></thead>
+                <thead><tr><th>Station</th><th>P&#8320; (Pa)</th><th>Ps (Pa)</th><th>&Delta;P (Pa)</th><th>V pitot (m/s)</th><th>V continuity (m/s)</th><th>Cp</th></tr></thead>
                 <tbody id="trav-tbody"></tbody>
               </table>
             </div>
@@ -746,14 +810,14 @@ table.dynq-table tbody tr:hover td { background: #f8fafc; }
         </div>
 
         <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:20px;">
-          <button class="btn-back" onclick="goTo(2)"><span class="arr">&#8592;</span> Back</button>
-          <button class="btn-proceed" style="margin-top:0;" onclick="goTo(4)">Move to results <span class="arr">&#8594;</span></button>
+          <button class="btn-back" onclick="goTo(3)"><span class="arr">&#8592;</span> Back</button>
+          <button class="btn-proceed" style="margin-top:0;" onclick="goTo(5)">Move to results <span class="arr">&#8594;</span></button>
         </div>
       </div>
     </div>
 
-    <!-- SLIDE 4: RESULTS -->
-    <div class="slide" id="s4">
+    <!-- SLIDE 5: RESULTS -->
+    <div class="slide" id="s5">
       <div class="slide-body">
         <div class="slide-h">Results &#8212; Flow Energy at Each Tapping</div>
         <div class="slide-lead">The three components of flow energy &#8212; static pressure, dynamic pressure, and total pressure &#8212; are plotted below for all 11 tapping points.</div>
@@ -831,7 +895,7 @@ table.dynq-table tbody tr:hover td { background: #f8fafc; }
         </div>
 
         <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:20px;">
-          <button class="btn-back" onclick="goTo(3)"><span class="arr">&#8592;</span> Back</button>
+          <button class="btn-back" onclick="goTo(4)"><span class="arr">&#8592;</span> Back</button>
         </div>
       </div>
     </div>
@@ -847,7 +911,7 @@ const TAPS=[
   {id:7,w:109.3,A:16395.0,zone:'d'},{id:8,w:119.35,A:17902.5,zone:'d'},{id:9,w:129.4,A:19410.0,zone:'d'},
   {id:10,w:139.4,A:20910.0,zone:'d'},{id:11,w:149.4,A:22410.0,zone:'d'}
 ];
-const ZC={c:'#b45309',t:'#1a7a4a',d:'#1a56a0'};
+const ZC={c:'#b3590d',t:'#0e8f74',d:'#3b5bdb'};
 let charts={},traverseCount=0;
 let answeredQs=new Set(),answeredUs=new Set();
 let iq2Answered=false;
@@ -864,8 +928,9 @@ function saveState() {
   // All numeric inputs with IDs
   const inputIds = [
     'p1','p2','p3','p4','p5','p6','p7','p8','p9','p10','p11',
+    'inlet-p0','inlet-ps','inlet-v',
     'pitot-p0','pitot-ps','pitot-v',
-    'd2-p0','d2-ps','d2-pos',
+    'd2-p0','d2-ps','d2-v',
     'calc-v-input'
   ];
   inputIds.forEach(id => {
@@ -888,8 +953,9 @@ function loadState() {
   // Restore numeric inputs
   const inputIds = [
     'p1','p2','p3','p4','p5','p6','p7','p8','p9','p10','p11',
+    'inlet-p0','inlet-ps','inlet-v',
     'pitot-p0','pitot-ps','pitot-v',
-    'd2-p0','d2-ps','d2-pos',
+    'd2-p0','d2-ps','d2-v',
     'calc-v-input'
   ];
   inputIds.forEach(id => {
@@ -964,8 +1030,9 @@ function loadState() {
 function attachPersistence() {
   const inputIds = [
     'p1','p2','p3','p4','p5','p6','p7','p8','p9','p10','p11',
+    'inlet-p0','inlet-ps','inlet-v',
     'pitot-p0','pitot-ps','pitot-v',
-    'd2-p0','d2-ps','d2-pos',
+    'd2-p0','d2-ps','d2-v',
     'calc-v-input'
   ];
   inputIds.forEach(id => {
@@ -993,11 +1060,11 @@ function toPa(v,u){return u==='mmH2O'?v*9.80665:u==='mbar'?v*100:u==='mmHg'?v*13
     h+=`<circle cx="${x}" cy="${ty}" r="3.5" fill="${c}"/>`;
     h+=`<text x="${x}" y="${ty-18}" text-anchor="middle" fill="${c}" font-size="10" font-weight="700" font-family="monospace">P${TAPS[i].id}</text>`;
   });
-  h+=`<defs><marker id="arr" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><polygon points="0,0 7,3.5 0,7" fill="#1a56a0"/></marker></defs>`;
-  h+=`<line x1="16" y1="${CY}" x2="50" y2="${CY}" stroke="#1a56a0" stroke-width="1.8" marker-end="url(#arr)"/>`;
+  h+=`<defs><marker id="arr" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><polygon points="0,0 7,3.5 0,7" fill="#1a5f96"/></marker></defs>`;
+  h+=`<line x1="16" y1="${CY}" x2="50" y2="${CY}" stroke="#1a5f96" stroke-width="1.8" marker-end="url(#arr)"/>`;
   h+=`<text x="${(xp[0]+xp[2])/2}" y="163" text-anchor="middle" fill="#92400e" font-size="9" font-family="monospace">CONTRACTION</text>`;
-  h+=`<text x="${(xp[3]+xp[5])/2}" y="163" text-anchor="middle" fill="#134e35" font-size="9" font-family="monospace">THROAT</text>`;
-  h+=`<text x="${(xp[6]+xp[10])/2}" y="163" text-anchor="middle" fill="#0f3675" font-size="9" font-family="monospace">DIFFUSER</text>`;
+  h+=`<text x="${(xp[3]+xp[5])/2}" y="163" text-anchor="middle" fill="#0b5c49" font-size="9" font-family="monospace">THROAT</text>`;
+  h+=`<text x="${(xp[6]+xp[10])/2}" y="163" text-anchor="middle" fill="#2c3fa8" font-size="9" font-family="monospace">DIFFUSER</text>`;
   svg.innerHTML=h;
 })();
 
@@ -1179,14 +1246,20 @@ function runAnalysis(){
   const A_t=15000,q_t=0.5*rho*Vt*Vt;
   const Ps=TAPS.map(t=>getPa('p'+t.id)),Pref=Ps[3];
   const res=TAPS.map((t,i)=>{const P=Ps[i],V=Vt*(A_t/t.A),q=0.5*rho*V*V,Cp=(P!==null&&Pref!==null)?(P-Pref)/q_t:null;return{tap:t,P,V,q,Cp};});
-  // fixed second-position reading
+  // fixed comparison stations: inlet (near P1) and diffuser (near P7)
   const trData=[];
-  const d2p0=getPa('d2-p0'),d2ps=getPa('d2-ps');
-  const d2pos=parseFloat(document.getElementById('d2-pos')?.value);
-  if(d2p0!==null&&d2ps!==null&&d2p0>d2ps){
-    const dP=d2p0-d2ps,V=Math.sqrt(2*dP/rho),Cp=Pref!==null?(d2ps-Pref)/q_t:null;
-    trData.push({pos:isNaN(d2pos)?null:d2pos,p0:d2p0,ps:d2ps,dP,V,Cp});
+  function addStation(label,p0id,psid,vid,refA){
+    const p0=getPa(p0id),ps=getPa(psid);
+    const dv=parseFloat(document.getElementById(vid)?.value);
+    let V=null,dP=(p0!==null&&ps!==null)?p0-ps:null;
+    if(!isNaN(dv)&&dv>0){V=dv;}
+    else if(dP!==null&&dP>0){V=Math.sqrt(2*dP/rho);}
+    if(V===null)return;
+    const Cp=(Pref!==null&&ps!==null)?(ps-Pref)/q_t:null,Vc=Vt*(A_t/refA);
+    trData.push({label,p0,ps,dP,V,Vc,Cp});
   }
+  addStation('Inlet (near P1)','inlet-p0','inlet-ps','inlet-v',TAPS[0].A);
+  addStation('Diffuser (near P7)','d2-p0','d2-ps','d2-v',TAPS[6].A);
   buildDynQTable(res,Vt);
   window._lastRes = res;
   window._lastTrData = trData;
@@ -1209,7 +1282,7 @@ function runAnalysis(){
     const trEl=document.getElementById('traverse-results');
     if(trEl) trEl.style.display='none';
   }
-  goTo(3);
+  goTo(4);
 }
 
 function fn(v,d){return v!==null&&!isNaN(v)?v.toFixed(d):'&#8212;';}
@@ -1219,12 +1292,13 @@ function buildResultsTable(res){
   document.getElementById('res-tbody').innerHTML=res.map(r=>`<tr><td>P${r.tap.id} <span class="zone-tag zt-${r.tap.zone}">${r.tap.zone.toUpperCase()}</span></td><td>${r.tap.w}</td><td>${r.tap.A.toLocaleString()}</td><td>${fn(r.P,1)}</td><td>${fn(r.V,3)}</td><td>${fn(r.V/Vr,4)}</td><td>${fn(r.q,2)}</td><td>${fn(r.Cp,4)}</td></tr>`).join('');
 }
 function buildTraverseTable(data){
-  const tt=document.getElementById('trav-tbody');if(tt)tt.innerHTML=data.map((d,i)=>`<tr><td>${i+1}</td><td>${d.pos!==null?d.pos.toFixed(1):'&#8212;'}</td><td>${fn(d.p0,2)}</td><td>${fn(d.ps,2)}</td><td>${fn(d.dP,2)}</td><td>${fn(d.V,3)}</td><td>${fn(d.Cp,4)}</td></tr>`).join('');
+  const tt=document.getElementById('trav-tbody');if(tt)tt.innerHTML=data.map(d=>`<tr><td>${d.label}</td><td>${fn(d.p0,2)}</td><td>${fn(d.ps,2)}</td><td>${fn(d.dP,2)}</td><td>${fn(d.V,3)}</td><td>${fn(d.Vc,3)}</td><td>${fn(d.Cp,4)}</td></tr>`).join('');
 }
 function buildTraverseChart(data,Vt){
   if(charts.trav){try{charts.trav.destroy();}catch(e){}}
-  const s=[...data].filter(d=>d.pos!==null).sort((a,b)=>a.pos-b.pos);
-  charts.trav=new Chart(document.getElementById('traverseChart').getContext('2d'),{type:'line',data:{labels:s.map(d=>d.pos.toFixed(0)+' mm'),datasets:[{label:'Pitot velocity (m/s)',data:s.map(d=>d.V),borderColor:'#1a56a0',backgroundColor:'#1a56a020',borderWidth:2,pointRadius:6,fill:true},{label:'Continuity estimate (m/s)',data:s.map(()=>Vt*(15000/16395)),borderColor:'#b45309',borderWidth:1.8,borderDash:[5,3],pointRadius:0}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:12,family:'Inter'}}}},scales:{y:{title:{display:true,text:'Velocity (m/s)',font:{size:12,family:'Inter'}},grid:{color:'#e2e8f0'}},x:{title:{display:true,text:'Position from P7 (mm)',font:{size:12,family:'Inter'}},grid:{color:'#e2e8f0'}}}}});
+  const order={'Inlet (near P1)':0,'Diffuser (near P7)':1};
+  const s=[...data].sort((a,b)=>(order[a.label]??9)-(order[b.label]??9));
+  charts.trav=new Chart(document.getElementById('traverseChart').getContext('2d'),{type:'bar',data:{labels:s.map(d=>d.label),datasets:[{label:'Pitot velocity (m/s)',data:s.map(d=>d.V),backgroundColor:'#1a5f96'},{label:'Continuity estimate (m/s)',data:s.map(d=>d.Vc),backgroundColor:'#b3590d'}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:12,family:'Inter'}}}},scales:{y:{title:{display:true,text:'Velocity (m/s)',font:{size:12,family:'Inter'}},grid:{color:'#e2e8f0'}},x:{title:{display:true,text:'Measurement station',font:{size:12,family:'Inter'}},grid:{display:false}}}}});
 }
 
 // DYNAMIC PRESSURE TABLE
@@ -1413,8 +1487,8 @@ function goTo(n){
   document.querySelectorAll('.slide').forEach(s=>{if(s.classList.contains('active')){s.classList.remove('active');s.classList.add('exit');setTimeout(()=>s.classList.remove('exit'),340);}});
   document.getElementById('s'+n).classList.add('active');
   document.getElementById('s'+n).scrollTop=0;
-  for(let i=1;i<=4;i++){const p=document.getElementById('sp'+i);p.classList.remove('active','done');if(i<n)p.classList.add('done');else if(i===n)p.classList.add('active');}
-  if(n===4 && window._lastRes) buildEnergyChart(window._lastRes);
+  for(let i=1;i<=5;i++){const p=document.getElementById('sp'+i);p.classList.remove('active','done');if(i<n)p.classList.add('done');else if(i===n)p.classList.add('active');}
+  if(n===5 && window._lastRes) buildEnergyChart(window._lastRes);
 }
 
 // ── SAMPLE DATA ────────────────────────────────────────────────────
