@@ -717,12 +717,12 @@ table.dynq-table tbody tr:hover td { background: #f8fafc; }
             <span class="q-badge q-prd" style="margin-bottom:0;">Calculate</span>
           </div>
           <div class="calc-body">
-            <p class="calc-premise">The total pressure P&#8320; at every tapping in this tunnel is <strong>0 mmH&#8322;O</strong> (gauge). The static pressure at P1 is shown below. Using Bernoulli&#8217;s principle, estimate the velocity the pitot tube would read at position P1.</p>
+            <p class="calc-premise">The total pressure P&#8320; at every tapping in this tunnel is <strong>0 mmH&#8322;O</strong> (gauge). The static pressure at P3 is shown below. Using Bernoulli&#8217;s principle, estimate the velocity the pitot tube would read at position P3.</p>
             <div class="calc-known" id="calc-known">
-              Static pressure at P1 (from your readings): <span id="calc-p1-display" style="font-family:var(--mono);font-weight:700;color:var(--c-cont);">&#8212; (enter P1 in Step 1 first)</span>
+              Static pressure at P3 (from your readings): <span id="calc-p3-display" style="font-family:var(--mono);font-weight:700;color:var(--c-cont);">&#8212; (enter P3 in Step 2 first)</span>
             </div>
             <div class="calc-input-row">
-              <label class="calc-label" for="calc-v-input">Estimated velocity at P1 (m/s)</label>
+              <label class="calc-label" for="calc-v-input">Estimated velocity at P3 (m/s)</label>
               <div class="calc-input-wrap">
                 <input type="number" id="calc-v-input" step="0.01" placeholder="m/s" inputmode="decimal" oninput="checkCalcAnswer()">
                 <span class="calc-unit">m/s</span>
@@ -1439,10 +1439,10 @@ function toggleGuidance(btn){
 
 // CALCULATE SECTION
 function updateCalcDisplay(){
-  const el=document.getElementById("p1");
-  const disp=document.getElementById("calc-p1-display");
+  const el=document.getElementById("p3");
+  const disp=document.getElementById("calc-p3-display");
   if(!el||el.value===''||isNaN(parseFloat(el.value))){
-    disp.textContent="\u2014 (enter P1 in Step 1 first)";
+    disp.textContent="\u2014 (enter P3 in Step 2 first)";
     disp.style.color="var(--text-lt)";
     return;
   }
@@ -1453,7 +1453,7 @@ function updateCalcDisplay(){
 }
 
 function checkCalcAnswer(){
-  const el=document.getElementById("p1");
+  const el=document.getElementById("p3");
   const vinput=document.getElementById("calc-v-input");
   const indicator=document.getElementById("calc-indicator");
   const hint=document.getElementById("calc-hint");
