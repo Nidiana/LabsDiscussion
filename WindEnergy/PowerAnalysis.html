@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wind Energy Lab: Data Analysis Tool</title>
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+<style>
+  :root{
+    --navy:#1B4332;
+    --navy-soft:#2D6A4F;
+    --teal:#52B788;
+    --amber:#D98E04;
+    --danger:#C0392B;
+    --success:#2D6A4F;
+    --paper:#F2F8F3;
+    --card:#FFFFFF;
+    --ink:#1B3A2C;
+    --ink-soft:#4C6B5A;
+    --border:#D3E6D8;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Arial,sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    font-size:18px;
+    line-height:1.6;
+  }
+  h1,h2,h3{font-family:'Segoe UI',Arial,sans-serif; color:var(--navy); margin:0 0 8px;}
+  .top-header{
+    background:var(--navy);
+    color:#fff;
+    padding:20px 18px 16px;
+  }
+  .top-header .eyebrow{
+    color:var(--teal);
+    font-size:15px;
+    font-weight:700;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    margin-bottom:4px;
+  }
+  .top-header h1{color:#fff; font-size:27px;}
+  .top-header p{color:#C7D2DE; margin:4px 0 0; font-size:17px;}
+
+  .stepnav{
+    position:sticky; top:0; z-index:50;
+    background:#fff;
+    border-bottom:1px solid var(--border);
+    padding:10px 12px;
+    display:flex;
+    gap:6px;
+    overflow-x:auto;
+    box-shadow:0 2px 6px rgba(13,27,42,0.08);
+  }
+  .pip{
+    flex:1 1 0;
+    min-width:96px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:4px;
+    padding:8px 4px;
+    border:none;
+    background:transparent;
+    cursor:pointer;
+    border-radius:8px;
+    color:var(--ink-soft);
+    font-size:14px;
+    font-weight:600;
+    min-height:44px;
+  }
+  .pip:hover{background:#EEF3F7;}
+  .pip .circle{
+    width:26px;height:26px;border-radius:50%;
+    background:#E2E8EF; color:var(--ink-soft);
+    display:flex;align-items:center;justify-content:center;
+    font-size:15px; font-weight:700;
+    border:2px solid transparent;
+  }
+  .pip.current .circle{background:var(--teal); color:#fff;}
+  .pip.current{color:var(--navy);}
+  .pip.done .circle{background:var(--success); color:#fff;}
+  .pip.done .circle::after{content:'✓';}
+  .pip.done .circle{font-size:0;}
+  .pip.done .circle::after{font-size:16px;}
+
+  main{max-width:880px; margin:0 auto; padding:18px 14px 90px;}
+  .step{display:none;}
+  .step.active{display:block; animation:fadein .25s ease;}
+  @keyframes fadein{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);}}
+
+  .card{
+    background:var(--card);
+    border-radius:10px;
+    box-shadow:0 1px 3px rgba(13,27,42,0.10), 0 1px 2px rgba(13,27,42,0.06);
+    padding:18px 18px 16px;
+    margin-bottom:16px;
+    border-left:4px solid var(--teal);
+  }
+  .card.amber{border-left-color:var(--amber);}
+  .card.danger{border-left-color:var(--danger);}
+  .card h2{font-size:22px;}
+  .card h3{font-size:18px; margin-top:14px;}
+
+  .alert{
+    background:#FFF7E8;
+    border:1px solid #F3D28A;
+    border-left:4px solid var(--amber);
+    border-radius:8px;
+    padding:12px 14px;
+    margin:10px 0;
+    font-size:17px;
+    display:flex; gap:10px; align-items:flex-start;
+  }
+  .alert.stop{background:#FEECEC; border-color:#F3AFAF; border-left-color:var(--danger);}
+  .alert .icon{font-size:20px; line-height:1;}
+  .alert b{display:block; margin-bottom:2px;}
+
+  .info-box{
+    background:#EEF7FD;
+    border:1px solid #BEE3F8;
+    border-left:4px solid var(--teal);
+    border-radius:8px;
+    padding:12px 14px;
+    margin:10px 0;
+    font-size:17px;
+  }
+
+  table{width:100%; border-collapse:collapse; margin-top:10px;}
+  thead th{
+    background:var(--navy-soft); color:#fff; font-size:15px;
+    padding:8px 6px; text-align:center; font-weight:600;
+  }
+  tbody td{
+    border-bottom:1px solid var(--border);
+    padding:8px; text-align:center; font-size:17px;
+  }
+  tbody tr:nth-child(even){background:#FAFBFC;}
+  .table-wrap{overflow-x:auto; -webkit-overflow-scrolling:touch;}
+  td.speed-cell{font-weight:700; color:var(--navy); background:#E5F3E8;}
+
+  input[type=number], input[type=text], select{
+    width:100%;
+    min-width:78px;
+    padding:8px 6px;
+    border:1px solid var(--border);
+    border-radius:6px;
+    min-height:44px;
+    text-align:center;
+    font-size:17px;
+  }
+  input:focus, select:focus, button:focus{
+    outline:3px solid var(--teal); outline-offset:1px;
+  }
+  input.invalid{border-color:var(--danger); background:#FFF3F3;}
+  input.filled{border-color:var(--success);}
+
+  label{font-weight:600; font-size:16px; color:var(--ink-soft); display:block; margin-bottom:4px;}
+
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:6px;
+    background:var(--teal); color:#fff; border:none;
+    padding:10px 18px; border-radius:8px; font-size:16.5px; font-weight:700;
+    cursor:pointer; min-height:44px;
+  }
+  .btn.secondary{background:#fff; color:var(--navy); border:1px solid var(--border);}
+  .btn.amber{background:var(--amber);}
+  .btn:disabled{background:#C9D2DA; cursor:not-allowed;}
+  .btn.danger{background:var(--danger);}
+
+  .footer-nav{
+    position:fixed; bottom:0; left:0; right:0;
+    background:#fff; border-top:1px solid var(--border);
+    padding:10px 14px; display:flex; justify-content:space-between; gap:10px;
+    box-shadow:0 -2px 6px rgba(13,27,42,0.08);
+  }
+  .footer-nav .center-note{font-size:14px; color:var(--ink-soft); align-self:center; text-align:center; flex:1;}
+
+  .progress-note{font-size:15px; color:var(--ink-soft); margin-top:6px;}
+  .locked-msg{font-size:15px; color:var(--danger); font-weight:600; margin-top:6px;}
+
+  .feedback{
+    margin-top:12px; padding:12px 14px; border-radius:8px; font-size:17px;
+    border:1px solid transparent;
+  }
+  .feedback.correct{background:#EAF7EE; border-color:#A9DFB6; color:#0F5E28;}
+  .feedback.wrong{background:#FDEDED; border-color:#F3AFAF; color:#8A1616;}
+  .feedback b{display:block; margin-bottom:4px;}
+
+  .diagram-note{font-size:15px; color:var(--ink-soft); font-style:italic;}
+
+  .completion-card{
+    background:linear-gradient(135deg,#0D1B2A,#0EA5E9);
+    color:#fff; border-radius:12px; padding:24px; text-align:center;
+  }
+  .completion-card h2{color:#fff;}
+
+  .recap-table td, .recap-table th{font-size:15px;}
+
+  @media print{
+    .stepnav, .footer-nav, .btn{display:none !important;}
+    .step{display:block !important;}
+    body{background:#fff;}
+  }
+  @media (max-width:480px){
+    .pip{min-width:70px; font-size:12.5px;}
+    .top-header h1{font-size:22px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="top-header">
+  <div class="eyebrow">CMB473 · Wind Energy · The University of Sheffield</div>
+  <h1>Wind Turbine Power — Data Analysis Tool</h1>
+  <p>Enter your measurements from the wind tunnel as you take them. Your progress is saved automatically on this device.</p>
+</div>
+
+<nav class="stepnav" id="stepnav" aria-label="Lab steps"></nav>
+
+<main id="main"></main>
+
+<div class="footer-nav">
+  <button class="btn secondary" id="prevBtn" type="button">← Back</button>
+  <div class="center-note" id="footerNote"></div>
+  <button class="btn" id="nextBtn" type="button">Continue →</button>
+</div>
+
+<script>
+/* ===================== Wind Turbine Power — Data Analysis Tool =====================
+   Single-file-friendly logic (paired with index.html + this app.js).
+   Steps: 1 Part 1 (wind speed) | 2 Part 2 (V, I, P) | 3 Results (chart) | 4 Wind power Q | 5 Summary
+   ==================================================================================== */
+
+const SPEEDS = [40, 50, 60, 70, 80, 90, 100];
+const STORAGE_KEY = 'cmb473_wind_lab_v1';
+const RHO = 1.225; // kg/m3, standard sea-level air density (assumption stated to students)
+
+const STEP_DEFS = [
+  { id: 1, label: 'Wind speed' },
+  { id: 2, label: 'Turbine power' },
+  { id: 3, label: 'Power vs speed' },
+  { id: 4, label: 'Wind power' },
+  { id: 5, label: 'Summary' }
+];
+
+let state = loadState();
+let currentStep = state.currentStep || 1;
+
+function defaultState() {
+  const windSpeed = {}, voltage = {}, current = {}, rpm = {}, power = {};
+  SPEEDS.forEach(s => { windSpeed[s] = ''; voltage[s] = ''; current[s] = ''; rpm[s] = ''; power[s] = ''; });
+  return {
+    currentStep: 1,
+    turbineDiameter: '510',
+    windSpeed, voltage, current, rpm, power,
+    windPowerAnswer: '',
+    windPowerChecked: false,
+    windPowerCorrect: null
+  };
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return defaultState();
+    const parsed = JSON.parse(raw);
+    return Object.assign(defaultState(), parsed);
+  } catch (e) {
+    return defaultState();
+  }
+}
+
+function saveState() {
+  state.currentStep = currentStep;
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { /* storage unavailable */ }
+}
+
+/* ---------------- helpers ---------------- */
+function isNum(v) { return v !== '' && v !== null && !isNaN(parseFloat(v)) && isFinite(v); }
+function fmtSci(n, digits = 3) {
+  if (!isFinite(n)) return '—';
+  if (n === 0) return '0';
+  return n.toExponential(digits);
+}
+function part1Complete() { return SPEEDS.every(s => isNum(state.windSpeed[s])); }
+function part2Complete() { return SPEEDS.every(s => isNum(state.voltage[s]) && isNum(state.current[s]) && isNum(state.rpm[s]) && isNum(state.power[s])); }
+function diameterM() { return parseFloat(state.turbineDiameter) / 1000; }
+function areaM2() { const d = diameterM(); return Math.PI * d * d / 4; }
+function uMax() { return isNum(state.windSpeed[100]) ? parseFloat(state.windSpeed[100]) : null; }
+function correctWindPower() {
+  const u = uMax();
+  if (u === null) return null;
+  return 0.5 * RHO * areaM2() * Math.pow(u, 3);
+}
+
+/* ---------------- render step nav ---------------- */
+function renderNav() {
+  const nav = document.getElementById('stepnav');
+  nav.innerHTML = '';
+  STEP_DEFS.forEach(sd => {
+    const btn = document.createElement('button');
+    btn.className = 'pip' + (sd.id === currentStep ? ' current' : '') + (isStepDone(sd.id) ? ' done' : '');
+    btn.type = 'button';
+    btn.innerHTML = `<span class="circle">${sd.id}</span><span>${sd.label}</span>`;
+    btn.addEventListener('click', () => goToStep(sd.id));
+    nav.appendChild(btn);
+  });
+}
+function isStepDone(id) {
+  if (id === 1) return part1Complete();
+  if (id === 2) return part2Complete();
+  if (id === 3) return part1Complete() && part2Complete();
+  if (id === 4) return state.windPowerChecked && state.windPowerCorrect;
+  return false;
+}
+
+function goToStep(n) {
+  currentStep = n;
+  saveState();
+  renderAll();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ---------------- footer buttons ---------------- */
+function renderFooter() {
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const note = document.getElementById('footerNote');
+  prevBtn.disabled = currentStep === 1;
+  prevBtn.onclick = () => goToStep(Math.max(1, currentStep - 1));
+
+  if (currentStep === 5) {
+    nextBtn.textContent = 'Print summary';
+    nextBtn.disabled = false;
+    nextBtn.onclick = () => window.print();
+    note.textContent = 'Session complete';
+  } else {
+    nextBtn.textContent = 'Continue →';
+    nextBtn.onclick = () => goToStep(Math.min(5, currentStep + 1));
+    if (currentStep === 1) {
+      nextBtn.disabled = !part1Complete();
+      note.textContent = part1Complete() ? 'All 7 readings entered' : 'Enter wind speed at all 7 fan speeds to continue';
+    } else if (currentStep === 2) {
+      nextBtn.disabled = !part2Complete();
+      note.textContent = part2Complete() ? 'All measurements entered' : 'Enter voltage, current, RPM and power at all 7 fan speeds to continue';
+    } else {
+      nextBtn.disabled = false;
+      note.textContent = '';
+    }
+  }
+}
+
+/* ---------------- main render dispatcher ---------------- */
+function renderAll() {
+  renderNav();
+  const main = document.getElementById('main');
+  main.innerHTML = '';
+  const stepEl = document.createElement('div');
+  stepEl.className = 'step active';
+  if (currentStep === 1) stepEl.innerHTML = renderStep1();
+  else if (currentStep === 2) stepEl.innerHTML = renderStep2();
+  else if (currentStep === 3) stepEl.innerHTML = renderStep3();
+  else if (currentStep === 4) stepEl.innerHTML = renderStep4();
+  else stepEl.innerHTML = renderStep5();
+  main.appendChild(stepEl);
+  renderFooter();
+  attachStepHandlers();
+  if (currentStep === 3) drawChart();
+  if (window.MathJax && window.MathJax.typesetPromise) {
+    MathJax.typesetPromise([main]).catch(() => {});
+  }
+}
+
+/* ===================== STEP 1 — Wind speed characterisation ===================== */
+function renderStep1() {
+  const rows = SPEEDS.map(s => `
+    <tr>
+      <td class="speed-cell">${s}%</td>
+      <td><input type="number" step="0.01" min="0" inputmode="decimal"
+            id="ws-${s}" data-speed="${s}"
+            value="${state.windSpeed[s]}" placeholder="e.g. 6.4" aria-label="Wind speed at ${s} percent fan speed"></td>
+    </tr>`).join('');
+
+  return `
+  <div class="card amber">
+    <h2>⚠ Before you start</h2>
+    <div class="alert">
+      <span class="icon">🦻</span>
+      <div><b>Hearing protection above 80% fan speed</b>
+      Wear the supplied PPE (hearing protection) whenever the wind tunnel is operating above 80% fan speed.</div>
+    </div>
+    <div class="alert stop">
+      <span class="icon">🚫</span>
+      <div><b>Staff only — do not move or disconnect equipment</b>
+      Do not move, adjust or disconnect any equipment yourself. All physical changes to the rig are carried out by laboratory staff.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Part 1 — Characterising the wind speed (20 minutes)</h2>
+    <p>Set the wind tunnel fan to each speed below. Let it settle, then read <b>only the maximum</b> wind speed shown over a window of about <b>1 minute</b>. Record that single maximum value — do not average multiple readings.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Fan speed</th><th>Maximum wind speed, U (m/s)</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    <p class="progress-note">${SPEEDS.filter(s => isNum(state.windSpeed[s])).length} of 7 readings entered.</p>
+  </div>`;
+}
+
+/* ===================== STEP 2 — Turbine power measurement ===================== */
+function renderStep2() {
+  const rows = SPEEDS.map(s => `
+    <tr>
+      <td class="speed-cell">${s}%</td>
+      <td><input type="number" step="0.0001" min="0" inputmode="decimal"
+            id="v-${s}" data-speed="${s}"
+            value="${state.voltage[s]}" placeholder="V" aria-label="Voltage at ${s} percent fan speed"></td>
+      <td><input type="number" step="0.0001" min="0" inputmode="decimal"
+            id="i-${s}" data-speed="${s}"
+            value="${state.current[s]}" placeholder="A" aria-label="Current at ${s} percent fan speed"></td>
+      <td><input type="number" step="1" min="0" inputmode="decimal"
+            id="rpm-${s}" data-speed="${s}"
+            value="${state.rpm[s]}" placeholder="rpm" aria-label="Rotational speed at ${s} percent fan speed"></td>
+      <td><input type="text" inputmode="decimal"
+            id="p-${s}" data-speed="${s}"
+            value="${state.power[s]}" placeholder="e.g. 1.8e-3" aria-label="Calculated power at ${s} percent fan speed"></td>
+    </tr>`).join('');
+
+  return `
+  <div class="card">
+    <h2>Part 2 — Turbine power measurement</h2>
+    <p>The turbine is now positioned close to the wind tunnel outlet. You do <b>not</b> need to measure wind speed again — reuse your Part 1 readings.</p>
+    <p>At each fan speed, allow the turbine to spin for about 1 minute. Record the <b>maximum voltage</b> and <b>maximum current</b>, then use the tachometer to measure <b>RPM</b>.</p>
+
+    <label for="turbineModel">Which turbine model are you using?</label>
+    <select id="turbineModel" style="max-width:280px;">
+      <option value="510" ${state.turbineDiameter === '510' ? 'selected' : ''}>Standard model — 510 mm rotor diameter</option>
+      <option value="800" ${state.turbineDiameter === '800' ? 'selected' : ''}>Large model — 800 mm rotor diameter</option>
+    </select>
+
+    <div class="alert stop">
+      <span class="icon">⚠️</span>
+      <div><b>Tachometer laser</b>
+      Never point the tachometer laser at your eyes or anyone else's. Press HOLD only when the beam hits the reflective tape on the rotor.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0;">How to enter the power column</h3>
+    <div class="info-box">
+      Calculate power by hand using <b>P = V × I</b>, then type the result in <b>watts (W)</b> in the P column.
+      Because voltages and currents here are small, the answer is often a fraction of a watt — write it in scientific
+      notation rather than rounding to zero.
+      <br><br>
+      <b>Worked example:</b> V = 0.15 V, I = 0.012 A → P = 0.15 × 0.012 = 0.0018 W = 1.8 mW = 1800 µW.
+      Enter this as <code>0.0018</code> or <code>1.8e-3</code> — both are read the same way by this tool.
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Fan speed</th><th>Voltage, V (V)</th><th>Current, I (A)</th><th>RPM</th><th>Power, P = V×I (W)</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    <p class="progress-note">${SPEEDS.filter(s => isNum(state.voltage[s]) && isNum(state.current[s]) && isNum(state.rpm[s]) && isNum(state.power[s])).length} of 7 rows complete.</p>
+  </div>`;
+}
+
+/* ===================== STEP 3 — Results: Power vs wind speed ===================== */
+function renderStep3() {
+  if (!(part1Complete() && part2Complete())) {
+    return `
+    <div class="card">
+      <h2>Power vs. wind speed</h2>
+      <div class="alert">
+        <span class="icon">🔒</span>
+        <div><b>Chart locked</b>
+        Complete Part 1 and Part 2 first — this chart is built from your own wind speed and power data.</div>
+      </div>
+    </div>`;
+  }
+  return `
+  <div class="card">
+    <h2>Power vs. wind speed</h2>
+    <p>This chart plots your measured electrical power, P, against your measured wind speed, U, at each fan speed setting.</p>
+    <div class="table-wrap" id="chartContainer" role="img" aria-label="Line chart of electrical power versus wind speed"></div>
+    <p class="diagram-note">Each point corresponds to one fan speed from 40% to 100%. If the curve looks flat, check whether your P values were entered in watts, not milliwatts.</p>
+  </div>`;
+}
+
+function drawChart() {
+  const container = document.getElementById('chartContainer');
+  if (!container) return;
+
+  const points = SPEEDS.map(s => ({
+    x: parseFloat(state.windSpeed[s]),
+    y: parseFloat(state.power[s]),
+    label: s
+  })).sort((a, b) => a.x - b.x);
+
+  const W = 700, H = 380;
+  const marginL = 74, marginR = 24, marginT = 20, marginB = 56;
+  const plotW = W - marginL - marginR;
+  const plotH = H - marginT - marginB;
+
+  const xs = points.map(p => p.x);
+  const ys = points.map(p => p.y);
+  let xMin = Math.min(...xs), xMax = Math.max(...xs);
+  let yMin = Math.min(0, Math.min(...ys)), yMax = Math.max(...ys);
+  if (xMin === xMax) { xMin -= 1; xMax += 1; }
+  if (yMin === yMax) { yMax = yMin + 1; }
+  const yPad = (yMax - yMin) * 0.1;
+  yMax += yPad;
+
+  const xScale = (x) => marginL + ((x - xMin) / (xMax - xMin)) * plotW;
+  const yScale = (y) => marginT + plotH - ((y - yMin) / (yMax - yMin)) * plotH;
+
+  const NGRID = 5;
+  let gridLines = '';
+  let yTickLabels = '';
+  for (let i = 0; i <= NGRID; i++) {
+    const yVal = yMin + (i / NGRID) * (yMax - yMin);
+    const yPix = yScale(yVal);
+    gridLines += `<line x1="${marginL}" y1="${yPix}" x2="${W - marginR}" y2="${yPix}" stroke="#D3E6D8" stroke-width="1"/>`;
+    yTickLabels += `<text x="${marginL - 8}" y="${yPix + 4}" text-anchor="end" font-size="12" fill="#4C6B5A">${fmtSci(yVal, 2)}</text>`;
+  }
+  let xTickLabels = '';
+  points.forEach(p => {
+    const xPix = xScale(p.x);
+    xTickLabels += `<text x="${xPix}" y="${H - marginB + 20}" text-anchor="middle" font-size="12" fill="#4C6B5A">${p.x}</text>`;
+    gridLines += `<line x1="${xPix}" y1="${marginT}" x2="${xPix}" y2="${H - marginB}" stroke="#EAF3EC" stroke-width="1"/>`;
+  });
+
+  const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${xScale(p.x).toFixed(1)} ${yScale(p.y).toFixed(1)}`).join(' ');
+
+  let dots = '';
+  points.forEach(p => {
+    const cx = xScale(p.x).toFixed(1), cy = yScale(p.y).toFixed(1);
+    dots += `<circle cx="${cx}" cy="${cy}" r="5.5" fill="#2D6A4F" stroke="#fff" stroke-width="1.5">
+      <title>Fan ${p.label}% — U = ${p.x} m/s, P = ${fmtSci(p.y)} W</title>
+    </circle>`;
+  });
+
+  const svg = `
+  <svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:100%; height:auto;" xmlns="http://www.w3.org/2000/svg">
+    <rect x="0" y="0" width="${W}" height="${H}" fill="#FFFFFF"/>
+    ${gridLines}
+    <line x1="${marginL}" y1="${marginT}" x2="${marginL}" y2="${H - marginB}" stroke="#1B4332" stroke-width="1.5"/>
+    <line x1="${marginL}" y1="${H - marginB}" x2="${W - marginR}" y2="${H - marginB}" stroke="#1B4332" stroke-width="1.5"/>
+    ${yTickLabels}
+    ${xTickLabels}
+    <path d="${linePath}" fill="none" stroke="#52B788" stroke-width="2.5"/>
+    ${dots}
+    <text x="${marginL + plotW / 2}" y="${H - 12}" text-anchor="middle" font-size="14" font-weight="700" fill="#1B4332">Wind speed, U (m/s)</text>
+    <text x="16" y="${marginT + plotH / 2}" text-anchor="middle" font-size="14" font-weight="700" fill="#1B4332" transform="rotate(-90 16 ${marginT + plotH / 2})">Electrical power, P (W)</text>
+  </svg>`;
+
+  container.innerHTML = svg;
+}
+
+/* ===================== STEP 4 — Wind power calculation question ===================== */
+function renderStep4() {
+  const u = uMax();
+  const d = state.turbineDiameter;
+  const area = areaM2();
+
+  if (u === null) {
+    return `
+    <div class="card">
+      <h2>Calculate the wind power</h2>
+      <div class="alert">
+        <span class="icon">🔒</span>
+        <div><b>Needs your 100% reading</b>
+        Enter your maximum wind speed at 100% fan speed in Part 1 first — this question uses that value.</div>
+      </div>
+    </div>`;
+  }
+
+  let feedbackHtml = '';
+  if (state.windPowerChecked) {
+    const correct = correctWindPower();
+    if (state.windPowerCorrect) {
+      feedbackHtml = `<div class="feedback correct"><b>✓ Correct, within tolerance</b>
+      Your answer matches P<sub>wind</sub> = ½ρAU³ ≈ ${fmtSci(correct)} W for U = ${u} m/s.</div>`;
+    } else {
+      feedbackHtml = `<div class="feedback wrong"><b>✗ Not quite — here's the worked check</b>
+      With ρ = ${RHO} kg/m³, D = ${d} mm → A = πD²/4 = ${area.toFixed(4)} m², and U = ${u} m/s:<br>
+      P<sub>wind</sub> = ½ × ${RHO} × ${area.toFixed(4)} × ${u}³ ≈ <b>${fmtSci(correct)} W</b>.<br>
+      Check your unit conversion for D (mm → m) and make sure you cubed U, not squared it. Try again below.</div>`;
+    }
+  }
+
+  return `
+  <div class="card">
+    <h2>Calculate the wind power</h2>
+    <p>Using the theoretical wind power equation from the datasheet:</p>
+    <p>\\[ P_{wind} = \\tfrac{1}{2}\\,\\rho\\, A\\, U^3 \\]</p>
+    <div class="info-box">
+      <b>Given values</b><br>
+      Air density, ρ = ${RHO} kg/m³ (standard assumption)<br>
+      Rotor diameter, D = ${d} mm → swept area A = πD²/4 = ${area.toFixed(4)} m²<br>
+      Maximum wind speed at 100% fan speed (your Part 1 reading): <b>U = ${u} m/s</b>
+    </div>
+    <label for="windPowerInput">Your calculated wind power (W)</label>
+    <input type="text" id="windPowerInput" inputmode="decimal" style="max-width:220px;"
+      value="${state.windPowerAnswer}" placeholder="e.g. 4.2">
+    <div style="margin-top:10px;">
+      <button class="btn" id="checkWindPower" type="button">Check my answer</button>
+    </div>
+    ${feedbackHtml}
+  </div>`;
+}
+
+/* ===================== STEP 5 — Summary ===================== */
+function renderStep5() {
+  const rows = SPEEDS.map(s => `
+    <tr>
+      <td>${s}%</td>
+      <td>${state.windSpeed[s] || '—'}</td>
+      <td>${state.voltage[s] || '—'}</td>
+      <td>${state.current[s] || '—'}</td>
+      <td>${state.rpm[s] || '—'}</td>
+      <td>${state.power[s] ? fmtSci(parseFloat(state.power[s])) : '—'}</td>
+    </tr>`).join('');
+
+  const allDone = part1Complete() && part2Complete();
+
+  return `
+  ${allDone ? `
+  <div class="completion-card">
+    <h2>Session recorded</h2>
+    <p>All readings for Part 1 and Part 2 are complete. Print or save this summary for your lab notebook.</p>
+  </div>` : `
+  <div class="card">
+    <div class="alert"><span class="icon">ℹ️</span><div><b>Some data is still missing</b>
+    You can print a partial summary, but Part 1 or Part 2 isn't fully complete yet.</div></div>
+  </div>`}
+
+  <div class="card">
+    <h2>Data summary</h2>
+    <p>Turbine model: ${state.turbineDiameter} mm rotor diameter</p>
+    <div class="table-wrap">
+      <table class="recap-table">
+        <thead><tr><th>Fan speed</th><th>U (m/s)</th><th>V (V)</th><th>I (A)</th><th>RPM</th><th>P (W)</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    ${uMax() !== null ? `<p style="margin-top:10px;">Theoretical wind power at U = ${uMax()} m/s: <b>${fmtSci(correctWindPower())} W</b></p>` : ''}
+    ${state.windPowerChecked ? `<p>Your submitted answer: ${state.windPowerAnswer} W — ${state.windPowerCorrect ? 'marked correct' : 'marked incorrect, see Step 4 for the worked check'}</p>` : ''}
+  </div>`;
+}
+
+/* ---------------- input handlers ---------------- */
+function attachStepHandlers() {
+  document.querySelectorAll('#main input, #main select').forEach(el => {
+    el.addEventListener('input', onInputChange);
+    el.addEventListener('change', onInputChange);
+  });
+  const chk = document.getElementById('checkWindPower');
+  if (chk) chk.addEventListener('click', onCheckWindPower);
+}
+
+function onInputChange(e) {
+  const el = e.target;
+  if (el.id === 'turbineModel') { state.turbineDiameter = el.value; saveState(); return; }
+  if (el.id === 'windPowerInput') { state.windPowerAnswer = el.value; state.windPowerChecked = false; saveState(); return; }
+  const speed = el.dataset.speed;
+  if (!speed) return;
+  if (el.id.startsWith('ws-')) state.windSpeed[speed] = el.value;
+  else if (el.id.startsWith('v-')) state.voltage[speed] = el.value;
+  else if (el.id.startsWith('i-')) state.current[speed] = el.value;
+  else if (el.id.startsWith('rpm-')) state.rpm[speed] = el.value;
+  else if (el.id.startsWith('p-')) state.power[speed] = el.value;
+
+  el.classList.toggle('filled', isNum(el.value));
+  saveState();
+  renderNav();
+  renderFooter();
+}
+
+function onCheckWindPower() {
+  const input = document.getElementById('windPowerInput');
+  const val = parseFloat(input.value);
+  state.windPowerAnswer = input.value;
+  if (!isNum(input.value)) { state.windPowerChecked = false; saveState(); renderAll(); return; }
+  const correct = correctWindPower();
+  const tolerance = 0.15; // ±15%
+  state.windPowerCorrect = Math.abs(val - correct) <= tolerance * correct;
+  state.windPowerChecked = true;
+  saveState();
+  renderAll();
+}
+
+/* ---------------- init ---------------- */
+renderAll();
+
+</script>
+</body>
+</html>
