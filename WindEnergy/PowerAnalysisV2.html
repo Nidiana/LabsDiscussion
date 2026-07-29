@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wind Energy Lab: Data Analysis Tool</title>
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+<style>
+  :root{
+    --navy:#1B4332;
+    --navy-soft:#2D6A4F;
+    --teal:#52B788;
+    --amber:#D98E04;
+    --danger:#C0392B;
+    --success:#2D6A4F;
+    --paper:#F2F8F3;
+    --card:#FFFFFF;
+    --ink:#1B3A2C;
+    --ink-soft:#4C6B5A;
+    --border:#D3E6D8;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Arial,sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    font-size:18px;
+    line-height:1.6;
+  }
+  h1,h2,h3{font-family:'Segoe UI',Arial,sans-serif; color:var(--navy); margin:0 0 8px;}
+  .top-header{
+    background:var(--navy);
+    color:#fff;
+    padding:20px 18px 16px;
+  }
+  .top-header .eyebrow{
+    color:var(--teal);
+    font-size:15px;
+    font-weight:700;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    margin-bottom:4px;
+  }
+  .top-header h1{color:#fff; font-size:27px;}
+  .top-header p{color:#C7D2DE; margin:4px 0 0; font-size:17px;}
+
+  .stepnav{
+    position:sticky; top:0; z-index:50;
+    background:#fff;
+    border-bottom:1px solid var(--border);
+    padding:10px 12px;
+    display:flex;
+    gap:6px;
+    overflow-x:auto;
+    box-shadow:0 2px 6px rgba(13,27,42,0.08);
+  }
+  .pip{
+    flex:1 1 0;
+    min-width:96px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:4px;
+    padding:8px 4px;
+    border:none;
+    background:transparent;
+    cursor:pointer;
+    border-radius:8px;
+    color:var(--ink-soft);
+    font-size:14px;
+    font-weight:600;
+    min-height:44px;
+  }
+  .pip:hover{background:#EEF3F7;}
+  .pip .circle{
+    width:26px;height:26px;border-radius:50%;
+    background:#E2E8EF; color:var(--ink-soft);
+    display:flex;align-items:center;justify-content:center;
+    font-size:15px; font-weight:700;
+    border:2px solid transparent;
+  }
+  .pip.current .circle{background:var(--teal); color:#fff;}
+  .pip.current{color:var(--navy);}
+  .pip.done .circle{background:var(--success); color:#fff;}
+  .pip.done .circle::after{content:'✓';}
+  .pip.done .circle{font-size:0;}
+  .pip.done .circle::after{font-size:16px;}
+
+  main{max-width:880px; margin:0 auto; padding:18px 14px 90px;}
+  .step{display:none;}
+  .step.active{display:block; animation:fadein .25s ease;}
+  @keyframes fadein{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);}}
+
+  .card{
+    background:var(--card);
+    border-radius:10px;
+    box-shadow:0 1px 3px rgba(13,27,42,0.10), 0 1px 2px rgba(13,27,42,0.06);
+    padding:18px 18px 16px;
+    margin-bottom:16px;
+    border-left:4px solid var(--teal);
+  }
+  .card.amber{border-left-color:var(--amber);}
+  .card.danger{border-left-color:var(--danger);}
+  .card h2{font-size:22px;}
+  .card h3{font-size:18px; margin-top:14px;}
+
+  .alert{
+    background:#FFF7E8;
+    border:1px solid #F3D28A;
+    border-left:4px solid var(--amber);
+    border-radius:8px;
+    padding:12px 14px;
+    margin:10px 0;
+    font-size:17px;
+    display:flex; gap:10px; align-items:flex-start;
+  }
+  .alert.stop{background:#FEECEC; border-color:#F3AFAF; border-left-color:var(--danger);}
+  .alert .icon{font-size:20px; line-height:1;}
+  .alert b{display:block; margin-bottom:2px;}
+
+  .info-box{
+    background:#EEF7FD;
+    border:1px solid #BEE3F8;
+    border-left:4px solid var(--teal);
+    border-radius:8px;
+    padding:12px 14px;
+    margin:10px 0;
+    font-size:17px;
+  }
+
+  table{width:100%; border-collapse:collapse; margin-top:10px;}
+  thead th{
+    background:var(--navy-soft); color:#fff; font-size:15px;
+    padding:8px 6px; text-align:center; font-weight:600;
+  }
+  tbody td{
+    border-bottom:1px solid var(--border);
+    padding:8px; text-align:center; font-size:17px;
+  }
+  tbody tr:nth-child(even){background:#FAFBFC;}
+  .table-wrap{overflow-x:auto; -webkit-overflow-scrolling:touch;}
+  td.speed-cell{font-weight:700; color:var(--navy); background:#E5F3E8;}
+
+  input[type=number], input[type=text], select{
+    width:100%;
+    min-width:78px;
+    padding:8px 6px;
+    border:1px solid var(--border);
+    border-radius:6px;
+    min-height:44px;
+    text-align:center;
+    font-size:17px;
+  }
+  input:focus, select:focus, button:focus{
+    outline:3px solid var(--teal); outline-offset:1px;
+  }
+  input.invalid{border-color:var(--danger); background:#FFF3F3;}
+  input.filled{border-color:var(--success);}
+  td.given-cell{
+    font-weight:700;
+    color:var(--navy-soft);
+    background:#EAF3EC;
+    text-align:center;
+    white-space:nowrap;
+  }
+  tr.dim-row{opacity:0.45;}
+
+  label{font-weight:600; font-size:16px; color:var(--ink-soft); display:block; margin-bottom:4px;}
+
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:6px;
+    background:var(--teal); color:#fff; border:none;
+    padding:10px 18px; border-radius:8px; font-size:16.5px; font-weight:700;
+    cursor:pointer; min-height:44px;
+  }
+  .btn.secondary{background:#fff; color:var(--navy); border:1px solid var(--border);}
+  .btn.amber{background:var(--amber);}
+  .btn:disabled{background:#C9D2DA; cursor:not-allowed;}
+  .btn.danger{background:var(--danger);}
+
+  .footer-nav{
+    position:fixed; bottom:0; left:0; right:0;
+    background:#fff; border-top:1px solid var(--border);
+    padding:10px 14px; display:flex; justify-content:space-between; gap:10px;
+    box-shadow:0 -2px 6px rgba(13,27,42,0.08);
+  }
+  .footer-nav .center-note{font-size:14px; color:var(--ink-soft); align-self:center; text-align:center; flex:1;}
+
+  .progress-note{font-size:15px; color:var(--ink-soft); margin-top:6px;}
+  .locked-msg{font-size:15px; color:var(--danger); font-weight:600; margin-top:6px;}
+
+  .feedback{
+    margin-top:12px; padding:12px 14px; border-radius:8px; font-size:17px;
+    border:1px solid transparent;
+  }
+  .feedback.correct{background:#EAF7EE; border-color:#A9DFB6; color:#0F5E28;}
+  .feedback.wrong{background:#FDEDED; border-color:#F3AFAF; color:#8A1616;}
+  .feedback b{display:block; margin-bottom:4px;}
+  .quiz-list{display:flex; flex-direction:column; gap:10px; margin-top:10px;}
+  .quiz-opt{
+    display:grid;
+    grid-template-columns:26px 1fr;
+    gap:4px 10px;
+    align-items:start;
+    padding:12px 14px;
+    border:1.5px solid var(--border);
+    border-radius:10px;
+    background:#fff;
+    cursor:pointer;
+  }
+  .quiz-opt input{margin-top:3px; width:20px; height:20px; accent-color:var(--navy-soft);}
+  .quiz-text{font-weight:600;}
+  .quiz-why{grid-column:2; font-weight:400; font-size:16px; margin-top:6px;}
+  .quiz-opt.opt-sel{border-color:var(--navy-soft); background:#F3F9F5;}
+  .quiz-opt.opt-right{border-color:#A9DFB6; background:#EAF7EE;}
+  .quiz-opt.opt-right .quiz-why{color:#0F5E28;}
+  .quiz-opt.opt-wrong{border-color:#F3AFAF; background:#FDEDED;}
+  .quiz-opt.opt-wrong .quiz-why{color:#8A1616;}
+  .quiz-opt.opt-missed{border-color:#F0C879; background:#FEF6E7;}
+  .quiz-opt.opt-missed .quiz-why{color:#7A5308;}
+
+  .diagram-note{font-size:15px; color:var(--ink-soft); font-style:italic;}
+
+  .completion-card{
+    background:linear-gradient(135deg,#0D1B2A,#0EA5E9);
+    color:#fff; border-radius:12px; padding:24px; text-align:center;
+  }
+  .completion-card h2{color:#fff;}
+
+  .recap-table td, .recap-table th{font-size:15px;}
+
+  @media print{
+    .stepnav, .footer-nav, .btn{display:none !important;}
+    .step{display:block !important;}
+    body{background:#fff;}
+  }
+  @media (max-width:480px){
+    .pip{min-width:70px; font-size:12.5px;}
+    .top-header h1{font-size:22px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="top-header">
+  <div class="eyebrow"> Wind Energy · The University of Sheffield</div>
+  <h1>Wind Turbine Power — Data Analysis Tool</h1>
+  <p>Enter your measurements from the wind tunnel as you take them. Your progress is saved automatically on this device.</p>
+</div>
+
+<nav class="stepnav" id="stepnav" aria-label="Lab steps"></nav>
+
+<main id="main"></main>
+
+<div class="footer-nav">
+  <button class="btn secondary" id="prevBtn" type="button">← Back</button>
+  <div class="center-note" id="footerNote"></div>
+  <button class="btn" id="nextBtn" type="button">Continue →</button>
+</div>
+
+<script>
+/* ===================== Wind Turbine Power — Data Analysis Tool =====================
+   Single-file-friendly logic (paired with index.html + this app.js).
+   Steps: 1 Setup | 2 Measurements | 3 Chart | 4 Wind power | 5 Efficiency | 6 Questions | 7 Summary
+   ==================================================================================== */
+
+/* ------------------------------------------------------------------
+   WIND TUNNEL CHARACTERISATION
+   Measured beforehand by laboratory staff. Fan setting (%) -> free-stream
+   wind speed U (m/s). Students do NOT measure these — they are given.
+   To update a tunnel, edit the numbers here and nothing else.
+   ------------------------------------------------------------------ */
+const TUNNEL = {
+  A: { 40:2.00, 45:2.50, 50:3.00, 55:3.50, 60:4.00, 65:4.50, 70:5.00,
+       75:5.50, 80:6.00, 85:6.50, 90:7.00, 95:7.50, 100:8.00 },
+  B: { 40:3.05, 45:3.40, 50:3.70, 55:4.30, 60:4.35, 65:5.35, 70:6.10,
+       75:7.45, 80:7.60, 85:8.55, 90:9.65, 95:10.55, 100:11.35 }
+};
+const TUNNEL_LABEL = { A: 'Tunnel A', B: 'Tunnel B' };
+
+/* The fan settings used in the session. Change this one line if you want a
+   different set — every table, chart and calculation follows it. */
+const FAN = [40, 50, 60, 70, 80, 90, 100];
+
+/* Rig facts, used in the interpretation questions. */
+const MAX_RPM = 120;
+
+const STORAGE_KEY = 'cmb473_wind_lab_v3';
+const RHO = 1.225; // kg/m3, standard sea-level air density (assumption stated to students)
+
+const STEP_DEFS = [
+  { id: 1, label: 'Setup' },
+  { id: 2, label: 'Measurements' },
+  { id: 3, label: 'Power vs speed' },
+  { id: 4, label: 'Wind power' },
+  { id: 5, label: 'Efficiency' },
+  { id: 6, label: 'Questions' },
+  { id: 7, label: 'Summary' }
+];
+
+/* ---------------- interpretation questions ---------------- */
+const QUIZ = [
+  {
+    id: 'q1',
+    multi: true,
+    text: () => {
+      const pct = cpPctStr(), f = cpFactorStr();
+      const opening = pct
+        ? `You measured a power coefficient of <b>${pct}</b>${f ? `, about ${f} times lower than` : ', far below'} the NREL 5 MW turbine you modelled in QBlade, which reached about 48%.`
+        : 'Your power coefficient came out extremely low, far below the NREL 5 MW turbine you modelled in QBlade, which reached about 48%.';
+      return `${opening} What is a possible explanation for the very low efficiency of this wind turbine? Select all that apply.`;
+    },
+    options: [
+      { key: 'a', correct: true,
+        text: 'Turbulence created by the fan of the wind tunnel',
+        why: 'Correct — turbulence affects the efficiency of a wind turbine. Air leaving a fan is churned up rather than smooth, so the blades never meet clean flow. In real installations this is avoided by raising the rotor on a tall tower, high enough that nearby obstacles no longer create turbulence.' },
+      { key: 'b', correct: true,
+        text: 'The rotor is not running at the optimum RPM for each wind speed',
+        why: 'Correct — you saw exactly this in the QBlade session. There is one best rotor speed at every wind speed, and away from it the power coefficient falls. This rotor is not free to choose its speed.' },
+      { key: 'c', correct: false,
+        text: 'The Betz limit means no wind turbine can be more than 2% efficient',
+        why: 'Incorrect. The Betz limit is 59.3%. It is a real ceiling, but it is nowhere near what is holding this rotor back.' },
+      { key: 'd', correct: false,
+        text: 'The air in the laboratory is not dense enough to carry energy',
+        why: 'Incorrect. Laboratory air is about 1.225 kg/m³, the same as outdoors. Density also appears in the wind power you divided by, so it largely cancels out of the efficiency.' },
+      { key: 'e', correct: false,
+        text: 'There is no energy in wind below 12 m/s',
+        why: 'Incorrect. You calculated the power in the wind yourself and got a value far larger than the turbine produced. The energy is there — the rotor is failing to capture it.' }
+    ]
+  },
+  {
+    id: 'q2',
+    multi: false,
+    text: 'What happens to a wind turbine if it is disconnected from the electrical network while the wind is still blowing?',
+    options: [
+      { key: 'a', correct: true,
+        text: 'It spins faster, fast enough that it can damage the structure',
+        why: 'Correct. The generator is what resists the rotor turning. Take the electrical load away and that resisting torque disappears, while the wind keeps pushing — so the rotor accelerates. This is called overspeed, or runaway, and it can destroy blades and the drivetrain within minutes. Real turbines guard against it with independent safety systems: pitching the blades edge-on to the wind to shed their lift, plus mechanical brakes that do not depend on the grid being there.' },
+      { key: 'b', correct: false,
+        text: 'It stops spinning',
+        why: 'Incorrect. Nothing has changed about the wind or the blades, and the rotor was never being driven by the grid. Disconnecting removes the load that was holding it back, so it speeds up rather than stopping.' },
+      { key: 'c', correct: false,
+        text: 'It keeps turning at exactly the same speed, because the wind speed has not changed',
+        why: 'Incorrect. Rotor speed is set by the balance between the torque the wind applies and the torque the generator resists with. Remove one side of that balance and the speed changes.' },
+      { key: 'd', correct: false,
+        text: 'It produces more electricity, because none is being drawn away by the grid',
+        why: 'Incorrect. With the circuit open no current can flow at all, so the electrical power output is zero. You can see the same effect on your own rig: disconnect the meter and the voltage rises while the current falls to nothing.' }
+    ]
+  }
+];
+
+let state = loadState();
+let currentStep = state.currentStep || 1;
+
+function defaultState() {
+  const voltage = {}, current = {}, rpm = {}, power = {};
+  FAN.forEach(s => { voltage[s] = ''; current[s] = ''; rpm[s] = ''; power[s] = ''; });
+  const quiz = {};
+  QUIZ.forEach(q => { quiz[q.id] = q.multi ? [] : ''; });
+  return {
+    currentStep: 1,
+    tunnelModel: 'A',
+    turbineDiameter: '510',
+    voltage, current, rpm, power,
+    windPowerAnswer: '',
+    windPowerChecked: false,
+    windPowerCorrect: null,
+    cpAnswer: '',
+    cpChecked: false,
+    cpCorrect: null,
+    quiz,
+    quizChecked: false
+  };
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return defaultState();
+    const parsed = JSON.parse(raw);
+    return Object.assign(defaultState(), parsed);
+  } catch (e) {
+    return defaultState();
+  }
+}
+
+function saveState() {
+  state.currentStep = currentStep;
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { /* storage unavailable */ }
+}
+
+/* ---------------- helpers ---------------- */
+function isNum(v) { return v !== '' && v !== null && !isNaN(parseFloat(v)) && isFinite(v); }
+function fmtSci(n, digits = 3) {
+  if (!isFinite(n)) return '—';
+  if (n === 0) return '0';
+  return n.toExponential(digits);
+}
+/* Fan settings in use, and the given wind speed at each. */
+function speeds() { return FAN; }
+function windSpeedAt(s) { return TUNNEL[state.tunnelModel][s]; }
+function rowsExpected() { return speeds().length; }
+function rowsDone() {
+  return speeds().filter(s => isNum(state.voltage[s]) && isNum(state.current[s])
+    && isNum(state.rpm[s]) && isNum(state.power[s])).length;
+}
+function part2Complete() { return rowsDone() === rowsExpected(); }
+function diameterM() { return parseFloat(state.turbineDiameter) / 1000; }
+function areaM2() { const d = diameterM(); return Math.PI * d * d / 4; }
+function uMax() { return windSpeedAt(100); }
+function measuredPowerMax() {
+  return isNum(state.power[100]) ? parseFloat(state.power[100]) : null;
+}
+/* Measured power coefficient at the top fan setting, as a fraction. */
+function measuredCp() {
+  const p = measuredPowerMax(), pw = correctWindPower();
+  if (p === null || !pw) return null;
+  return p / pw;
+}
+/* The QBlade reference the students have just come from. */
+const QBLADE_CP = 0.48;
+
+/* The student's own Cp as a readable percentage — these values run very small,
+   so use significant figures rather than a fixed number of decimals. */
+function cpPctStr() {
+  const cp = measuredCp();
+  if (cp === null) return null;
+  const v = cp * 100;
+  if (v >= 1) return v.toFixed(2) + '%';
+  return parseFloat(v.toPrecision(2)) + '%';
+}
+/* How many times smaller than the QBlade machine. */
+function cpFactorStr() {
+  const cp = measuredCp();
+  if (cp === null || cp <= 0) return null;
+  const f = QBLADE_CP / cp;
+  let r;
+  if (f < 100) r = Math.round(f);
+  else if (f < 1000) r = Math.round(f / 10) * 10;
+  else r = parseFloat(f.toPrecision(2));   // 48790 -> 49000, not a false-precision figure
+  return r.toLocaleString('en-GB');
+}
+
+/* Tip speed ratio at the top fan setting, from the student's own RPM reading. */
+function tipSpeedRatio() {
+  if (!isNum(state.rpm[100])) return null;
+  const omega = parseFloat(state.rpm[100]) * 2 * Math.PI / 60;
+  return omega * (diameterM() / 2) / uMax();
+}
+function correctWindPower() {
+  const u = uMax();
+  if (u === null) return null;
+  return 0.5 * RHO * areaM2() * Math.pow(u, 3);
+}
+
+/* ---------------- render step nav ---------------- */
+function renderNav() {
+  const nav = document.getElementById('stepnav');
+  nav.innerHTML = '';
+  STEP_DEFS.forEach(sd => {
+    const btn = document.createElement('button');
+    btn.className = 'pip' + (sd.id === currentStep ? ' current' : '') + (isStepDone(sd.id) ? ' done' : '');
+    btn.type = 'button';
+    btn.innerHTML = `<span class="circle">${sd.id}</span><span>${sd.label}</span>`;
+    btn.addEventListener('click', () => goToStep(sd.id));
+    nav.appendChild(btn);
+  });
+}
+function isStepDone(id) {
+  if (id === 1) return true;              // wind speeds are given, not measured
+  if (id === 2) return part2Complete();
+  if (id === 3) return part2Complete();
+  if (id === 4) return state.windPowerChecked && state.windPowerCorrect;
+  if (id === 5) return state.cpChecked && state.cpCorrect;
+  if (id === 6) return state.quizChecked;
+  return false;
+}
+
+function goToStep(n) {
+  currentStep = n;
+  saveState();
+  renderAll();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ---------------- footer buttons ---------------- */
+function renderFooter() {
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const note = document.getElementById('footerNote');
+  prevBtn.disabled = currentStep === 1;
+  prevBtn.onclick = () => goToStep(Math.max(1, currentStep - 1));
+
+  if (currentStep === 7) {
+    nextBtn.textContent = 'Print summary';
+    nextBtn.disabled = false;
+    nextBtn.onclick = () => window.print();
+    note.textContent = 'Session complete';
+  } else {
+    nextBtn.textContent = 'Continue →';
+    nextBtn.onclick = () => goToStep(Math.min(7, currentStep + 1));
+    if (currentStep === 1) {
+      nextBtn.disabled = false;
+      note.textContent = `${TUNNEL_LABEL[state.tunnelModel]} selected — ${rowsExpected()} fan settings loaded`;
+    } else if (currentStep === 2) {
+      nextBtn.disabled = !part2Complete();
+      note.textContent = part2Complete()
+        ? 'All measurements entered'
+        : `Enter voltage, current, RPM and power at all ${rowsExpected()} fan settings to continue`;
+    } else {
+      nextBtn.disabled = false;
+      note.textContent = '';
+    }
+  }
+}
+
+/* ---------------- main render dispatcher ---------------- */
+function renderAll() {
+  renderNav();
+  const main = document.getElementById('main');
+  main.innerHTML = '';
+  const stepEl = document.createElement('div');
+  stepEl.className = 'step active';
+  if (currentStep === 1) stepEl.innerHTML = renderStep1();
+  else if (currentStep === 2) stepEl.innerHTML = renderStep2();
+  else if (currentStep === 3) stepEl.innerHTML = renderStep3();
+  else if (currentStep === 4) stepEl.innerHTML = renderStep4();
+  else if (currentStep === 5) stepEl.innerHTML = renderStep5();
+  else if (currentStep === 6) stepEl.innerHTML = renderStep6();
+  else stepEl.innerHTML = renderStep7();
+  main.appendChild(stepEl);
+  renderFooter();
+  attachStepHandlers();
+  if (currentStep === 3) drawChart();
+  if (window.MathJax && window.MathJax.typesetPromise) {
+    MathJax.typesetPromise([main]).catch(() => {});
+  }
+}
+
+/* ===================== STEP 1 — Setup ===================== */
+function renderStep1() {
+  const rows = speeds().map(f => `
+    <tr>
+      <td class="speed-cell">${f}%</td>
+      <td class="given-cell">${windSpeedAt(f).toFixed(2)}</td>
+    </tr>`).join('');
+
+  return `
+  <div class="card amber">
+    <h2>⚠ Before you start</h2>
+    <div class="alert">
+      <span class="icon">🦻</span>
+      <div><b>Hearing protection above 80% fan speed</b>
+      Wear the supplied PPE (hearing protection) whenever the wind tunnel is operating above 80% fan speed.</div>
+    </div>
+    <div class="alert stop">
+      <span class="icon">🚫</span>
+      <div><b>Staff only — do not move or disconnect equipment</b>
+      Do not move, adjust or disconnect any equipment yourself. All physical changes to the rig are carried out by laboratory staff.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Your rig</h2>
+    <p>The wind speed has been measured for each wind tunnel model. Select the model.</p>
+
+    <label for="tunnelModel">Wind tunnel model</label>
+    <select id="tunnelModel" style="max-width:280px;">
+      <option value="A" ${state.tunnelModel === 'A' ? 'selected' : ''}>Model A</option>
+      <option value="B" ${state.tunnelModel === 'B' ? 'selected' : ''}>Model B</option>
+    </select>
+
+    <label for="turbineModel" style="margin-top:14px;">Turbine model</label>
+    <select id="turbineModel" style="max-width:280px;">
+      <option value="510" ${state.turbineDiameter === '510' ? 'selected' : ''}>Standard model — 510 mm rotor diameter</option>
+      <option value="800" ${state.turbineDiameter === '800' ? 'selected' : ''}>Large model — 800 mm rotor diameter</option>
+    </select>
+  </div>
+
+  <div class="card">
+    <h2>Wind speeds loaded for ${TUNNEL_LABEL[state.tunnelModel]}</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Fan setting</th><th>Wind speed, U (m/s)</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    <p class="diagram-note">These values are used automatically in every table, chart and calculation that follows.
+    You do not measure the wind speed.</p>
+  </div>`;
+}
+
+/* ===================== STEP 2 — Turbine power measurement ===================== */
+function renderStep2() {
+  const rows = speeds().map(s => `
+    <tr>
+      <td class="speed-cell">${s}%</td>
+      <td class="given-cell">${windSpeedAt(s).toFixed(2)}</td>
+      <td><input type="number" step="0.0001" min="0" inputmode="decimal"
+            id="v-${s}" data-speed="${s}"
+            value="${state.voltage[s]}" placeholder="V" aria-label="Voltage at ${s} percent fan speed"></td>
+      <td><input type="number" step="0.0001" min="0" inputmode="decimal"
+            id="i-${s}" data-speed="${s}"
+            value="${state.current[s]}" placeholder="A" aria-label="Current at ${s} percent fan speed"></td>
+      <td><input type="number" step="1" min="0" inputmode="decimal"
+            id="rpm-${s}" data-speed="${s}"
+            value="${state.rpm[s]}" placeholder="rpm" aria-label="Rotational speed at ${s} percent fan speed"></td>
+      <td><input type="text" inputmode="decimal"
+            id="p-${s}" data-speed="${s}"
+            value="${state.power[s]}" placeholder="e.g. 1.8e-3" aria-label="Calculated power at ${s} percent fan speed"></td>
+    </tr>`).join('');
+
+  return `
+  <div class="card">
+    <h2>Turbine measurements</h2>
+    <p>At each fan setting, allow the turbine to spin for about 1 minute. Record the <b>maximum voltage</b> and
+    <b>maximum current</b>, then use the tachometer to measure <b>RPM</b>.</p>
+    <p class="progress-note">Rig: ${TUNNEL_LABEL[state.tunnelModel]} · ${state.turbineDiameter} mm rotor ·
+    change either on the Setup step.</p>
+
+    <div class="alert stop">
+      <span class="icon">⚠️</span>
+      <div><b>Tachometer laser</b>
+      Never point the tachometer laser at your eyes or anyone else's. Press HOLD only when the beam hits the reflective tape on the rotor.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0;">How to enter the power column</h3>
+    <div class="info-box">
+      Calculate power by hand using <b>P = V × I</b>, then type the result in <b>watts (W)</b> in the P column.
+      Because voltages and currents here are small, the answer is often a fraction of a watt — write it in scientific
+      notation rather than rounding to zero.
+      <br><br>
+      <b>Worked example:</b> V = 0.15 V, I = 0.012 A → P = 0.15 × 0.012 = 0.0018 W = 1.8 mW = 1800 µW.
+      Enter this as <code>0.0018</code> or <code>1.8e-3</code> — both are read the same way by this tool.
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Fan setting</th><th>U (m/s)<br><span style="font-weight:400;font-size:14px;">given</span></th><th>Voltage, V (V)</th><th>Current, I (A)</th><th>RPM</th><th>Power, P = V×I (W)</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    <p class="progress-note">${rowsDone()} of ${rowsExpected()} rows complete.</p>
+  </div>`;
+}
+
+/* ===================== STEP 3 — Results: Power vs wind speed ===================== */
+function renderStep3() {
+  if (!part2Complete()) {
+    return `
+    <div class="card">
+      <h2>Power vs. wind speed</h2>
+      <div class="alert">
+        <span class="icon">🔒</span>
+        <div><b>Chart locked</b>
+        Complete your measurements first — this chart is built from your own power readings.</div>
+      </div>
+    </div>`;
+  }
+  return `
+  <div class="card">
+    <h2>Power vs. wind speed</h2>
+    <p>This chart plots your measured electrical power, P, against the given wind speed, U, for
+    ${TUNNEL_LABEL[state.tunnelModel]} at each fan setting.</p>
+    <div class="table-wrap" id="chartContainer" role="img" aria-label="Line chart of electrical power versus wind speed"></div>
+    <p class="diagram-note">Each point corresponds to one fan speed from 40% to 100%. If the curve looks flat, check whether your P values were entered in watts, not milliwatts.</p>
+  </div>`;
+}
+
+function drawChart() {
+  const container = document.getElementById('chartContainer');
+  if (!container) return;
+
+  const points = speeds().map(s => ({
+    x: windSpeedAt(s),
+    y: parseFloat(state.power[s]),
+    label: s
+  })).sort((a, b) => a.x - b.x);
+
+  const W = 700, H = 380;
+  const marginL = 74, marginR = 24, marginT = 20, marginB = 56;
+  const plotW = W - marginL - marginR;
+  const plotH = H - marginT - marginB;
+
+  const xs = points.map(p => p.x);
+  const ys = points.map(p => p.y);
+  let xMin = Math.min(...xs), xMax = Math.max(...xs);
+  let yMin = Math.min(0, Math.min(...ys)), yMax = Math.max(...ys);
+  if (xMin === xMax) { xMin -= 1; xMax += 1; }
+  if (yMin === yMax) { yMax = yMin + 1; }
+  const yPad = (yMax - yMin) * 0.1;
+  yMax += yPad;
+
+  const xScale = (x) => marginL + ((x - xMin) / (xMax - xMin)) * plotW;
+  const yScale = (y) => marginT + plotH - ((y - yMin) / (yMax - yMin)) * plotH;
+
+  const NGRID = 5;
+  let gridLines = '';
+  let yTickLabels = '';
+  for (let i = 0; i <= NGRID; i++) {
+    const yVal = yMin + (i / NGRID) * (yMax - yMin);
+    const yPix = yScale(yVal);
+    gridLines += `<line x1="${marginL}" y1="${yPix}" x2="${W - marginR}" y2="${yPix}" stroke="#D3E6D8" stroke-width="1"/>`;
+    yTickLabels += `<text x="${marginL - 8}" y="${yPix + 4}" text-anchor="end" font-size="12" fill="#4C6B5A">${fmtSci(yVal, 2)}</text>`;
+  }
+  let xTickLabels = '';
+  points.forEach(p => {
+    const xPix = xScale(p.x);
+    xTickLabels += `<text x="${xPix}" y="${H - marginB + 20}" text-anchor="middle" font-size="12" fill="#4C6B5A">${p.x}</text>`;
+    gridLines += `<line x1="${xPix}" y1="${marginT}" x2="${xPix}" y2="${H - marginB}" stroke="#EAF3EC" stroke-width="1"/>`;
+  });
+
+  const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${xScale(p.x).toFixed(1)} ${yScale(p.y).toFixed(1)}`).join(' ');
+
+  let dots = '';
+  points.forEach(p => {
+    const cx = xScale(p.x).toFixed(1), cy = yScale(p.y).toFixed(1);
+    dots += `<circle cx="${cx}" cy="${cy}" r="5.5" fill="#2D6A4F" stroke="#fff" stroke-width="1.5">
+      <title>Fan ${p.label}% — U = ${p.x} m/s, P = ${fmtSci(p.y)} W</title>
+    </circle>`;
+  });
+
+  const svg = `
+  <svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:100%; height:auto;" xmlns="http://www.w3.org/2000/svg">
+    <rect x="0" y="0" width="${W}" height="${H}" fill="#FFFFFF"/>
+    ${gridLines}
+    <line x1="${marginL}" y1="${marginT}" x2="${marginL}" y2="${H - marginB}" stroke="#1B4332" stroke-width="1.5"/>
+    <line x1="${marginL}" y1="${H - marginB}" x2="${W - marginR}" y2="${H - marginB}" stroke="#1B4332" stroke-width="1.5"/>
+    ${yTickLabels}
+    ${xTickLabels}
+    <path d="${linePath}" fill="none" stroke="#52B788" stroke-width="2.5"/>
+    ${dots}
+    <text x="${marginL + plotW / 2}" y="${H - 12}" text-anchor="middle" font-size="14" font-weight="700" fill="#1B4332">Wind speed, U (m/s)</text>
+    <text x="16" y="${marginT + plotH / 2}" text-anchor="middle" font-size="14" font-weight="700" fill="#1B4332" transform="rotate(-90 16 ${marginT + plotH / 2})">Electrical power, P (W)</text>
+  </svg>`;
+
+  container.innerHTML = svg;
+}
+
+/* ===================== STEP 4 — Wind power calculation question ===================== */
+function renderStep4() {
+  const u = uMax();
+  const d = state.turbineDiameter;
+  const area = areaM2();
+
+  let feedbackHtml = '';
+  if (state.windPowerChecked) {
+    const correct = correctWindPower();
+    if (state.windPowerCorrect) {
+      feedbackHtml = `<div class="feedback correct"><b>✓ Correct, within tolerance</b>
+      Your answer matches P<sub>wind</sub> = ½ρAU³ ≈ ${fmtSci(correct)} W for U = ${u} m/s.</div>`;
+    } else {
+      feedbackHtml = `<div class="feedback wrong"><b>✗ Not quite — here's the worked check</b>
+      With ρ = ${RHO} kg/m³, D = ${d} mm → A = πD²/4 = ${area.toFixed(4)} m², and U = ${u} m/s:<br>
+      P<sub>wind</sub> = ½ × ${RHO} × ${area.toFixed(4)} × ${u}³ ≈ <b>${fmtSci(correct)} W</b>.<br>
+      Check your unit conversion for D (mm → m) and make sure you cubed U, not squared it. Try again below.</div>`;
+    }
+  }
+
+  return `
+  <div class="card">
+    <h2>Calculate the wind power</h2>
+    <p>Using the theoretical wind power equation from the datasheet:</p>
+    <p>\\[ P_{wind} = \\tfrac{1}{2}\\,\\rho\\, A\\, U^3 \\]</p>
+    <div class="info-box">
+      <b>Given values</b><br>
+      Air density, ρ = ${RHO} kg/m³ (standard assumption)<br>
+      Rotor diameter, D = ${d} mm → swept area A = πD²/4 = ${area.toFixed(4)} m²<br>
+      Wind speed at 100% fan setting for ${TUNNEL_LABEL[state.tunnelModel]}: <b>U = ${u} m/s</b>
+    </div>
+    <label for="windPowerInput">Your calculated wind power (W)</label>
+    <input type="text" id="windPowerInput" inputmode="decimal" style="max-width:220px;"
+      value="${state.windPowerAnswer}" placeholder="e.g. 4.2">
+    <div style="margin-top:10px;">
+      <button class="btn" id="checkWindPower" type="button">Check my answer</button>
+    </div>
+    ${feedbackHtml}
+  </div>`;
+}
+
+/* ===================== STEP 5 — Power coefficient ===================== */
+function renderStep5() {
+  const pw = correctWindPower();
+  const p  = measuredPowerMax();
+  const cp = measuredCp();
+  const lam = tipSpeedRatio();
+
+  if (p === null) {
+    return `
+    <div class="card">
+      <h2>Power coefficient</h2>
+      <div class="alert">
+        <span class="icon">🔒</span>
+        <div><b>Needs your 100% reading</b>
+        Enter voltage, current and power at the 100% fan setting first — this step uses that measurement.</div>
+      </div>
+    </div>`;
+  }
+
+  let fb = '';
+  if (state.cpChecked) {
+    if (state.cpCorrect) {
+      fb = `<div class="feedback correct"><b>✓ Correct, within tolerance</b>
+      C<sub>P</sub> = ${fmtSci(p)} W ÷ ${fmtSci(pw)} W = <b>${cpPctStr()}</b>.
+      ${cpFactorStr() ? `That is about ${cpFactorStr()} times lower than the 48% you obtained in QBlade.` : ''}
+      The next step asks you why.</div>`;
+    } else {
+      fb = `<div class="feedback wrong"><b>✗ Not quite — here is the worked check</b>
+      Your measured electrical power at 100% fan was <b>${fmtSci(p)} W</b>.<br>
+      The power in the wind at U = ${uMax()} m/s was <b>${fmtSci(pw)} W</b>.<br>
+      C<sub>P</sub> = ${fmtSci(p)} ÷ ${fmtSci(pw)} = <b>${cpPctStr()}</b>.<br>
+      Check that both numbers are in watts, and remember the answer here is a percentage.</div>`;
+    }
+  }
+
+  return `
+  <div class="card">
+    <h2>Power coefficient</h2>
+    <p>You now have both halves of the efficiency: the electrical power your turbine produced, and the power
+    carried by the wind passing through it. The power coefficient is the ratio of the two.</p>
+    <p>\\[ C_P = \\frac{P_{turbine}}{P_{wind}} \\]</p>
+    <div class="info-box">
+      <b>Your numbers at the 100% fan setting</b><br>
+      Measured electrical power, P = <b>${fmtSci(p)} W</b><br>
+      Power in the wind, P<sub>wind</sub> = ½ρAU³ = <b>${fmtSci(pw)} W</b> at U = ${uMax()} m/s
+    </div>
+    <label for="cpInput">Your power coefficient, C<sub>P</sub> (%)</label>
+    <input type="text" id="cpInput" inputmode="decimal" style="max-width:220px;"
+      value="${state.cpAnswer}" placeholder="e.g. 1.4">
+    <div style="margin-top:10px;">
+      <button class="btn" id="checkCp" type="button">Check my answer</button>
+    </div>
+    ${fb}
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0;">How fast were the blade tips actually moving?</h3>
+    <div class="info-box">
+      ${lam === null ? 'Enter your RPM reading at the 100% fan setting to see this.' : `
+      At ${state.rpm[100]} RPM the tips of a ${state.turbineDiameter} mm rotor travel at
+      <b>${(parseFloat(state.rpm[100]) * 2 * Math.PI / 60 * diameterM() / 2).toFixed(2)} m/s</b>,
+      while the wind arrives at <b>${uMax()} m/s</b>.<br><br>
+      Divide one by the other and you get <b>${lam.toFixed(2)}</b> — the same rotor speed ÷ wind speed ratio you
+      worked out in QBlade. Compare it with the value the NREL 5 MW held onto, and keep it in mind for the
+      next step.`}
+    </div>
+  </div>`;
+}
+
+/* ===================== STEP 6 — Interpretation questions ===================== */
+function renderQuestion(q, index) {
+  const chosen = state.quiz[q.id];
+  const isChosen = (k) => q.multi ? chosen.includes(k) : chosen === k;
+
+  const opts = q.options.map(o => {
+    const sel = isChosen(o.key);
+    let cls = 'quiz-opt';
+    if (state.quizChecked) {
+      if (o.correct && sel) cls += ' opt-right';
+      else if (!o.correct && sel) cls += ' opt-wrong';
+      else if (o.correct && !sel) cls += ' opt-missed';
+    } else if (sel) cls += ' opt-sel';
+
+    return `
+    <label class="${cls}">
+      <input type="${q.multi ? 'checkbox' : 'radio'}" name="${q.id}"
+        data-qid="${q.id}" data-okey="${o.key}" class="quiz-input"
+        ${sel ? 'checked' : ''} ${state.quizChecked ? 'disabled' : ''}>
+      <span class="quiz-text">${o.text}</span>
+      ${state.quizChecked && (sel || o.correct) ? `<span class="quiz-why">${o.why}</span>` : ''}
+    </label>`;
+  }).join('');
+
+  return `
+  <div class="card">
+    <h3 style="margin-top:0;">Question ${index + 1}</h3>
+    <p>${typeof q.text === 'function' ? q.text() : q.text}</p>
+    ${q.multi ? '<p class="progress-note">Select all that apply.</p>' : ''}
+    <div class="quiz-list">${opts}</div>
+  </div>`;
+}
+
+function renderStep6() {
+  const body = QUIZ.map((q, i) => renderQuestion(q, i)).join('');
+
+  let score = '';
+  if (state.quizChecked) {
+    let right = 0, total = 0;
+    QUIZ.forEach(q => q.options.forEach(o => {
+      const sel = q.multi ? state.quiz[q.id].includes(o.key) : state.quiz[q.id] === o.key;
+      if (o.correct) { total++; if (sel) right++; }
+    }));
+    score = `<div class="feedback ${right === total ? 'correct' : 'wrong'}">
+      <b>${right} of ${total} correct answers found</b>
+      Read the explanations against each option. Green means you selected a correct answer, amber means you
+      missed one, red means the option was not right.</div>`;
+  }
+
+  return `
+  <div class="card">
+    <h2>Making sense of your result</h2>
+    <p>${cpPctStr()
+      ? `Your turbine converted <b>${cpPctStr()}</b> of the energy in the wind. The 5 MW machine you modelled in QBlade managed about 48%.`
+      : 'Work out your power coefficient on the previous step first — these questions are about the number you get.'}
+    These questions ask you to explain that gap, and to think about what the generator is actually doing to the rotor.</p>
+  </div>
+  ${body}
+  <div class="card">
+    <button class="btn" id="${'checkQuiz'}" type="button">${state.quizChecked ? 'Try again' : 'Check my answers'}</button>
+    ${score}
+  </div>`;
+}
+
+/* ===================== STEP 7 — Summary ===================== */
+function renderStep7() {
+  const rows = speeds().map(s => `
+    <tr>
+      <td>${s}%</td>
+      <td>${windSpeedAt(s).toFixed(2)}</td>
+      <td>${state.voltage[s] || '—'}</td>
+      <td>${state.current[s] || '—'}</td>
+      <td>${state.rpm[s] || '—'}</td>
+      <td>${state.power[s] ? fmtSci(parseFloat(state.power[s])) : '—'}</td>
+    </tr>`).join('');
+
+  const allDone = part2Complete();
+
+  return `
+  ${allDone ? `
+  <div class="completion-card">
+    <h2>Session recorded</h2>
+    <p>All measurements are complete. Print or save this summary for your lab notebook.</p>
+  </div>` : `
+  <div class="card">
+    <div class="alert"><span class="icon">ℹ️</span><div><b>Some data is still missing</b>
+    You can print a partial summary, but ${rowsExpected() - rowsDone()} of your ${rowsExpected()} rows are incomplete.</div></div>
+  </div>`}
+
+  <div class="card">
+    <h2>Data summary</h2>
+    <p>${TUNNEL_LABEL[state.tunnelModel]} · turbine rotor diameter ${state.turbineDiameter} mm</p>
+    <div class="table-wrap">
+      <table class="recap-table">
+        <thead><tr><th>Fan speed</th><th>U (m/s)</th><th>V (V)</th><th>I (A)</th><th>RPM</th><th>P (W)</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    <p style="margin-top:10px;">Theoretical wind power at U = ${uMax()} m/s: <b>${fmtSci(correctWindPower())} W</b></p>
+    ${measuredCp() !== null ? `<p>Measured power coefficient at 100% fan setting: <b>${(measuredCp() * 100).toFixed(2)}%</b>${tipSpeedRatio() !== null ? ` · rotor speed ÷ wind speed = <b>${tipSpeedRatio().toFixed(2)}</b>` : ''}</p>` : ''}
+    ${state.cpChecked ? `<p>Your submitted C<sub>P</sub>: ${state.cpAnswer}% — ${state.cpCorrect ? 'marked correct' : 'marked incorrect, see the Efficiency step'}</p>` : ''}
+    ${state.windPowerChecked ? `<p>Your submitted answer: ${state.windPowerAnswer} W — ${state.windPowerCorrect ? 'marked correct' : 'marked incorrect, see Step 4 for the worked check'}</p>` : ''}
+  </div>`;
+}
+
+/* ---------------- input handlers ---------------- */
+function attachStepHandlers() {
+  document.querySelectorAll('#main input, #main select').forEach(el => {
+    el.addEventListener('input', onInputChange);
+    el.addEventListener('change', onInputChange);
+  });
+  const chk = document.getElementById('checkWindPower');
+  if (chk) chk.addEventListener('click', onCheckWindPower);
+  const chkCp = document.getElementById('checkCp');
+  if (chkCp) chkCp.addEventListener('click', onCheckCp);
+  const chkQuiz = document.getElementById('checkQuiz');
+  if (chkQuiz) chkQuiz.addEventListener('click', onCheckQuiz);
+  document.querySelectorAll('.quiz-input').forEach(el => el.addEventListener('change', onQuizChange));
+}
+
+function onQuizChange(e) {
+  const { qid, okey } = e.target.dataset;
+  const q = QUIZ.find(x => x.id === qid);
+  if (!q) return;
+  if (q.multi) {
+    const set = new Set(state.quiz[qid]);
+    e.target.checked ? set.add(okey) : set.delete(okey);
+    state.quiz[qid] = [...set];
+  } else {
+    state.quiz[qid] = okey;
+  }
+  saveState();
+  renderAll();
+}
+
+function onCheckQuiz() {
+  state.quizChecked = !state.quizChecked;   // second press re-opens the questions
+  if (!state.quizChecked) QUIZ.forEach(q => { state.quiz[q.id] = q.multi ? [] : ''; });
+  saveState();
+  renderAll();
+}
+
+function onCheckCp() {
+  const input = document.getElementById('cpInput');
+  state.cpAnswer = input.value;
+  if (!isNum(input.value)) { state.cpChecked = false; saveState(); renderAll(); return; }
+  const val = parseFloat(input.value);
+  const expectedPct = measuredCp() * 100;
+  /* Accept the answer as a percentage, or as a fraction if that reading is the closer one. */
+  const asPct = Math.abs(val - expectedPct);
+  const asFrac = Math.abs(val * 100 - expectedPct);
+  const err = Math.min(asPct, asFrac);
+  state.cpCorrect = err <= 0.2 * expectedPct;
+  state.cpChecked = true;
+  saveState();
+  renderAll();
+}
+
+function onInputChange(e) {
+  const el = e.target;
+  if (el.id === 'tunnelModel')  { state.tunnelModel = el.value; saveState(); renderAll(); return; }
+  if (el.id === 'turbineModel') { state.turbineDiameter = el.value; saveState(); renderAll(); return; }
+  if (el.id === 'windPowerInput') { state.windPowerAnswer = el.value; state.windPowerChecked = false; saveState(); return; }
+  if (el.id === 'cpInput') { state.cpAnswer = el.value; state.cpChecked = false; saveState(); return; }
+  const speed = el.dataset.speed;
+  if (!speed) return;
+  if (el.id.startsWith('v-')) state.voltage[speed] = el.value;
+  else if (el.id.startsWith('i-')) state.current[speed] = el.value;
+  else if (el.id.startsWith('rpm-')) state.rpm[speed] = el.value;
+  else if (el.id.startsWith('p-')) state.power[speed] = el.value;
+
+  el.classList.toggle('filled', isNum(el.value));
+  saveState();
+  renderNav();
+  renderFooter();
+}
+
+function onCheckWindPower() {
+  const input = document.getElementById('windPowerInput');
+  const val = parseFloat(input.value);
+  state.windPowerAnswer = input.value;
+  if (!isNum(input.value)) { state.windPowerChecked = false; saveState(); renderAll(); return; }
+  const correct = correctWindPower();
+  const tolerance = 0.15; // ±15%
+  state.windPowerCorrect = Math.abs(val - correct) <= tolerance * correct;
+  state.windPowerChecked = true;
+  saveState();
+  renderAll();
+}
+
+/* ---------------- init ---------------- */
+renderAll();
+
+</script>
+</body>
+</html>
