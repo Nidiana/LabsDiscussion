@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ohm's Law Physics Quiz</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --card: #151c33;
+      --card-2: #1b2542;
+      --text: #f4f7ff;
+      --muted: #aab5d0;
+      --accent: #6ea8fe;
+      --accent-2: #8b7cf6;
+      --success: #4ade80;
+      --error: #fb7185;
+      --border: rgba(255,255,255,.1);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(110,168,254,.18), transparent 35%),
+        radial-gradient(circle at bottom right, rgba(139,124,246,.15), transparent 35%),
+        var(--bg);
+      color: var(--text);
+      padding: 32px 16px;
+    }
+
+    .quiz {
+      width: min(820px, 100%);
+      margin: auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(110,168,254,.12);
+      color: var(--accent);
+      font-size: .8rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      margin: 14px 0 8px;
+      letter-spacing: -0.04em;
+    }
+
+    header p {
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .formula {
+      margin: 22px auto 0;
+      width: fit-content;
+      padding: 12px 22px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: rgba(255,255,255,.04);
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    .question {
+      background: linear-gradient(145deg, var(--card), var(--card-2));
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 24px;
+      margin: 18px 0;
+      box-shadow: 0 18px 50px rgba(0,0,0,.2);
+    }
+
+    .question h2 {
+      font-size: 1.08rem;
+      line-height: 1.55;
+      margin: 0 0 18px;
+    }
+
+    .number {
+      color: var(--accent);
+      margin-right: 6px;
+    }
+
+    .options {
+      display: grid;
+      gap: 10px;
+    }
+
+    label {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      cursor: pointer;
+      transition: .2s ease;
+      background: rgba(255,255,255,.025);
+    }
+
+    label:hover {
+      border-color: rgba(110,168,254,.55);
+      transform: translateY(-1px);
+    }
+
+    input[type="radio"] {
+      accent-color: var(--accent);
+      width: 18px;
+      height: 18px;
+    }
+
+    .hint-btn {
+      margin-top: 15px;
+      border: 0;
+      background: transparent;
+      color: var(--accent);
+      cursor: pointer;
+      font-weight: 700;
+      padding: 7px 0;
+    }
+
+    .hint {
+      display: none;
+      margin-top: 8px;
+      padding: 12px 14px;
+      border-left: 3px solid var(--accent);
+      background: rgba(110,168,254,.08);
+      color: #dbe7ff;
+      border-radius: 0 10px 10px 0;
+      line-height: 1.5;
+    }
+
+    .hint.show { display: block; }
+
+    .feedback {
+      display: none;
+      margin-top: 14px;
+      padding: 14px;
+      border-radius: 12px;
+      line-height: 1.55;
+      border: 1px solid var(--border);
+    }
+
+    .feedback.show { display: block; }
+    .feedback.correct {
+      background: rgba(74,222,128,.1);
+      border-color: rgba(74,222,128,.3);
+      color: #b8f7ca;
+    }
+
+    .feedback.wrong {
+      background: rgba(251,113,133,.1);
+      border-color: rgba(251,113,133,.3);
+      color: #ffd0d8;
+    }
+
+    .check {
+      width: 100%;
+      margin-top: 10px;
+      padding: 15px 20px;
+      border: 0;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: white;
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 10px 30px rgba(110,168,254,.18);
+      transition: .2s ease;
+    }
+
+    .check:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 35px rgba(110,168,254,.28);
+    }
+
+    .result {
+      display: none;
+      text-align: center;
+      margin-top: 20px;
+      padding: 22px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.05);
+      border: 1px solid var(--border);
+    }
+
+    .result.show { display: block; }
+
+    .score {
+      font-size: 2rem;
+      font-weight: 900;
+    }
+
+    .reset {
+      margin-top: 12px;
+      padding: 10px 16px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: transparent;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    @media (max-width: 560px) {
+      body { padding: 20px 12px; }
+      .question { padding: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="quiz">
+    <header>
+      <span class="badge">Physics • 3 Questions</span>
+      <h1>Ohm's Law Quiz</h1>
+      <p>Work out each problem, then use the feedback to diagnose your mistake.</p>
+      <div class="formula">V = I × R</div>
+    </header>
+
+    <section class="question" data-answer="C">
+      <h2><span class="number">1.</span>
+        A circuit has a voltage of 12 V and a resistance of 4 Ω.
+        What current flows through the circuit?
+      </h2>
+
+      <div class="options">
+        <label><input type="radio" name="q1" value="A"> 48 A</label>
+        <label><input type="radio" name="q1" value="B"> 0.33 A</label>
+        <label><input type="radio" name="q1" value="C"> 3 A</label>
+        <label><input type="radio" name="q1" value="D"> 16 A</label>
+      </div>
+
+      <button class="hint-btn" type="button" onclick="toggleHint(1)">
+        💡 Hint
+      </button>
+      <div class="hint" id="hint1">
+        You need current, I. Rearrange V = I × R so that I is on its own.
+        Then substitute the voltage and resistance, keeping the units consistent.
+      </div>
+
+      <div class="feedback" id="feedback1"></div>
+    </section>
+
+    <section class="question" data-answer="B">
+      <h2><span class="number">2.</span>
+        A resistor carries 2 A of current when connected to 10 V.
+        What is its resistance?
+      </h2>
+
+      <div class="options">
+        <label><input type="radio" name="q2" value="A"> 20 Ω</label>
+        <label><input type="radio" name="q2" value="B"> 5 Ω</label>
+        <label><input type="radio" name="q2" value="C"> 0.2 Ω</label>
+        <label><input type="radio" name="q2" value="D"> 12 Ω</label>
+      </div>
+
+      <button class="hint-btn" type="button" onclick="toggleHint(2)">
+        💡 Hint
+      </button>
+      <div class="hint" id="hint2">
+        You need resistance, R. Start with V = I × R and rearrange it
+        so resistance is isolated before inserting the two given quantities.
+      </div>
+
+      <div class="feedback" id="feedback2"></div>
+    </section>
+
+    <section class="question" data-answer="D">
+      <h2><span class="number">3.</span>
+        A device has a resistance of 6 Ω and draws 500 mA.
+        What voltage is across the device?
+      </h2>
+
+      <div class="options">
+        <label><input type="radio" name="q3" value="A"> 0.083 V</label>
+        <label><input type="radio" name="q3" value="B"> 3,000 V</label>
+        <label><input type="radio" name="q3" value="C"> 12 V</label>
+        <label><input type="radio" name="q3" value="D"> 3 V</label>
+      </div>
+
+      <button class="hint-btn" type="button" onclick="toggleHint(3)">
+        💡 Hint
+      </button>
+      <div class="hint" id="hint3">
+        You need voltage, V. Before calculating, make sure the current is
+        expressed in amperes rather than milliamperes. Then use the form of
+        Ohm's Law that gives voltage directly.
+      </div>
+
+      <div class="feedback" id="feedback3"></div>
+    </section>
+
+    <button class="check" type="button" onclick="checkQuiz()">
+      Check My Answers
+    </button>
+
+    <div class="result" id="result">
+      <div class="score" id="score"></div>
+      <p id="message"></p>
+      <button class="reset" type="button" onclick="resetQuiz()">Try Again</button>
+    </div>
+  </main>
+
+  <script>
+    const feedback = {
+      1: {
+        A: "48 A comes from multiplying 12 × 4. Ohm's Law requires I = V ÷ R, so the units also show that volts divided by ohms gives amperes.",
+        B: "0.33 A is approximately 1 ÷ 3 A. The required calculation is 12 V ÷ 4 Ω = 3 A, so this value is too small.",
+        C: "12 V ÷ 4 Ω = 3 A. The formula and units are both consistent, so this is the correct current.",
+        D: "16 A comes from adding 12 + 4. Ohm's Law does not add voltage and resistance; current is found by dividing voltage by resistance."
+      },
+      2: {
+        A: "20 Ω comes from multiplying 10 × 2. To find resistance, rearrange Ohm's Law to R = V ÷ I, giving 10 V ÷ 2 A = 5 Ω.",
+        B: "10 V ÷ 2 A = 5 Ω. Dividing voltage by current gives resistance in ohms, so this answer has the correct formula and units.",
+        C: "0.2 Ω is the reciprocal-style result 2 ÷ 10. Resistance requires V ÷ I, which is 10 ÷ 2 = 5 Ω.",
+        D: "12 Ω does not satisfy the given relationship: 2 A × 12 Ω = 24 V, not the stated 10 V."
+      },
+      3: {
+        A: "500 mA must first be converted to 0.5 A. Then V = I × R = 0.5 A × 6 Ω = 3 V, so 0.083 V is not the required voltage.",
+        B: "Using 500 as though it were amperes gives 500 A × 6 Ω = 3,000 V. But 500 mA equals 0.5 A, so the unit conversion is essential.",
+        C: "12 V does not satisfy the given values: 0.5 A × 6 Ω = 3 V, not 12 V.",
+        D: "500 mA = 0.5 A, and 0.5 A × 6 Ω = 3 V. The current conversion and Ohm's Law both agree with this answer."
+      }
+    };
+
+    function toggleHint(number) {
+      document.getElementById(`hint${number}`).classList.toggle("show");
+    }
+
+    function checkQuiz() {
+      let score = 0;
+
+      for (let i = 1; i <= 3; i++) {
+        const selected = document.querySelector(`input[name="q${i}"]:checked`);
+        const box = document.getElementById(`feedback${i}`);
+
+        box.className = "feedback show";
+
+        if (!selected) {
+          box.classList.add("wrong");
+          box.textContent =
+            "Choose an answer first. Use the hint to identify the quantity being asked for and rearrange Ohm's Law before calculating.";
+          continue;
+        }
+
+        const answer = selected.value;
+        const correct = document.querySelector(`.question:nth-of-type(${i})`)?.dataset.answer;
+
+        // Safer lookup: get the question by its radio group's nearest question card.
+        const questionCard = selected.closest(".question");
+        const expected = questionCard.dataset.answer;
+
+        if (answer === expected) {
+          score++;
+          box.classList.add("correct");
+        } else {
+          box.classList.add("wrong");
+        }
+
+        box.textContent = feedback[i][answer];
+      }
+
+      const result = document.getElementById("result");
+      const scoreEl = document.getElementById("score");
+      const messageEl = document.getElementById("message");
+
+      scoreEl.textContent = `${score} / 3`;
+      messageEl.textContent =
+        score === 3
+          ? "Excellent! You applied Ohm's Law and handled the units correctly."
+          : score === 2
+            ? "Good work. Review the diagnostic feedback above and check your rearrangement or units."
+            : score === 1
+              ? "You're getting there. Focus on rearranging V = I × R and checking units before calculating."
+              : "Start with the formula and identify which quantity is unknown. The hints will guide you.";
+
+      result.classList.add("show");
+      result.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    function resetQuiz() {
+      document.querySelectorAll('input[type="radio"]').forEach(input => {
+        input.checked = false;
+      });
+
+      document.querySelectorAll(".feedback").forEach(box => {
+        box.className = "feedback";
+        box.textContent = "";
+      });
+
+      document.getElementById("result").classList.remove("show");
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+    }
+  </script>
+</body>
+</html>
