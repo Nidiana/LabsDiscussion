@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>States of Matter & Temperature</title>
+
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #151c32;
+      --panel-2: #1c2642;
+      --text: #eef3ff;
+      --muted: #9eabc7;
+      --accent: #66d9ff;
+      --accent-2: #a78bfa;
+      --good: #53d769;
+      --bad: #ff6b81;
+      --border: rgba(255,255,255,.1);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 15% 10%, rgba(102,217,255,.12), transparent 30%),
+        radial-gradient(circle at 85% 85%, rgba(167,139,250,.12), transparent 30%),
+        var(--bg);
+      padding: 28px 18px 50px;
+    }
+
+    .app {
+      width: min(1050px, 100%);
+      margin: auto;
+    }
+
+    header {
+      margin-bottom: 22px;
+    }
+
+    .eyebrow {
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: .14em;
+      font-size: .75rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 5vw, 3.4rem);
+      line-height: 1;
+      letter-spacing: -.04em;
+    }
+
+    .intro {
+      color: var(--muted);
+      max-width: 720px;
+      line-height: 1.6;
+      margin: 14px 0 0;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.6fr) minmax(280px, .8fr);
+      gap: 18px;
+    }
+
+    .card {
+      background: rgba(21, 28, 50, .88);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      box-shadow: 0 18px 50px rgba(0,0,0,.25);
+      overflow: hidden;
+    }
+
+    .simulation {
+      padding: 18px;
+    }
+
+    .canvas-wrap {
+      position: relative;
+      border-radius: 15px;
+      overflow: hidden;
+      background: #070b16;
+      border: 1px solid rgba(255,255,255,.08);
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 430px;
+    }
+
+    .state-badge {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: rgba(7,11,22,.76);
+      border: 1px solid rgba(255,255,255,.12);
+      backdrop-filter: blur(8px);
+      font-size: .78rem;
+      font-weight: 800;
+    }
+
+    .controls {
+      padding: 18px 4px 2px;
+    }
+
+    .temperature-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 15px;
+    }
+
+    .temperature-value {
+      font-size: 1.8rem;
+      font-weight: 850;
+      color: var(--accent);
+      white-space: nowrap;
+    }
+
+    label {
+      font-weight: 750;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      margin: 18px 0 4px;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    .scale {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: .75rem;
+    }
+
+    .explanation {
+      margin-top: 16px;
+      padding: 14px;
+      background: rgba(255,255,255,.035);
+      border-radius: 13px;
+      color: #d8e1f7;
+      line-height: 1.55;
+      font-size: .92rem;
+    }
+
+    .side {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .section {
+      padding: 20px;
+    }
+
+    h2 {
+      margin: 0 0 8px;
+      font-size: 1.1rem;
+    }
+
+    .section-intro {
+      color: var(--muted);
+      font-size: .88rem;
+      line-height: 1.5;
+      margin: 0 0 16px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 11px;
+      padding: 10px 14px;
+      background: var(--panel-2);
+      color: var(--text);
+      font: inherit;
+      font-weight: 750;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      transition: transform .15s, background .15s;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      background: #273252;
+    }
+
+    .formula {
+      display: none;
+      margin-top: 13px;
+      padding: 17px;
+      border-radius: 13px;
+      background: #090e1d;
+      text-align: center;
+      border: 1px solid rgba(102,217,255,.2);
+    }
+
+    .formula.visible {
+      display: block;
+      animation: reveal .2s ease-out;
+    }
+
+    .equation {
+      font-family: Georgia, serif;
+      font-size: 1.65rem;
+      letter-spacing: .03em;
+    }
+
+    .formula small {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    @keyframes reveal {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .question {
+      padding: 14px;
+      background: rgba(255,255,255,.035);
+      border-radius: 13px;
+      margin-top: 12px;
+    }
+
+    .question p {
+      margin: 0 0 12px;
+      font-size: .91rem;
+      line-height: 1.5;
+      font-weight: 700;
+    }
+
+    .options {
+      display: grid;
+      gap: 8px;
+    }
+
+    .option {
+      width: 100%;
+      text-align: left;
+      background: transparent;
+      color: #dce5fa;
+    }
+
+    .option.correct {
+      border-color: rgba(83,215,105,.6);
+      background: rgba(83,215,105,.12);
+    }
+
+    .option.incorrect {
+      border-color: rgba(255,107,129,.6);
+      background: rgba(255,107,129,.1);
+    }
+
+    .feedback {
+      display: none;
+      margin-top: 11px;
+      padding: 11px 12px;
+      border-radius: 10px;
+      font-size: .82rem;
+      line-height: 1.5;
+    }
+
+    .feedback.show {
+      display: block;
+    }
+
+    .feedback.good {
+      background: rgba(83,215,105,.1);
+      color: #b9f5c2;
+    }
+
+    .feedback.bad {
+      background: rgba(255,107,129,.1);
+      color: #ffc1cb;
+    }
+
+    .key-idea {
+      margin-top: 15px;
+      padding: 13px;
+      border-left: 3px solid var(--accent-2);
+      background: rgba(167,139,250,.07);
+      color: #d8d0ff;
+      font-size: .85rem;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 800px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      canvas {
+        height: 350px;
+      }
+    }
+
+    @media (max-width: 500px) {
+      body {
+        padding: 18px 10px 35px;
+      }
+
+      .simulation,
+      .section {
+        padding: 14px;
+      }
+
+      canvas {
+        height: 300px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="app">
+    <header>
+      <div class="eyebrow">Interactive particle model</div>
+      <h1>States of Matter & Temperature</h1>
+      <p class="intro">
+        Move the temperature slider and watch the particles respond.
+        Temperature changes the particles' <strong>average kinetic energy</strong> —
+        in this model, hotter particles move faster.
+      </p>
+    </header>
+
+    <div class="grid">
+
+      <!-- Simulation -->
+      <section class="card simulation">
+        <div class="canvas-wrap">
+          <canvas id="particleCanvas"></canvas>
+          <div class="state-badge" id="stateBadge">Liquid-like motion</div>
+        </div>
+
+        <div class="controls">
+          <div class="temperature-row">
+            <label for="temperature">Temperature</label>
+            <div class="temperature-value">
+              <span id="tempValue">50</span> K
+            </div>
+          </div>
+
+          <input
+            id="temperature"
+            type="range"
+            min="0"
+            max="100"
+            value="50"
+            aria-label="Temperature"
+          />
+
+          <div class="scale">
+            <span>Cold</span>
+            <span>Hot</span>
+          </div>
+
+          <div class="explanation" id="explanation">
+            The particles have moderate kinetic energy. They move around each
+            other while remaining relatively close together.
+          </div>
+        </div>
+      </section>
+
+      <!-- Learning controls -->
+      <aside class="side">
+
+        <section class="card section">
+          <h2>One idea at a time</h2>
+          <p class="section-intro">
+            The gas-law relationship is hidden until you need it, keeping the
+            visual model focused on particle motion first.
+          </p>
+
+          <button id="formulaButton" aria-expanded="false">
+            Show ideal gas law
+          </button>
+
+          <div class="formula" id="formula">
+            <div class="equation">PV = nRT</div>
+            <small>
+              P = pressure &nbsp; V = volume &nbsp; n = amount of gas<br>
+              R = gas constant &nbsp; T = absolute temperature
+            </small>
+          </div>
+        </section>
+
+        <section class="card section">
+          <h2>Predict before you look</h2>
+          <p class="section-intro">
+            Use the particle model to test your thinking. Feedback appears
+            immediately and explains the misconception behind each distractor.
+          </p>
+
+          <div class="question" data-question="1">
+            <p>
+              1. If the temperature increases, what happens to the particles
+              in this model?
+            </p>
+
+            <div class="options">
+              <button class="option" data-correct="true">
+                They move faster on average.
+              </button>
+
+              <button class="option"
+                data-feedback="A common misconception is that heating makes each particle itself grow. Temperature changes the particles' average kinetic energy; the particle size is not what is increasing here.">
+                Each particle becomes physically larger.
+              </button>
+
+              <button class="option"
+                data-feedback="Heating does not make the particles gain more matter. Their average kinetic energy increases, so their motion becomes faster.">
+                The particles become heavier.
+              </button>
+            </div>
+
+            <div class="feedback"></div>
+          </div>
+
+          <div class="question" data-question="2">
+            <p>
+              2. Two gas samples have the same amount of gas and volume.
+              If one is hotter, what should happen to its pressure?
+            </p>
+
+            <div class="options">
+              <button class="option" data-correct="true">
+                Its pressure increases because particles collide with the walls more energetically.
+              </button>
+
+              <button class="option"
+                data-feedback="The particles do not need to expand to produce greater pressure. Faster particles transfer more momentum during collisions with the container walls.">
+                Its pressure increases because the particles expand.
+              </button>
+
+              <button class="option"
+                data-feedback="At fixed amount of gas and volume, increasing absolute temperature increases pressure in the ideal-gas model. The hotter particles collide with the walls more energetically and frequently.">
+                Its pressure decreases because particles move faster.
+              </button>
+            </div>
+
+            <div class="feedback"></div>
+          </div>
+
+          <div class="key-idea">
+            <strong>Key distinction:</strong>
+            heating a substance does not mean its individual particles
+            necessarily become bigger. In this model, temperature primarily
+            changes how energetically particles move.
+          </div>
+        </section>
+
+      </aside>
+    </div>
+  </main>
+
+  <script>
+    // ------------------------------------------------------------
+    // Particle simulation
+    // ------------------------------------------------------------
+
+    const canvas = document.getElementById("particleCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const temperatureSlider = document.getElementById("temperature");
+    const tempValue = document.getElementById("tempValue");
+    const explanation = document.getElementById("explanation");
+    const stateBadge = document.getElementById("stateBadge");
+
+    let particles = [];
+    let width = 0;
+    let height = 0;
+    let temperature = Number(temperatureSlider.value);
+
+    function resizeCanvas() {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+
+      width = rect.width;
+      height = rect.height;
+
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function random(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    function createParticles() {
+      particles = [];
+
+      for (let i = 0; i < 55; i++) {
+        particles.push({
+          x: random(25, width - 25),
+          y: random(25, height - 25),
+          vx: random(-1, 1),
+          vy: random(-1, 1),
+          radius: random(4, 6)
+        });
+      }
+    }
+
+    function getSpeedMultiplier() {
+      // Temperature controls average kinetic energy.
+      // A small nonzero base keeps particles moving even when cold.
+      return 0.18 + (temperature / 100) * 2.6;
+    }
+
+    function getState() {
+      if (temperature < 28) return "solid-like";
+      if (temperature < 68) return "liquid-like";
+      return "gas-like";
+    }
+
+    function updateDescription() {
+      const state = getState();
+
+      if (state === "solid-like") {
+        stateBadge.textContent = "Solid-like motion";
+        explanation.innerHTML =
+          "The particles have low kinetic energy. They mostly stay near fixed positions and vibrate rather than freely traveling around the container.";
+      } else if (state === "liquid-like") {
+        stateBadge.textContent = "Liquid-like motion";
+        explanation.innerHTML =
+          "The particles have moderate kinetic energy. They move around one another while remaining relatively close together.";
+      } else {
+        stateBadge.textContent = "Gas-like motion";
+        explanation.innerHTML =
+          "The particles have high kinetic energy. They travel rapidly and spread throughout the available container.";
+      }
+    }
+
+    function updateTemperature() {
+      temperature = Number(temperatureSlider.value);
+      tempValue.textContent = temperature;
+      updateDescription();
+    }
+
+    temperatureSlider.addEventListener("input", updateTemperature);
+
+    // ------------------------------------------------------------
+    // Animation
+    // ------------------------------------------------------------
+
+    function constrainParticle(p, speed) {
+      // Soft attraction at lower temperatures gives a clustered,
+      // liquid/solid-like appearance without changing particle size.
+      const centerX = width / 2;
+      const centerY = height / 2;
+
+      if (temperature < 68) {
+        const attraction = temperature < 28 ? 0.0008 : 0.00025;
+
+        p.vx += (centerX - p.x) * attraction;
+        p.vy += (centerY - p.y) * attraction;
+      }
+
+      // Keep particles inside the container.
+      if (p.x < p.radius) {
+        p.x = p.radius;
+        p.vx = Math.abs(p.vx);
+      }
+
+      if (p.x > width - p.radius) {
+        p.x = width - p.radius;
+        p.vx = -Math.abs(p.vx);
+      }
+
+      if (p.y < p.radius) {
+        p.y = p.radius;
+        p.vy = Math.abs(p.vy);
+      }
+
+      if (p.y > height - p.radius) {
+        p.y = height - p.radius;
+        p.vy = -Math.abs(p.vy);
+      }
+
+      // Normalize velocity so temperature determines the speed.
+      const magnitude = Math.hypot(p.vx, p.vy) || 1;
+      const target = speed * (0.65 + Math.random() * 0.5);
+
+      p.vx += ((p.vx / magnitude) * target - p.vx) * 0.025;
+      p.vy += ((p.vy / magnitude) * target - p.vy) * 0.025;
+
+      p.x += p.vx;
+      p.y += p.vy;
+    }
+
+    function resolveParticleCollisions() {
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const a = particles[i];
+          const b = particles[j];
+
+          const dx = b.x - a.x;
+          const dy = b.y - a.y;
+          const distance = Math.hypot(dx, dy);
+          const minimum = a.radius + b.radius;
+
+          if (distance > 0 && distance < minimum) {
+            const nx = dx / distance;
+            const ny = dy / distance;
+
+            const overlap = minimum - distance;
+
+            a.x -= nx * overlap * 0.5;
+            a.y -= ny * overlap * 0.5;
+            b.x += nx * overlap * 0.5;
+            b.y += ny * overlap * 0.5;
+
+            // Approximate elastic collision.
+            const relativeVelocity =
+              (a.vx - b.vx) * nx +
+              (a.vy - b.vy) * ny;
+
+            if (relativeVelocity > 0) {
+              a.vx -= relativeVelocity * nx;
+              a.vy -= relativeVelocity * ny;
+              b.vx += relativeVelocity * nx;
+              b.vy += relativeVelocity * ny;
+            }
+          }
+        }
+      }
+    }
+
+    function drawBackground() {
+      ctx.fillStyle = "#070b16";
+      ctx.fillRect(0, 0, width, height);
+
+      // Subtle container grid.
+      ctx.strokeStyle = "rgba(255,255,255,.035)";
+      ctx.lineWidth = 1;
+
+      for (let x = 0; x < width; x += 40) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, height);
+        ctx.stroke();
+      }
+
+      for (let y = 0; y < height; y += 40) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(width, y);
+        ctx.stroke();
+      }
+    }
+
+    function drawParticle(p) {
+      const gradient = ctx.createRadialGradient(
+        p.x - p.radius * .35,
+        p.y - p.radius * .35,
+        1,
+        p.x,
+        p.y,
+        p.radius * 1.8
+      );
+
+      gradient.addColorStop(0, "#ffffff");
+      gradient.addColorStop(.25, "#a9edff");
+      gradient.addColorStop(1, "#35a9dc");
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+      ctx.fillStyle = gradient;
+      ctx.fill();
+    }
+
+    function animate() {
+      drawBackground();
+
+      const speed = getSpeedMultiplier();
+
+      for (const particle of particles) {
+        constrainParticle(particle, speed);
+      }
+
+      resolveParticleCollisions();
+
+      for (const particle of particles) {
+        drawParticle(particle);
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    // ------------------------------------------------------------
+    // Formula toggle
+    // ------------------------------------------------------------
+
+    const formulaButton = document.getElementById("formulaButton");
+    const formula = document.getElementById("formula");
+
+    formulaButton.addEventListener("click", () => {
+      const visible = formula.classList.toggle("visible");
+
+      formulaButton.textContent = visible
+        ? "Hide ideal gas law"
+        : "Show ideal gas law";
+
+      formulaButton.setAttribute("aria-expanded", visible);
+    });
+
+    // ------------------------------------------------------------
+    // Prediction questions
+    // ------------------------------------------------------------
+
+    document.querySelectorAll(".question").forEach(question => {
+      const buttons = question.querySelectorAll(".option");
+      const feedback = question.querySelector(".feedback");
+
+      buttons.forEach(button => {
+        button.addEventListener("click", () => {
+          buttons.forEach(b => {
+            b.classList.remove("correct", "incorrect");
+          });
+
+          const isCorrect = button.dataset.correct === "true";
+
+          if (isCorrect) {
+            button.classList.add("correct");
+
+            feedback.className = "feedback show good";
+            feedback.textContent =
+              "Correct. Temperature is related to average kinetic energy, so increasing temperature makes the particles move faster on average.";
+          } else {
+            button.classList.add("incorrect");
+
+            feedback.className = "feedback show bad";
+            feedback.textContent = button.dataset.feedback;
+          }
+        });
+      });
+    });
+
+    // ------------------------------------------------------------
+    // Start
+    // ------------------------------------------------------------
+
+    window.addEventListener("resize", () => {
+      resizeCanvas();
+    });
+
+    resizeCanvas();
+    createParticles();
+    updateTemperature();
+    animate();
+  </script>
+</body>
+</html>

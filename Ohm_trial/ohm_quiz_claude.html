@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ohm's Law — diagnostic quiz</title>
+<style>
+  :root{
+    --paper:#F2F4F1;
+    --ink:#13211F;
+    --muted:#5A6B67;
+    --rule:rgba(19,33,31,.14);
+    --grid:rgba(19,33,31,.055);
+    --signal:#16544A;
+    --amber:#8A6400;
+    --amber-bg:#FBF3DC;
+    --wrong:#A03A32;
+    --wrong-bg:#FAECEA;
+    --right-bg:#E4EFEA;
+    --mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,"Liberation Mono",monospace;
+    --sans:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+
+  *{box-sizing:border-box}
+
+  html{-webkit-text-size-adjust:100%}
+
+  body{
+    margin:0;
+    padding:48px 20px 96px;
+    background:
+      linear-gradient(var(--grid) 1px,transparent 1px) 0 0/22px 22px,
+      linear-gradient(90deg,var(--grid) 1px,transparent 1px) 0 0/22px 22px,
+      var(--paper);
+    color:var(--ink);
+    font:400 17px/1.6 var(--sans);
+  }
+
+  .sheet{max-width:660px;margin:0 auto}
+
+  /* ---- masthead + triangle ---- */
+  .top{
+    display:flex;gap:28px;align-items:center;
+    padding-bottom:26px;border-bottom:2px solid var(--ink);
+  }
+  h1{
+    font-family:var(--mono);
+    font-size:clamp(1.7rem,5vw,2.3rem);
+    font-weight:600;letter-spacing:-.02em;
+    margin:0 0 6px;
+  }
+  .top p{margin:0;color:var(--muted);font-size:.95rem;max-width:34ch}
+
+  .triangle{flex:0 0 132px}
+  .triangle svg{display:block;width:132px;height:118px}
+  .tri-seg{cursor:pointer}
+  .tri-seg rect,.tri-seg polygon{fill:transparent;transition:fill .15s}
+  .tri-seg:hover rect,.tri-seg:hover polygon{fill:rgba(22,84,74,.10)}
+  .tri-seg.on rect,.tri-seg.on polygon{fill:rgba(22,84,74,.18)}
+  .tri-seg text{font-family:var(--mono);font-size:20px;font-weight:600;fill:var(--ink);pointer-events:none}
+  .tri-line{stroke:var(--ink);stroke-width:2;fill:none}
+
+  .readout{
+    margin:14px 0 0;padding:10px 14px;
+    border:1px solid var(--rule);border-left:3px solid var(--signal);
+    background:#fff;font-family:var(--mono);font-size:.95rem;
+  }
+
+  /* ---- questions ---- */
+  fieldset{border:0;margin:0;padding:0}
+  .q{padding:30px 0;border-bottom:1px solid var(--rule)}
+  legend{padding:0;font-size:1.05rem;font-weight:500;line-height:1.5}
+  .qn{font-family:var(--mono);color:var(--signal);margin-right:.5ch}
+  .given{
+    font-family:var(--mono);font-size:.9rem;color:var(--muted);
+    margin:8px 0 16px;
+  }
+
+  .opts{display:grid;gap:6px}
+  .opt{
+    display:flex;align-items:center;gap:12px;
+    padding:11px 14px;background:#fff;
+    border:1px solid var(--rule);border-radius:3px;
+    cursor:pointer;font-family:var(--mono);font-size:.95rem;
+  }
+  .opt:hover{border-color:var(--signal)}
+  .opt input{accent-color:var(--signal);width:17px;height:17px;margin:0;flex:none}
+  .opt.is-right{border-color:var(--signal);background:var(--right-bg)}
+  .opt.is-wrong{border-color:var(--wrong);background:var(--wrong-bg)}
+  .opt .mark{margin-left:auto;font-weight:700;visibility:hidden}
+  .opt.is-right .mark{visibility:visible;color:var(--signal)}
+  .opt.is-wrong .mark{visibility:visible;color:var(--wrong)}
+
+  .helpbar{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+  button{font:inherit;cursor:pointer;border-radius:3px}
+  .ghost{
+    background:transparent;border:1px solid var(--rule);
+    color:var(--muted);padding:7px 13px;font-size:.85rem;
+  }
+  .ghost:hover{border-color:var(--ink);color:var(--ink)}
+  .ghost[hidden]{display:none}
+
+  .hint{
+    margin-top:12px;padding:12px 15px;
+    background:var(--amber-bg);border-left:3px solid var(--amber);
+    font-size:.94rem;
+  }
+  .hint b{font-family:var(--mono);font-weight:600}
+
+  .fb{margin-top:14px;padding:13px 16px;border-left:3px solid;font-size:.94rem}
+  .fb.right{background:var(--right-bg);border-color:var(--signal)}
+  .fb.wrong{background:var(--wrong-bg);border-color:var(--wrong)}
+  .fb .why{display:block;margin-top:6px;font-family:var(--mono);font-size:.86rem;color:var(--muted)}
+
+  /* ---- footer ---- */
+  .actions{display:flex;gap:10px;align-items:center;margin-top:28px;flex-wrap:wrap}
+  .primary{
+    background:var(--signal);border:1px solid var(--signal);color:#fff;
+    padding:13px 26px;font-weight:600;
+  }
+  .primary:hover{background:#0F3F37}
+
+  .score{
+    margin-top:24px;padding:20px;background:#fff;
+    border:1px solid var(--rule);border-top:3px solid var(--ink);
+  }
+  .score[hidden]{display:none}
+  .score .n{font-family:var(--mono);font-size:1.8rem;font-weight:600;display:block}
+  .score p{margin:6px 0 0;color:var(--muted);font-size:.95rem}
+
+  :focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+
+  @media (max-width:560px){
+    body{padding:28px 14px 64px}
+    .top{flex-direction:column;align-items:flex-start;gap:18px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none!important;scroll-behavior:auto!important}
+  }
+</style>
+</head>
+<body>
+<main class="sheet">
+
+  <div class="top">
+    <div class="triangle">
+      <svg viewBox="0 0 132 118" role="img" aria-label="Ohm's law triangle: V over I and R">
+        <polygon class="tri-line" points="66,6 126,112 6,112"/>
+        <line class="tri-line" x1="33" y1="60" x2="99" y2="60"/>
+        <line class="tri-line" x1="66" y1="60" x2="66" y2="112"/>
+        <g class="tri-seg" data-solve="V" tabindex="0" role="button" aria-label="Solve for voltage">
+          <polygon points="66,6 99,60 33,60"/>
+          <text x="66" y="49" text-anchor="middle">V</text>
+        </g>
+        <g class="tri-seg" data-solve="I" tabindex="0" role="button" aria-label="Solve for current">
+          <rect x="6" y="60" width="60" height="52"/>
+          <text x="36" y="94" text-anchor="middle">I</text>
+        </g>
+        <g class="tri-seg" data-solve="R" tabindex="0" role="button" aria-label="Solve for resistance">
+          <rect x="66" y="60" width="60" height="52"/>
+          <text x="96" y="94" text-anchor="middle">R</text>
+        </g>
+      </svg>
+    </div>
+    <div>
+      <h1>Ohm's Law</h1>
+      <p>Three problems. Every wrong option maps to a specific mistake, and the feedback names it.</p>
+    </div>
+  </div>
+
+  <p class="readout" id="readout">Cover the quantity you want in the triangle above &mdash; tap V, I or R.</p>
+
+  <form id="quiz">
+
+    <fieldset class="q" data-key="C">
+      <legend><span class="qn">1</span>A circuit is connected to a 12 V supply through a 4 &Omega; resistor. What current flows?</legend>
+      <p class="given">V = 12 V &nbsp; R = 4 &Omega; &nbsp; I = ?</p>
+      <div class="opts">
+        <label class="opt"><input type="radio" name="q1" value="A"><span>48 A</span><span class="mark">&times;</span></label>
+        <label class="opt"><input type="radio" name="q1" value="B"><span>0.33 A</span><span class="mark">&times;</span></label>
+        <label class="opt"><input type="radio" name="q1" value="C"><span>3 A</span><span class="mark">&times;</span></label>
+        <label class="opt"><input type="radio" name="q1" value="D"><span>16 A</span><span class="mark">&times;</span></label>
+      </div>
+      <div class="helpbar">
+        <button type="button" class="ghost" data-hint="1" data-tier="1" aria-expanded="false">Hint</button>
+        <button type="button" class="ghost" data-hint="1" data-tier="2" aria-expanded="false" hidden>Show the setup</button>
+      </div>
+      <div class="hint" id="h1a" hidden>Current is the unknown, so cover <b>I</b> in the triangle. What is left is V sitting above R, which means <b>I = V / R</b>. Check the units before you divide: volts per ohm must come out as amperes.</div>
+      <div class="hint" id="h1b" hidden>Substitute, but don't evaluate yet: <b>I = 12 V &divide; 4 &Omega;</b>. Both quantities are already in base SI units, so no conversion is needed here.</div>
+      <div class="fb" id="f1" role="status" hidden></div>
+    </fieldset>
+
+    <fieldset class="q" data-key="B">
+      <legend><span class="qn">2</span>A resistor draws 2 A when 10 V is placed across it. What is its resistance?</legend>
+      <p class="given">V = 10 V &nbsp; I = 2 A &nbsp; R = ?</p>
+      <div class="opts">
+        <label class="opt"><input type="radio" name="q2" value="A"><span>20 &Omega;</span><span class="mark">&times;</span></label>
+        <label class="opt"><input type="radio" name="q2" value="B"><span>5 &Omega;</span><span class="mark">&times;</span></label>
+        <label class="opt"><input type="radio" name="q2" value="C"><span>0.2 &Omega;</span><span class="mark">&times;</span></label>
+        <label class="opt"><input type="radio" name="q2" value="D"><span>12 &Omega;</span><span class="mark">&times;</span></label>
+      </div>
+      <div class="helpbar">
+        <button type="button" class="ghost" data-hint="2" data-tier="1" aria-expanded="false">Hint</button>
+        <button type="button" class="ghost" data-hint="2" data-tier="2" aria-expanded="false" hidden>Show the setup</button>
+      </div>
+      <div class="hint" id="h2a" hidden>Resistance is the unknown, so cover <b>R</b>. V remains above I, giving <b>R = V / I</b>. Watch the order: dividing current by voltage would give you conductance in siemens, not resistance.</div>
+      <div class="hint" id="h2b" hidden>Substitute without evaluating: <b>R = 10 V &divide; 2 A</b>. A useful sanity check &mdash; a bigger current for the same voltage must mean a smaller resistance.</div>
+      <div class="fb" id="f2" role="status" hidden></div>
+    </fieldset>
+
+    <fieldset class="q" data-key="C">
+      <legend><span class="qn">3</span>A device of resistance 6 &Omega; draws 500 mA. What voltage is across it?</legend>
+      <p class="given">R = 6 &Omega; &nbsp; I = 500 mA &nbsp; V = ?</p>
+      <div class="opts">
+        <label class="opt"><input type="radio" name="q3" value="A"><span>0.083 V</span><span class="mark">&times;</span></label>
+        <label class="opt"><input type="radio" name="q3" value="B"><span>3,000 V</span><span class="mark">&times;</span></label>
+        <label class="opt"><input type="radio" name="q3" value="C"><span>3 V</span><span class="mark">&times;</span></label>
+        <label class="opt"><input type="radio" name="q3" value="D"><span>6.5 V</span><span class="mark">&times;</span></label>
+      </div>
+      <div class="helpbar">
+        <button type="button" class="ghost" data-hint="3" data-tier="1" aria-expanded="false">Hint</button>
+        <button type="button" class="ghost" data-hint="3" data-tier="2" aria-expanded="false" hidden>Show the setup</button>
+      </div>
+      <div class="hint" id="h3a" hidden>Voltage is the unknown, so cover <b>V</b>. I and R sit side by side, which means they multiply: <b>V = I &times; R</b>. This one also carries a prefix &mdash; convert the current to amperes before anything else.</div>
+      <div class="hint" id="h3b" hidden>500 mA = 500 &times; 10<sup>&minus;3</sup> A = 0.5 A. Now substitute: <b>V = 0.5 A &times; 6 &Omega;</b>. Half an amp through a small resistance should give you a low voltage, not a large one.</div>
+      <div class="fb" id="f3" role="status" hidden></div>
+    </fieldset>
+
+    <div class="actions">
+      <button type="button" class="primary" id="check">Check my answers</button>
+      <button type="button" class="ghost" id="reset">Clear and start again</button>
+    </div>
+  </form>
+
+  <div class="score" id="score" hidden>
+    <span class="n" id="scoreN"></span>
+    <p id="scoreMsg"></p>
+  </div>
+</main>
+
+<script>
+  /* ---- Ohm triangle ---- */
+  const forms = {
+    V: "Cover V  →  V = I × R      (A × Ω = V)",
+    I: "Cover I  →  I = V / R      (V ÷ Ω = A)",
+    R: "Cover R  →  R = V / I      (V ÷ A = Ω)"
+  };
+  const readout = document.getElementById('readout');
+  document.querySelectorAll('.tri-seg').forEach(seg => {
+    const pick = () => {
+      document.querySelectorAll('.tri-seg').forEach(s => s.classList.remove('on'));
+      seg.classList.add('on');
+      readout.textContent = forms[seg.dataset.solve];
+    };
+    seg.addEventListener('click', pick);
+    seg.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); }
+    });
+  });
+
+  /* ---- diagnostic feedback: each distractor names the misconception ---- */
+  const feedback = {
+    1: {
+      A: ["You multiplied instead of dividing: 12 × 4 = 48.",
+          "The triangle has V on top, so I = V / R. A unit check catches this too: V × Ω would be W-per-amp-squared, not amperes."],
+      B: ["The formula is inverted: 4 ÷ 12 = 0.33.",
+          "R / V gives conductance (siemens), not current. Voltage always goes on top: I = V / R = 3 A."],
+      C: ["Correct. I = V / R = 12 ÷ 4 = 3 A.",
+          "Units confirm it: 12 V ÷ 4 Ω = 3 A."],
+      D: ["You added the two quantities: 12 + 4 = 16.",
+          "Voltage and resistance are different physical quantities and cannot be added. I = V / R = 3 A."]
+    },
+    2: {
+      A: ["You multiplied instead of dividing: 10 × 2 = 20.",
+          "V = I × R is the form that gives voltage. Here voltage is already known, so rearrange to R = V / I = 5 Ω."],
+      B: ["Correct. R = V / I = 10 ÷ 2 = 5 Ω.",
+          "Units confirm it: 10 V ÷ 2 A = 5 Ω."],
+      C: ["The formula is inverted: 2 ÷ 10 = 0.2.",
+          "I / V gives conductance in siemens. Resistance needs V / I = 5 Ω."],
+      D: ["You added the two quantities: 10 + 2 = 12.",
+          "Test it against the data: 2 A × 12 Ω would require 24 V, not the 10 V given. R = V / I = 5 Ω."]
+    },
+    3: {
+      A: ["You divided instead of multiplying: 0.5 ÷ 6 = 0.083.",
+          "The prefix conversion was right, but I and R sit side by side in the triangle, so they multiply: V = I × R = 3 V."],
+      B: ["The milli prefix was dropped: 500 × 6 = 3,000.",
+          "500 mA = 0.5 A, not 500 A. Always convert to base SI units first: V = 0.5 × 6 = 3 V."],
+      C: ["Correct. 500 mA = 0.5 A, so V = I × R = 0.5 × 6 = 3 V.",
+          "Both the prefix conversion and the multiplication are consistent."],
+      D: ["You added the two quantities: 6 + 0.5 = 6.5.",
+          "Ohms and amperes cannot be added. V = I × R = 3 V."]
+    }
+  };
+
+  /* ---- tiered hints ---- */
+  document.querySelectorAll('[data-hint]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = 'h' + btn.dataset.hint + (btn.dataset.tier === '1' ? 'a' : 'b');
+      const panel = document.getElementById(id);
+      const open = panel.hidden;
+      panel.hidden = !open;
+      btn.setAttribute('aria-expanded', String(open));
+      btn.textContent = open
+        ? (btn.dataset.tier === '1' ? 'Hide hint' : 'Hide the setup')
+        : (btn.dataset.tier === '1' ? 'Hint' : 'Show the setup');
+      if (btn.dataset.tier === '1' && open) {
+        btn.parentElement.querySelector('[data-tier="2"]').hidden = false;
+      }
+    });
+  });
+
+  /* ---- marking ---- */
+  const cards = [...document.querySelectorAll('.q')];
+
+  document.getElementById('check').addEventListener('click', () => {
+    let score = 0, unanswered = 0;
+
+    cards.forEach((card, idx) => {
+      const n = idx + 1;
+      const key = card.dataset.answer || card.dataset.key;
+      const chosen = card.querySelector('input:checked');
+      const box = document.getElementById('f' + n);
+
+      card.querySelectorAll('.opt').forEach(o => o.classList.remove('is-right', 'is-wrong'));
+
+      if (!chosen) {
+        unanswered++;
+        box.hidden = false;
+        box.className = 'fb wrong';
+        box.textContent = 'No answer selected. Identify the unknown first, then use the triangle to pick the right rearrangement.';
+        return;
+      }
+
+      const correct = chosen.value === key;
+      if (correct) score++;
+
+      chosen.closest('.opt').classList.add(correct ? 'is-right' : 'is-wrong');
+      if (!correct) {
+        card.querySelector(`input[value="${key}"]`).closest('.opt').classList.add('is-right');
+      }
+
+      const [diagnosis, repair] = feedback[n][chosen.value];
+      box.hidden = false;
+      box.className = 'fb ' + (correct ? 'right' : 'wrong');
+      box.innerHTML = '';
+      box.append(diagnosis);
+      const why = document.createElement('span');
+      why.className = 'why';
+      why.textContent = repair;
+      box.append(why);
+    });
+
+    const panel = document.getElementById('score');
+    document.getElementById('scoreN').textContent = score + ' / 3';
+    document.getElementById('scoreMsg').textContent =
+      unanswered ? 'Some questions are still blank — answer them, then check again.'
+      : score === 3 ? 'Formula rearrangement and unit conversion both handled correctly.'
+      : score === 2 ? 'One slip. Read the diagnosis above — it names the specific error, not just the right number.'
+      : score === 1 ? 'Two slips. Work through the triangle for each unknown before substituting any numbers.'
+      : 'Start from the triangle: cover the unknown, read off the rearrangement, convert units, then substitute.';
+    panel.hidden = false;
+    panel.scrollIntoView({behavior: 'smooth', block: 'center'});
+  });
+
+  document.getElementById('reset').addEventListener('click', () => {
+    document.getElementById('quiz').reset();
+    document.querySelectorAll('.opt').forEach(o => o.classList.remove('is-right', 'is-wrong'));
+    document.querySelectorAll('.fb').forEach(b => { b.hidden = true; b.textContent = ''; });
+    document.querySelectorAll('.hint').forEach(h => h.hidden = true);
+    document.querySelectorAll('[data-hint]').forEach(b => {
+      b.setAttribute('aria-expanded', 'false');
+      b.textContent = b.dataset.tier === '1' ? 'Hint' : 'Show the setup';
+      if (b.dataset.tier === '2') b.hidden = true;
+    });
+    document.getElementById('score').hidden = true;
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  });
+</script>
+</body>
+</html>
