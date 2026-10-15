@@ -313,9 +313,8 @@ const QUIZ = [
     text: () => {
       const pct = cpPctStr(), f = cpFactorStr();
       const opening = pct
-        ? `You measured a power coefficient of <b>${pct}</b>${f ? `, about ${f} times lower than` : ', far below'} the NREL 5 MW turbine you modelled in QBlade, which reached about 48%.`
-        : 'Your power coefficient came out extremely low, far below the NREL 5 MW turbine you modelled in QBlade, which reached about 48%.';
-      return `${opening} What is a possible explanation for the very low efficiency of this wind turbine? Select all that apply.`;
+        ? `You measured a power coefficient of <b>${pct}</b>${f ? `.} 
+        `${opening} What is a possible explanation for the very low efficiency of this wind turbine? Select all that apply.`;
     },
     options: [
       { key: 'a', correct: true,
@@ -905,15 +904,7 @@ function renderStep6() {
   }
 
   return `
-  <div class="card">
-    <h2>Making sense of your result</h2>
-    <p>${cpPctStr()
-      ? `Your turbine converted <b>${cpPctStr()}</b> of the energy in the wind. The 5 MW machine you modelled in QBlade managed about 48%.`
-      : 'Work out your power coefficient on the previous step first — these questions are about the number you get.'}
-    These questions ask you to explain that gap, and to think about what the generator is actually doing to the rotor.</p>
-  </div>
-  ${body}
-  <div class="card">
+  
     <button class="btn" id="${'checkQuiz'}" type="button">${state.quizChecked ? 'Try again' : 'Check my answers'}</button>
     ${score}
   </div>`;
