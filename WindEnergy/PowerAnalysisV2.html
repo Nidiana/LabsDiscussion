@@ -311,10 +311,11 @@ const QUIZ = [
     id: 'q1',
     multi: true,
     text: () => {
-      const pct = cpPctStr(), f = cpFactorStr();
+      const pct = cpPctStr();
       const opening = pct
-        ? `You measured a power coefficient of <b>${pct}</b>${f ? `.} 
-        `${opening} What is a possible explanation for the very low efficiency of this wind turbine? Select all that apply.`;
+        ? `You measured a power coefficient of <b>${pct}</b>, far below what full-scale wind turbines achieve.`
+        : 'Your power coefficient came out extremely low, far below what full-scale wind turbines achieve.';
+      return `${opening} What is a possible explanation for the very low efficiency of this wind turbine? Select all that apply.`;
     },
     options: [
       { key: 'a', correct: true,
@@ -322,7 +323,7 @@ const QUIZ = [
         why: 'Correct — turbulence affects the efficiency of a wind turbine. Air leaving a fan is churned up rather than smooth, so the blades never meet clean flow. In real installations this is avoided by raising the rotor on a tall tower, high enough that nearby obstacles no longer create turbulence.' },
       { key: 'b', correct: true,
         text: 'The rotor is not running at the optimum RPM for each wind speed',
-        why: 'Correct — you saw exactly this in the QBlade session. There is one best rotor speed at every wind speed, and away from it the power coefficient falls. This rotor is not free to choose its speed.' },
+        why: 'Correct. There is one best rotor speed at every wind speed, and away from it the power coefficient falls. This rotor is not free to choose its speed.' },
       { key: 'c', correct: false,
         text: 'The Betz limit means no wind turbine can be more than 2% efficient',
         why: 'Incorrect. The Betz limit is 59.3%. It is a real ceiling, but it is nowhere near what is holding this rotor back.' },
@@ -809,7 +810,6 @@ function renderStep5() {
     if (state.cpCorrect) {
       fb = `<div class="feedback correct"><b>✓ Correct, within tolerance</b>
       C<sub>P</sub> = ${fmtSci(p)} W ÷ ${fmtSci(pw)} W = <b>${cpPctStr()}</b>.
-      ${cpFactorStr() ? `That is about ${cpFactorStr()} times lower than the 48% you obtained in QBlade.` : ''}
       The next step asks you why.</div>`;
     } else {
       fb = `<div class="feedback wrong"><b>✗ Not quite — here is the worked check</b>
@@ -847,8 +847,7 @@ function renderStep5() {
       At ${state.rpm[100]} RPM the tips of a ${state.turbineDiameter} mm rotor travel at
       <b>${(parseFloat(state.rpm[100]) * 2 * Math.PI / 60 * diameterM() / 2).toFixed(2)} m/s</b>,
       while the wind arrives at <b>${uMax()} m/s</b>.<br><br>
-      Divide one by the other and you get <b>${lam.toFixed(2)}</b> — the same rotor speed ÷ wind speed ratio you
-      worked out in QBlade. Compare it with the value the NREL 5 MW held onto, and keep it in mind for the
+      Divide one by the other and you get <b>${lam.toFixed(2)}</b> — the tip speed ratio. Keep it in mind for the
       next step.`}
     </div>
   </div>`;
@@ -904,7 +903,15 @@ function renderStep6() {
   }
 
   return `
-  
+  <div class="card">
+    <h2>Making sense of your result</h2>
+    <p>${cpPctStr()
+      ? `Your turbine converted <b>${cpPctStr()}</b> of the energy in the wind.`
+      : 'Work out your power coefficient on the previous step first — these questions are about the number you get.'}
+    These questions ask you to explain that gap, and to think about what the generator is actually doing to the rotor.</p>
+  </div>
+  ${body}
+  <div class="card">
     <button class="btn" id="${'checkQuiz'}" type="button">${state.quizChecked ? 'Try again' : 'Check my answers'}</button>
     ${score}
   </div>`;
