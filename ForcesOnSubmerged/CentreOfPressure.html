@@ -1,0 +1,552 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Centre of Pressure Analysis</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout: one column, four steps. Readings first, then one hand-worked partly covered case, one fully covered case, then the plot.
+   Colour: water is blue-teal, force and centre of pressure are signal orange, centroid is plain ink. */
+:root{
+  --paper:#F4F4F6; --panel:#FFFFFF; --body:#E8E9EE;
+  --ink:#151E28; --ink-2:#3F4A5C; --rule:#CDD0DA; --grid:#E4E6EC;
+  --brand:#3C0F93; --on-brand:#FFFFFF; --chip:#E8E5FF;
+  --water:#2060C5; --water-soft:#DCE7F8; --on-water:#FFFFFF;
+  --force:#C9501A; --force-soft:#FBE3D3; --plate:#B9BECB;
+  --ok:#1B7A55; --ok-soft:#D9F0E6; --bad:#B3303B; --bad-soft:#F8DADD; --warn-soft:#FBEFC9;
+  --f-display:'Barlow Condensed','Arial Narrow',Arial,sans-serif;
+  --f-body:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --f-mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#12141C; --panel:#1B1F2B; --body:#262B3A;
+    --ink:#ECEEF5; --ink-2:#B0B7C9; --rule:#363C50; --grid:#262B3B;
+    --brand:#BBAAFF; --on-brand:#1B1236; --chip:#2E2755;
+    --water:#78A9F5; --water-soft:#1D2D4D; --on-water:#0B1426;
+    --force:#FF9B66; --force-soft:#43271A; --plate:#6B7390;
+    --ok:#5CCB93; --ok-soft:#173A29; --bad:#FF8F98; --bad-soft:#4A2228; --warn-soft:#3F3719;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#12141C; --panel:#1B1F2B; --body:#262B3A;
+  --ink:#ECEEF5; --ink-2:#B0B7C9; --rule:#363C50; --grid:#262B3B;
+  --brand:#BBAAFF; --on-brand:#1B1236; --chip:#2E2755;
+  --water:#78A9F5; --water-soft:#1D2D4D; --on-water:#0B1426;
+  --force:#FF9B66; --force-soft:#43271A; --plate:#6B7390;
+  --ok:#5CCB93; --ok-soft:#173A29; --bad:#FF8F98; --bad-soft:#4A2228; --warn-soft:#3F3719;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;font-size:19px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{
+  margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:1rem;line-height:1.55;
+  padding-block:0 3rem;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:40;background:var(--paper)}
+.wrap{max-width:1180px;margin:0 auto}
+:focus-visible{outline:3px solid var(--force);outline-offset:2px}
+sub{font-size:.75em;line-height:0}
+.ob{text-decoration:overline}
+.muted{color:var(--ink-2)}
+.small{font-size:.86rem}
+header.top{padding-block:1.5rem .8rem}
+.kicker{margin:0;font:600 .9rem/1 var(--f-display);letter-spacing:.16em;text-transform:uppercase;color:var(--brand)}
+h1{margin:.5rem 0 .6rem;font:700 clamp(2rem,6vw,3.2rem)/1.02 var(--f-display);text-wrap:balance}
+.lede{max-width:62ch;margin:0 0 1rem;font-size:1.05rem;color:var(--ink-2)}
+.eqs{display:flex;gap:.6rem 1.6rem;flex-wrap:wrap;background:var(--panel);border:1px solid var(--ink-2);padding:.7rem 1rem;font:500 1.1rem var(--f-mono)}
+.eqs span small{display:block;font:400 .75rem var(--f-body);color:var(--ink-2)}
+.route{display:flex;gap:.4rem;flex-wrap:wrap;margin:1rem 0 0;padding:0;list-style:none}
+.route li{font:600 .85rem var(--f-display);letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--rule);padding:.25rem .6rem;background:var(--panel)}
+.route li.on{border-color:var(--ok);color:var(--ok)}
+
+details.consts{margin-top:1rem;background:var(--panel);border:1px solid var(--rule);padding:.6rem 1rem}
+details.consts summary{cursor:pointer;font-weight:600}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(8.5rem,1fr));gap:.6rem;margin-top:.7rem}
+.cgrid label{display:block;font-size:.82rem;color:var(--ink-2)}
+.cgrid input{display:block;width:100%;margin-top:.15rem;font:500 1rem var(--f-mono);padding:.3rem .45rem;border:1px solid var(--ink-2);background:var(--paper);color:var(--ink);border-radius:2px}
+
+.step{margin-top:1.8rem;padding-top:1.4rem;border-top:1px solid var(--rule);scroll-margin-top:1rem}
+.stepno{margin:0;font:600 .85rem/1 var(--f-display);letter-spacing:.16em;text-transform:uppercase;color:var(--brand)}
+h2{margin:.35rem 0 .3rem;font:700 clamp(1.6rem,4.4vw,2.2rem)/1.05 var(--f-display);text-wrap:balance}
+.say{margin:0 0 1rem;max-width:62ch;color:var(--ink-2)}
+
+/* data table */
+.tablewrap{overflow-x:auto;background:var(--panel);border:1px solid var(--rule)}
+table.data{border-collapse:collapse;width:100%;min-width:520px}
+table.data th{font:600 .8rem var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);text-align:left;padding:.5rem .6rem;border-bottom:1px solid var(--rule)}
+table.data td{padding:.3rem .6rem;border-top:1px solid var(--grid);vertical-align:middle}
+table.data td.n{font-family:var(--f-mono);color:var(--ink-2);width:2rem}
+.cell,select.cell{font:500 1rem var(--f-mono);padding:.4rem .5rem;width:7rem;border:1px solid var(--ink-2);background:var(--paper);color:var(--ink);border-radius:2px;min-height:40px}
+select.cell{font-family:var(--f-body);width:9.5rem}
+.chip{display:inline-block;font-size:.8rem;padding:.1rem .5rem;border:1px solid var(--rule);border-radius:99px;color:var(--ink-2)}
+.chip.ok{border-color:var(--ok);color:var(--ok)}
+.chip.bad{border-color:var(--bad);color:var(--bad);background:var(--bad-soft)}
+.delx{font:500 1.2rem var(--f-body);background:transparent;border:0;color:var(--ink-2);cursor:pointer;min-width:40px;min-height:40px}
+.delx:hover{color:var(--bad)}
+.btnrow{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.8rem}
+.btn{font:500 .95rem var(--f-body);padding:.5rem .9rem;min-height:42px;background:var(--panel);color:var(--ink);border:1px solid var(--ink-2);border-radius:3px;cursor:pointer}
+.btn:hover{background:var(--chip)}
+.btn.pri{background:var(--brand);color:var(--on-brand);border-color:var(--brand)}
+.btn.ghost{border-color:var(--rule);color:var(--ink-2)}
+.banner{background:var(--warn-soft);border:1px solid var(--rule);padding:.5rem .8rem;margin-bottom:.8rem;font-size:.92rem}
+
+/* worked cases */
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1rem;align-items:start}
+@media (max-width:820px){.split{grid-template-columns:minmax(0,1fr)}}
+figure{margin:0;background:var(--panel);border:1px solid var(--rule)}
+figure svg{display:block;width:100%;height:auto}
+figcaption{padding:.5rem .8rem;font-size:.85rem;color:var(--ink-2);border-top:1px solid var(--rule)}
+.g{display:inline-block;width:.8rem;height:.8rem;border-radius:50%;vertical-align:-1px;margin-right:.25rem}
+.g.ring{border:2px solid var(--ink);background:var(--panel)}
+.g.dot{background:var(--force)}
+.pick{margin:0 0 .6rem;font-weight:600}
+.pick span{font-family:var(--f-mono);color:var(--brand)}
+.work{background:var(--panel);border:1px solid var(--rule);padding:.3rem 1rem}
+ol.items{list-style:none;margin:0;padding:0}
+li.it{padding:.7rem 0;border-top:1px solid var(--rule)}
+li.it:first-child{border-top:0}
+.ihead{display:flex;align-items:baseline;gap:.5rem;flex-wrap:wrap}
+.rl{font-weight:600}
+.sym{font:500 1rem var(--f-mono);color:var(--brand)}
+.lnk{margin-left:auto;font:500 .82rem var(--f-body);background:none;border:0;color:var(--brand);cursor:pointer;text-decoration:underline;padding:.2rem}
+.fm{margin:.25rem 0;font-size:.88rem;color:var(--ink-2);background:var(--paper);padding:.35rem .6rem;border-left:3px solid var(--brand)}
+.irow{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-top:.35rem}
+input.expr{font:500 1rem var(--f-mono);padding:.4rem .5rem;width:min(13rem,100%);border:1px solid var(--ink-2);background:var(--paper);color:var(--ink);border-radius:2px;min-height:40px}
+li.ok input.expr{border-color:var(--ok);background:var(--ok-soft)}
+li.bad input.expr{border-color:var(--bad);background:var(--bad-soft)}
+.unit{font:500 .95rem var(--f-mono);color:var(--ink-2)}
+.live{font:500 .9rem var(--f-mono);color:var(--ink-2);min-width:5rem}
+.fbk{margin:.35rem 0 0;font-size:.9rem}
+.fbk.ok{color:var(--ok)} .fbk.bad{color:var(--bad)}
+.sum{margin-top:.2rem;padding:.7rem .9rem;border:1px solid var(--ok);background:var(--ok-soft)}
+.sum p{margin:.25rem 0}
+.sum .big{font:700 1.15rem var(--f-display);letter-spacing:.04em}
+.lock{background:var(--panel);border:1px dashed var(--ink-2);padding:.9rem 1rem;max-width:62ch}
+.lock p{margin:0}
+
+/* results */
+.legend{display:flex;gap:.4rem 1.2rem;flex-wrap:wrap;margin:0 0 .5rem;font-size:.88rem;color:var(--ink-2)}
+.legend i{display:inline-block;width:1.4rem;height:0;border-top:3px solid;vertical-align:middle;margin-right:.35rem}
+.chartfig{margin:0 0 1rem}
+.take{max-width:66ch}
+.take p{margin:.4rem 0}
+table.res{border-collapse:collapse;width:100%;min-width:760px;font-size:.88rem}
+table.res th{font:600 .75rem var(--f-display);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);text-align:right;padding:.45rem .5rem;border-bottom:1px solid var(--rule)}
+table.res td{font-family:var(--f-mono);text-align:right;padding:.35rem .5rem;border-top:1px solid var(--grid);font-variant-numeric:tabular-nums}
+table.res th:first-child,table.res td:first-child{text-align:left}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <p class="kicker">Forces on submerged surfaces</p>
+  <h1>Centre of pressure analysis</h1>
+  <p class="lede">Enter your bench readings, work one partly covered and one fully covered case by hand, and then every reading is compared with theory.</p>
+</header>
+
+<section class="step" id="s1">
+  <p class="stepno">Step 1</p>
+  <h2>Your readings</h2>
+  <p class="say">Enter the mass on the hanger including the pan, m, and the water level above the bottom edge of the face, y. Add as many rows as you have. For each row choose whether the face was partly or fully covered.</p>
+  <div class="tablewrap"><table class="data">
+    <thead><tr><th>#</th><th>m (g)</th><th>y (mm)</th><th>Face is</th><th></th><th></th></tr></thead>
+    <tbody id="tbody"></tbody>
+  </table></div>
+  <div class="btnrow">
+    <button class="btn pri" id="addrow" type="button">Add row</button>
+    <button class="btn ghost" id="clearall" type="button">Clear all rows</button>
+  </div>
+</section>
+
+<section class="step" id="s2">
+  <p class="stepno">Step 2</p>
+  <h2>Partly covered: your first reading</h2>
+  <p class="say" id="say_p"></p>
+  <div id="caseP"></div>
+</section>
+
+<section class="step" id="s3">
+  <p class="stepno">Step 3</p>
+  <h2>Fully covered: your first reading</h2>
+  <p class="say" id="say_f"></p>
+  <div id="caseF"></div>
+</section>
+
+<section class="step" id="s4">
+  <p class="stepno">Step 4</p>
+  <h2>All readings against theory</h2>
+  <div id="results"></div>
+</section>
+</div>
+
+<script>
+/* ---------- state ---------- */
+const $=id=>document.getElementById(id);
+const C={L1:275,a:100,b:75,d:100,rho:1000,g:9.81,dm:1,dy:1};
+const CLAB={L1:['L₁ (mm)','pivot to hanger'],a:['a (mm)','pivot to top of face'],b:['b (mm)','face width'],d:['d (mm)','face height'],dm:['± m (g)','mass uncertainty'],dy:['± y (mm)','level uncertainty']};
+let rows=[], work={p:{},f:{}}, example=true;
+const KEY='cop-analysis-v3';
+
+function exampleRows(){return Array.from({length:8},()=>({m:'',y:'',reg:''}))}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({C,rows,work,example}))}catch(e){}}
+function load(){
+  try{const s=JSON.parse(localStorage.getItem(KEY)||'null');
+    if(s&&Array.isArray(s.rows)&&s.rows.length){Object.assign(C,s.C||{});rows=s.rows;work=s.work||{p:{},f:{}};example=!!s.example;return}
+  }catch(e){}
+  rows=exampleRows();example=true;
+}
+
+/* ---------- physics ---------- */
+function num(s){if(s===''||s==null)return NaN;const v=parseFloat(String(s).replace(',','.'));return v}
+function geo(y){const full=y>=C.d;const h=full?C.d:y;return {full,h,xb:full?y-C.d/2:y/2,A:C.b*h,IG:C.b*h*h*h/12}}
+function Fn(y){const g=geo(y);return C.rho*C.g*(g.A*1e-6)*(g.xb*1e-3)}
+function calc(m,y){
+  const g=geo(y),F=Fn(y),L2=(m/1000)*C.g*C.L1/F,hexp=L2-(C.a+C.d-y),hth=g.xb+g.IG/(g.A*g.xb);
+  return {...g,F,L2,hexp,hth,ycpE:y-hexp,ycpT:y-hth,yc:y-g.xb};
+}
+function thCP(y){const g=geo(y);return y-(g.xb+g.IG/(g.A*g.xb))}
+function ycpExp(m,y){return C.a+C.d-(m/1000)*C.g*C.L1/Fn(y)}
+function errBar(m,y){
+  let mx=0;const c=ycpExp(m,y);
+  for(const dm of[-C.dm,C.dm])for(const dy of[-C.dy,C.dy]){
+    const m2=m+dm,y2=y+dy;if(m2>0&&y2>0)mx=Math.max(mx,Math.abs(ycpExp(m2,y2)-c));
+  }
+  return mx;
+}
+
+/* ---------- expression evaluator (no eval) ---------- */
+function evalExpr(src){
+  let s=String(src==null?'':src).trim();if(!s)return NaN;
+  s=s.replace(/,/g,'.').replace(/[×·]/g,'*').replace(/÷/g,'/').replace(/\*\*/g,'^').replace(/(\d|\))\s*x\s*(?=[\d(])/gi,'$1*');
+  let p=0;const ws=()=>{while(s[p]===' ')p++};
+  function prim(){ws();if(s[p]==='('){p++;const v=add();ws();if(s[p]!==')')throw 0;p++;return v}
+    const m=/^(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?/.exec(s.slice(p));if(!m)throw 0;p+=m[0].length;return parseFloat(m[0])}
+  function un(){ws();if(s[p]==='-'){p++;return -un()}if(s[p]==='+'){p++;return un()}return pw()}
+  function pw(){const b=prim();ws();if(s[p]==='^'){p++;return Math.pow(b,un())}return b}
+  function mul(){let v=un();for(;;){ws();if(s[p]==='*'){p++;v*=un()}else if(s[p]==='/'){p++;v/=un()}else return v}}
+  function add(){let v=mul();for(;;){ws();if(s[p]==='+'){p++;v+=mul()}else if(s[p]==='-'){p++;v-=mul()}else return v}}
+  try{const v=add();ws();if(p!==s.length)return NaN;return isFinite(v)?v:NaN}catch(e){return NaN}
+}
+function fmt(v){
+  if(!isFinite(v))return '–';const a=Math.abs(v);
+  if(a!==0&&(a>=1e6||a<1e-3)){const [m,e]=v.toExponential(3).split('e');return m+'×10<sup>'+parseInt(e,10)+'</sup>'}
+  return String(parseFloat(v.toPrecision(4)));
+}
+const OB=t=>'<span class="ob">'+t+'</span>';
+
+/* ---------- rows ---------- */
+function geoReg(y){return y>=C.d?'f':'p'}
+function status(r){
+  const m=num(r.m),y=num(r.y);
+  if(!(m>0)||!(y>0))return 'incomplete';
+  if(!r.reg)return 'pick';
+  return r.reg===geoReg(y)?'ok':'mismatch';
+}
+function chip(r){
+  const s=status(r),y=num(r.y);
+  if(s==='mismatch')return ['bad',geoReg(y)==='f'?'y ≥ d: fully covered':'y < d: partly covered'];
+  return ['',''];
+}
+function renderTable(){
+  const tb=$('tbody');tb.innerHTML='';
+  rows.forEach((r,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td class="n">${i+1}</td>
+      <td><input class="cell" id="m_${i}" inputmode="decimal" placeholder="g" aria-label="Mass m, row ${i+1}" value="${r.m}"></td>
+      <td><input class="cell" id="y_${i}" inputmode="decimal" placeholder="mm" aria-label="Water level y, row ${i+1}" value="${r.y}"></td>
+      <td><select class="cell" id="r_${i}" aria-label="Face covering, row ${i+1}"><option value="">Select…</option><option value="p"${r.reg==='p'?' selected':''}>Partly covered</option><option value="f"${r.reg==='f'?' selected':''}>Fully covered</option></select></td>
+      <td id="st_${i}"></td>
+      <td><button class="delx" type="button" data-del="${i}" aria-label="Delete row ${i+1}">×</button></td>`;
+    tb.appendChild(tr);
+    setChip(i);
+  });
+}
+function setChip(i){const [c,t]=chip(rows[i]);const el=$('st_'+i);if(el)el.innerHTML=t?`<span class="chip ${c}">${t}</span>`:''}
+let tmr=null;
+function refreshSoon(){clearTimeout(tmr);tmr=setTimeout(refreshAll,250)}
+$('tbody').addEventListener('input',e=>{
+  const id=e.target.id||'';const [k,i]=id.split('_');if(i===undefined)return;
+  const r=rows[+i];if(!r)return;
+  if(k==='m')r.m=e.target.value;else if(k==='y')r.y=e.target.value;else if(k==='r')r.reg=e.target.value;
+  example=false;setChip(+i);save();refreshSoon();
+});
+$('tbody').addEventListener('click',e=>{
+  const b=e.target.closest('[data-del]');if(!b)return;
+  rows.splice(+b.dataset.del,1);example=false;renderTable();save();refreshAll();
+});
+$('addrow').onclick=()=>{if(rows.length<40){rows.push({m:'',y:'',reg:''});example=false;renderTable();save();const i=rows.length-1;$('m_'+i).focus()}};
+$('clearall').onclick=()=>{rows=[{m:'',y:'',reg:''}];example=false;work={p:{},f:{}};renderTable();save();refreshAll()};
+
+/* ---------- worked items ---------- */
+function itemsFor(k,m,y){
+  const c=calc(m,y),full=k==='f',d=C.d,b=C.b,a=C.a;
+  const L=v=>v/1000,A2=v=>v*1e-6,I4=v=>v*1e-12;
+  const SI=(A,x)=>C.rho*C.g*(A*1e-6)*(x*1e-3);
+  const it=[];
+  it.push({id:'xb',label:'Centroid depth',sym:OB('x'),unit:'m',exp:L(c.xb),
+    fm:full?'Depth of the centroid of the face below the water surface. The face is d tall and its top edge is y − d below the surface.':'Depth below the water surface of the centroid of the <b>wetted</b> rectangle. Only the part under water counts.',
+    alts:full?[{v:L(y/2),msg:'y/2 is the partly covered result. Here the whole face of height d is under water, so the centroid is d/2 below its top edge, which is y − d below the surface.'},{v:L(y-d),msg:'y − d is the depth of the top edge of the face. Add d/2 to reach the centroid.'}]
+             :[{v:L(y),msg:'That is the depth of the bottom of the wetted part. The centroid is halfway down the wetted height.'},{v:L(d/2),msg:'The face is not fully covered, so the wetted height is y, not d.'}]});
+  it.push({id:'A',label:'Area acted on by the water',sym:'A',unit:'m²',exp:A2(c.A),
+    fm:full?'Width × height of the whole face (Equation 3).':'Width × wetted height (Equation 4).',
+    alts:full?[{v:A2(b*y),msg:'The face is only d tall. Once it is fully covered, A = b × d.'}]:[{v:A2(b*d),msg:'b × d is the whole face. Only the wetted height y is under water.'}]});
+  it.push({id:'F',label:'Hydrostatic force',sym:'F',unit:'N',exp:c.F,
+    fm:'F = ρ g A x̄ (Equation 1), with ρ = 1000 kg/m³, g = 9.81 m/s², A in m² and x̄ in m.',
+    alts:[{v:SI(c.A,y),msg:'You used y where the centroid depth x̄ belongs.'},{v:SI(b*d,c.xb),msg:full?null:'You used the whole face area. Only the wetted part carries pressure.'}].filter(x=>x.msg)});
+  it.push({id:'L2',label:'Moment arm of F',sym:'L<sub>2</sub>',unit:'m',exp:L(c.L2),
+    fm:'Moment balance m g L₁ = F L₂, so L₂ = m g L₁ / F, with m in kg, L₁ in m and F in N.',
+    alts:[],unitNote:'Check m: the table is in grams, the formula needs kilograms, and L₁ must be in metres.'});
+  it.push({id:'hexp',label:'Experimental depth of the centre of pressure',sym:OB('h')+'<sub>exp</sub>',unit:'m',exp:L(c.hexp),
+    fm:'h̄ is measured down from the top level of the water. L₂ is measured from the pivot, and the pivot is a + d − y above the water surface, so h̄ = L₂ − (a + d − y). Use metres throughout.',
+    alts:[{v:L(c.L2),msg:'That is L₂, measured from the pivot. Subtract the distance from the pivot to the water surface, a + d − y, to measure from the surface.'},{v:L(c.L2-(a+d)),msg:'Subtract a + d − y, the distance from the pivot to the water surface, not a + d.'}]});
+  it.push({id:'IG',label:'Second moment of area about the centroid',sym:'I<sub>G</sub>',unit:'m⁴',exp:I4(c.IG),
+    fm:full?'Rectangle: I_G = b h³/12 with h the height of the face, d.':'Rectangle: I_G = b h³/12 with h the wetted height, y.',
+    alts:full?[{v:I4(b*y**3/12),msg:'The face is only d tall. Use d in b d³/12.'}]:[{v:I4(b*d**3/12),msg:'Use the wetted height y, not d, because the face is partly covered.'},{v:I4(b*y**3/3),msg:'b h³/3 is about the edge. About the centroid it is b h³/12.'}]});
+  it.push({id:'hth',label:'Theoretical depth of the centre of pressure',sym:OB('h')+'<sub>th</sub>',unit:'m',exp:L(c.hth),
+    fm:'h̄ = x̄ + I_G / (A x̄) (Equation 2).',
+    alts:[{v:L(c.xb),msg:'That is the centroid depth only. Add I_G/(A x̄): the centre of pressure always lies below the centroid.'}]});
+  return it;
+}
+const SCALES=[1e3,1e-3,1e6,1e-6,1e9,1e-9,1e12,1e-12];
+
+function pickRow(k){for(let i=0;i<rows.length;i++)if(status(rows[i])==='ok'&&rows[i].reg===k)return i;return -1}
+function caseDone(k){const w=work[k];return !!(w&&w.n&&w.n===7&&w.okc===7)}
+
+function renderCase(k){
+  const el=$(k==='p'?'caseP':'caseF');
+  const i=pickRow(k);
+  if(i<0){
+    const mism=rows.some(r=>status(r)==='mismatch'),pend=rows.some(r=>status(r)==='pick');
+    el.innerHTML=`<div class="lock"><p>${mism?'A row has a covering choice that does not match its y. Fix it in Step 1.':pend?'Choose partly or fully covered for each row in Step 1.':`Add a ${k==='p'?'partly':'fully'} covered reading in Step 1 (y ${k==='p'?'< d':'≥ d'}).`}</p></div>`;
+    work[k]={};$('say_'+k).textContent='Calculate the experimental and theoretical position of P, the centre of pressure, for your first '+(k==='p'?'partly':'fully')+' covered reading.';return;
+  }
+  const r=rows[i],m=num(r.m),y=num(r.y);
+  const key=[i,m,y,C.L1,C.a,C.b,C.d].join('|');
+  if(!work[k]||work[k].key!==key)work[k]={key,vals:{},ok:{},tries:{},shown:{}};
+  const w=work[k],items=itemsFor(k,m,y);
+  $('say_'+k).innerHTML=`Your first ${k==='p'?'partly':'fully'} covered case is <b>row ${i+1}</b>: m = <b>${r.m} g</b>, y = <b>${r.y} mm</b>. Calculate the experimental and theoretical position of P, the centre of pressure.<br><span class="small muted">Work in SI units: m = ${fmt(m/1000)} kg, y = ${fmt(y/1000)} m, L₁ = ${fmt(C.L1/1000)} m, a = ${fmt(C.a/1000)} m, b = ${fmt(C.b/1000)} m, d = ${fmt(C.d/1000)} m.</span>`;
+  let okc=0;
+  const lis=items.map((t,j)=>{
+    const done=!!w.ok[t.id];if(done)okc++;
+    const bad=!done&&w.bad&&w.bad[t.id];
+    const cls=done?'ok':bad?'bad':'';
+    const v=w.vals[t.id]||'';
+    const ev=evalExpr(v);
+    const fb=w.fb&&w.fb[t.id]?w.fb[t.id]:'';
+    return `<li class="it ${cls}" data-id="${t.id}">
+      <div class="ihead"><span class="rl">${j+1}. ${t.label}</span><span class="sym">${t.sym}</span><button class="lnk" type="button" data-act="hint">formula</button></div>
+      <div class="fm" hidden>${t.fm}</div>
+      <div class="irow"><input class="expr" id="in_${k}_${t.id}" type="text" autocomplete="off" spellcheck="false" placeholder="calculation" aria-label="${t.label} in ${t.unit}" value="${v.replace(/"/g,'&quot;')}">
+        <span class="unit">${t.unit}</span><span class="live" id="lv_${k}_${t.id}">${isFinite(ev)?'= '+fmt(ev):''}</span></div>
+      <p class="fbk ${done?'ok':bad?'bad':''}" id="fb_${k}_${t.id}">${fb}</p>
+    </li>`;
+  }).join('');
+  w.n=7;w.okc=okc;
+  let sum='';
+  if(okc===7){
+    const c=calc(m,y);
+    sum=`<div class="sum"><p class="big">Reading ${i+1} complete</p>
+      <p>Measured: h̄ = ${fmt(c.hexp/1000)} m below the water surface, so P is at y<sub>cp</sub> = ${fmt(c.ycpE/1000)} m above the bottom edge.</p>
+      <p>Theory: h̄ = ${fmt(c.hth/1000)} m below the water surface, so P is at y<sub>cp</sub> = ${fmt(c.ycpT/1000)} m above the bottom edge.</p>
+      ${k==='p'?`<p>The centre of pressure of a rectangle whose top edge is at the surface sits <b>two thirds</b> of the depth down, which is y/3 above the bottom.</p>`
+               :`<p>Gap between centroid and centre of pressure: h̄ − x̄ = ${fmt((c.hth-c.xb)/1000)} m. It shrinks as the face goes deeper, so the centre of pressure creeps towards the centroid at d/2 = ${fmt(C.d/2000)} m above the bottom.</p>`}</div>`;
+  }
+  el.innerHTML=`<div class="split"><figure>${faceSVG(k,y,okc===7)}<figcaption id="cap_${k}">${capHTML(k,y,okc===7)}</figcaption></figure>
+    <div><div class="work"><ol class="items">${lis}</ol></div>${sum}</div></div>`;
+  updateRoute();
+}
+function capHTML(k,y,done){
+  const base='<span class="g dot"></span>centre of pressure &nbsp; <span class="g ring"></span>centroid &nbsp; thin arrows: pressure ρ g h on the face &nbsp; thick arrow: resultant F. Not to scale.';
+  const split=y>=C.d?'<br>Dashed line: the pressure splits into a uniform rectangle (depth y − d) plus a triangle (depth d). The rectangle’s force acts at d/2, the triangle’s at two thirds of d down.':'<br>Pressure rises from zero at the surface, so it is a triangle and F acts two thirds of the way down the wetted height.';
+  let v='';
+  if(done){const c=calc(1,y);v=`<br>Heights above the bottom edge: centroid ${fmt(c.yc/1000)} m, centre of pressure ${fmt(c.ycpT/1000)} m.`}
+  return base+split+v;
+}
+
+/* ---------- face diagram ---------- */
+function faceSVG(k,y,done){
+  const d=C.d,g=geo(y),s=230/Math.max(y,d),yb=262,xf=290;
+  const Y=h=>yb-h*s,topW=Math.min(y,d),dTop=y-topW,kp=165/y;
+  const pTop=dTop*kp,pBot=y*kp;
+  const cpH=thCP(y),cH=y-g.xb;
+  const id='ah'+k;
+  const halo='stroke="var(--panel)" stroke-width="4" paint-order="stroke"';
+  let o=`<svg viewBox="0 0 450 300" role="img" aria-label="Pressure distribution on the face">
+  <defs><marker id="${id}" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L8 4L0 8z" fill="var(--force)"/></marker>
+  <marker id="${id}b" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L8 4L0 8z" fill="var(--ink-2)"/></marker></defs>
+  <rect x="10" y="${Y(y)}" width="${xf-10}" height="${yb-Y(y)}" fill="var(--water-soft)"/>
+  <line x1="10" x2="${xf}" y1="${Y(y)}" y2="${Y(y)}" stroke="var(--water)" stroke-width="2"/>
+  <text x="14" y="${Y(y)-6}" font-size="14" fill="var(--water)" font-family="var(--f-body)">water surface</text>`;
+  // pressure polygon
+  o+=`<polygon points="${xf},${Y(topW)} ${xf-pTop},${Y(topW)} ${xf-pBot},${Y(0)} ${xf},${Y(0)}" fill="var(--force-soft)" fill-opacity=".75" stroke="var(--force)" stroke-width="1.5"/>`;
+  if(y>=d)o+=`<line x1="${xf-pTop}" x2="${xf-pTop}" y1="${Y(d)}" y2="${Y(0)}" stroke="var(--force)" stroke-width="1.2" stroke-dasharray="4 3"/>`;
+  for(let j=0;j<6;j++){
+    const h=topW*(j+.5)/6,len=(y-h)*kp;
+    o+=`<line x1="${xf-len}" x2="${xf-1}" y1="${Y(h)}" y2="${Y(h)}" stroke="var(--force)" stroke-width="1.2" marker-end="url(#${id})"/>`;
+  }
+  // face and bottom edge
+  o+=`<rect x="${xf}" y="${Y(d)}" width="10" height="${Y(0)-Y(d)}" fill="var(--plate)" stroke="var(--ink-2)" stroke-width="1.5"/>
+  <rect x="${xf}" y="${Y(topW)}" width="10" height="${Y(0)-Y(topW)}" fill="var(--water)" fill-opacity=".85" stroke="var(--ink-2)" stroke-width="1.5"/>`;
+  if(y<d)o+=`<text x="${xf+16}" y="${(Y(d)+Y(y))/2+4}" font-size="14" fill="var(--ink-2)" font-family="var(--f-body)">face above the water</text>`;
+  o+=`<line x1="10" x2="440" y1="${Y(0)}" y2="${Y(0)}" stroke="var(--ink-2)" stroke-width="1" stroke-dasharray="2 3"/>
+  <text x="440" y="${Y(0)+15}" text-anchor="end" font-size="14" fill="var(--ink-2)" font-family="var(--f-body)">bottom edge of the face (reference)</text>
+  <text x="${xf-pBot}" y="${Y(0)+15}" font-size="14" fill="var(--force)" font-family="var(--f-body)">p = ρ g h</text>`;
+  if(y<d)o+=`<line x1="${xf-6}" x2="${xf+16}" y1="${Y(d)}" y2="${Y(d)}" stroke="var(--ink)" stroke-width="1.5"/><text x="${xf+20}" y="${Y(d)-4}" font-size="14" fill="var(--ink)" font-family="var(--f-body)">top of face (d)</text>`;
+  // resultant
+  o+=`<line x1="${xf-80}" x2="${xf-2}" y1="${Y(cpH)}" y2="${Y(cpH)}" stroke="var(--force)" stroke-width="3.5" marker-end="url(#${id})"/>
+  <text x="${xf-84}" y="${Y(cpH)+4}" text-anchor="end" font-size="18" font-weight="600" fill="var(--force)" font-family="var(--f-mono)" ${halo}>F</text>`;
+  // markers
+  o+=`<circle cx="${xf+5}" cy="${Y(cH)}" r="6" fill="var(--panel)" stroke="var(--ink)" stroke-width="2.5"/>
+  <circle cx="${xf+5}" cy="${Y(cpH)}" r="5.5" fill="var(--force)" stroke="var(--panel)" stroke-width="1.5"/>`;
+  // dimensions
+  const dims=[[xf+44,Y(y),Y(cH),'<tspan text-decoration="overline">x</tspan>','var(--ink)'],[xf+84,Y(y),Y(cpH),'<tspan text-decoration="overline">h</tspan>','var(--force)'],[xf+124,Y(0),Y(cpH),'y<tspan font-size="11" dy="3">cp</tspan>','var(--force)']];
+  for(const [x,y1,y2,lab,col] of dims){
+    const top=Math.min(y1,y2),bot=Math.max(y1,y2);
+    o+=`<line x1="${xf+12}" x2="${x}" y1="${y1}" y2="${y1}" stroke="${col}" stroke-width=".8" stroke-dasharray="2 3"/>
+    <line x1="${xf+12}" x2="${x}" y1="${y2}" y2="${y2}" stroke="${col}" stroke-width=".8" stroke-dasharray="2 3"/>
+    <line x1="${x}" x2="${x}" y1="${y2<y1?y1:y1}" y2="${y2}" stroke="${col}" stroke-width="1.6" marker-end="url(#${id}b)"/>
+    <text x="${x}" y="${(top+bot)/2+4}" text-anchor="middle" font-size="16" font-family="var(--f-mono)" fill="${col}" ${halo}>${lab}</text>`;
+  }
+  // mirror: water on the right pushes the face towards the left
+  o=o.replace('</defs>','</defs><g transform="translate(450 0) scale(-1 1)">');
+  o=o.replace(/<text ([^>]*)>/g,(m,at)=>{
+    const x=/\bx="([^"]+)"/.exec(at)[1],yy=/\by="([^"]+)"/.exec(at)[1];
+    let a=at.replace(/\bx="[^"]+"\s*/,'').replace(/\by="[^"]+"\s*/,'');
+    const an=/text-anchor="(\w+)"/.exec(a);
+    if(an){a=a.replace(an[0],'text-anchor="'+(an[1]==='end'?'start':an[1]==='start'?'end':an[1])+'"')}else a+=' text-anchor="end"';
+    return '<text transform="translate('+x+' '+yy+') scale(-1 1)" '+a+'>';
+  });
+  o+='</g></svg>';
+  return o;
+}
+
+/* ---------- checking ---------- */
+function judge(t,v){
+  const abs=t.unit==='m'?0.0005:0;
+  if(Math.abs(v-t.exp)<=Math.max(Math.abs(t.exp)*0.015,abs))return {ok:true,msg:'✓ Correct: '+fmt(v)+' '+t.unit};
+  let msg='';
+  for(const a of t.alts)if(Math.abs(v-a.v)<=Math.max(Math.abs(a.v)*0.015,abs)){msg=a.msg;break}
+  if(!msg){for(const r of SCALES){if(Math.abs(v-t.exp*r)<=Math.abs(t.exp*r)*0.02){msg='Units slip: the answer must be in '+t.unit+'.'+(t.unitNote?' '+t.unitNote:'');break}}}
+  if(!msg)msg='Check the formula and the numbers you used.';
+  return {ok:false,msg:'✗ Incorrect. '+msg};
+}
+function itemOf(k,id){const i=pickRow(k);if(i<0)return null;return itemsFor(k,num(rows[i].m),num(rows[i].y)).find(x=>x.id===id)}
+function doJudge(k,li,force){
+  const w=work[k];if(!w||!w.vals)return;
+  const id=li.dataset.id,t=itemOf(k,id);if(!t)return;
+  const raw=(w.vals[id]||'').trim(),before=w.okc===7;
+  w.fb=w.fb||{};w.bad=w.bad||{};
+  const p=$('fb_'+k+'_'+id);
+  if(!raw){w.ok[id]=false;w.bad[id]=false;w.fb[id]='';}
+  else{
+    const v=evalExpr(raw);
+    if(!isFinite(v)){if(!force)return;w.ok[id]=false;w.bad[id]=true;w.fb[id]='✗ Incorrect. Type numbers with + − × ÷ ( ) only, for example 75*40/2.'}
+    else{const j=judge(t,v);w.ok[id]=j.ok;w.bad[id]=!j.ok;w.fb[id]=j.msg+(j.ok?'':' <button class="lnk" type="button" data-act="show">show answer</button>')}
+  }
+  li.classList.toggle('ok',!!w.ok[id]);li.classList.toggle('bad',!!w.bad[id]);
+  p.className='fbk '+(w.ok[id]?'ok':w.bad[id]?'bad':'');p.innerHTML=w.fb[id];
+  w.okc=Object.values(w.ok).filter(Boolean).length;
+  save();
+  if((w.okc===7)!==before){const ae=document.activeElement&&document.activeElement.id;renderCase(k);refreshResults();if(ae){const e=$(ae);if(e)e.focus()}}
+}
+const timers={};
+for(const k of['p','f']){
+  const el=$(k==='p'?'caseP':'caseF');
+  el.addEventListener('click',e=>{
+    const b=e.target.closest('[data-act]');if(!b)return;const li=b.closest('li');
+    if(b.dataset.act==='hint'){const f=li.querySelector('.fm');f.hidden=!f.hidden}
+    else if(b.dataset.act==='show'){
+      const t=itemOf(k,li.dataset.id);const w=work[k];
+      w.vals[t.id]=String(parseFloat(t.exp.toPrecision(5)));
+      const inp=li.querySelector('input');inp.value=w.vals[t.id];
+      $('lv_'+k+'_'+t.id).innerHTML='= '+fmt(t.exp);
+      doJudge(k,li,true);
+    }
+  });
+  el.addEventListener('input',e=>{
+    const inp=e.target.closest('input.expr');if(!inp)return;
+    const li=inp.closest('li'),id=li.dataset.id;
+    work[k].vals[id]=inp.value;const v=evalExpr(inp.value);
+    $('lv_'+k+'_'+id).innerHTML=isFinite(v)?'= '+fmt(v):'';
+    save();clearTimeout(timers[k+id]);timers[k+id]=setTimeout(()=>doJudge(k,li,false),700);
+  });
+  el.addEventListener('change',e=>{
+    const inp=e.target.closest('input.expr');if(!inp)return;
+    const li=inp.closest('li');clearTimeout(timers[k+li.dataset.id]);doJudge(k,li,true);
+  });
+  el.addEventListener('keydown',e=>{
+    if(e.key==='Enter'&&e.target.matches('input.expr')){e.preventDefault();const li=e.target.closest('li');clearTimeout(timers[k+li.dataset.id]);doJudge(k,li,true)}
+  });
+}
+
+/* ---------- results ---------- */
+function updateRoute(){}
+function refreshResults(){
+  const el=$('results');updateRoute();
+  if(!(caseDone('p')&&caseDone('f'))){
+    const need=[!caseDone('p')&&'the partly covered case',!caseDone('f')&&'the fully covered case'].filter(Boolean).join(' and ');
+    el.innerHTML=`<div class="lock"><p>Finish ${need} above. Then every row of your table is calculated for you and plotted against theory.</p></div>`;
+    return;
+  }
+  const pts=[];
+  rows.forEach((r,i)=>{if(status(r)!=='ok')return;const m=num(r.m),y=num(r.y),c=calc(m,y);pts.push({i,m,y,c,err:errBar(m,y)})});
+  if(!pts.length){el.innerHTML='<div class="lock"><p>No complete rows to plot.</p></div>';return}
+  const part=pts.filter(p=>!p.c.full);
+  const ratio=part.length?part.reduce((s,p)=>s+p.c.hexp/p.y,0)/part.length:NaN;
+  const worst=pts.reduce((a,p)=>Math.abs(p.c.ycpE-p.c.ycpT)>Math.abs(a.c.ycpE-a.c.ycpT)?p:a,pts[0]);
+  const rowsHTML=pts.map(p=>{const c=p.c;return `<tr><td>${p.i+1}</td><td>${fmt(p.y/1000)}</td><td>${fmt(p.m/1000)}</td><td>${c.full?'full':'part'}</td><td>${fmt(c.xb/1000)}</td><td>${fmt(c.F)}</td><td>${fmt(c.L2/1000)}</td><td>${fmt(c.hexp/1000)}</td><td>${fmt(c.hth/1000)}</td><td>${fmt(c.ycpE/1000)}</td><td>${fmt(c.ycpT/1000)}</td></tr>`}).join('');
+  el.innerHTML=`<p class="say">Every ready row of your table is now calculated with the same steps you did by hand. Heights are measured up from the bottom edge of the toroid face.</p>
+  <div class="legend"><span><i style="border-color:var(--water)"></i>theory: centre of pressure</span><span><i style="border-color:var(--ink-2);border-top-style:dashed"></i>theory: centroid</span><span style="color:var(--force)">● partly covered, ■ fully covered: your readings, ± ${C.dm} g and ± ${C.dy} mm</span></div>
+  <figure class="chartfig">${chartSVG(pts)}</figure>
+  <div class="take">
+    <p><b>The 2/3 rule.</b> For a partly covered rectangle, P is two thirds of the depth below the surface, which is y/3 above the bottom edge. So while the face is partly covered, P cannot be higher than d/3 = ${fmt(C.d/3000)} m, reached when y = d. Once the face is fully covered, P keeps rising slowly towards d/2 = ${fmt(C.d/2000)} m.${part.length?` Your highest partly covered reading is ${fmt(Math.max(...part.map(p=>p.c.ycpE))/1000)} m.`:''}</p>
+    <p><b>Centroid and centre of pressure.</b> Dashed centroid line: y/2 while the face fills, then fixed at d/2 = ${fmt(C.d/2000)} m. The centre of pressure is always lower, because pressure grows with depth. Once the face is fully covered the two curves close up, since the pressure becomes more uniform.</p>
+    <p><b>Uncertainty.</b> The largest gap between experiment and theory is in row ${worst.i+1}: ${fmt((worst.c.ycpE-worst.c.ycpT)/1000)} m, with an error bar of ± ${fmt(worst.err/1000)} m from the reading errors alone. Does the theory line fall inside the bars? If not, think about L₁, the zero of the level scale, and whether the pan was included in m.</p>
+  </div>
+  <h3 style="margin:1.4rem 0 .4rem;font:600 1.2rem var(--f-display);letter-spacing:.03em">Calculated table</h3>
+  <div class="tablewrap"><table class="res"><thead><tr><th>Row</th><th>y m</th><th>m kg</th><th>Face</th><th>x̄ m</th><th>F N</th><th>L₂ m</th><th>h̄ exp m</th><th>h̄ th m</th><th>y_cp exp m</th><th>y_cp th m</th></tr></thead><tbody>${rowsHTML}</tbody></table></div>`;
+}
+function chartSVG(pts){
+  const W=640,H=380,L=58,R=22,T=26,B=56;
+  const maxY=Math.max(...pts.map(p=>p.y));
+  const xmax=Math.max(200,Math.ceil((maxY+10)/20)*20);
+  let lo=0,hi=60;
+  for(const p of pts){hi=Math.max(hi,p.c.ycpE+p.err,p.c.ycpT);lo=Math.min(lo,p.c.ycpE-p.err)}
+  hi=Math.ceil((hi+2)/10)*10;lo=Math.floor(lo/10)*10;
+  const X=v=>L+(v/xmax)*(W-L-R),Yv=v=>H-B-((v-lo)/(hi-lo))*(H-B-T);
+  const halo='stroke="var(--panel)" stroke-width="4" paint-order="stroke"';
+  let o=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Height of the centre of pressure above the bottom edge against water level, experiment and theory">`;
+  const ystep=hi-lo>80?20:10;
+  for(let v=lo;v<=hi;v+=ystep)o+=`<line x1="${L}" x2="${W-R}" y1="${Yv(v)}" y2="${Yv(v)}" stroke="var(--grid)"/><text x="${L-8}" y="${Yv(v)+4}" text-anchor="end" font-size="13" font-family="var(--f-mono)" fill="var(--ink-2)">${(v/1000).toFixed(2)}</text>`;
+  for(let v=0;v<=xmax;v+=20)o+=`<line x1="${X(v)}" x2="${X(v)}" y1="${T}" y2="${H-B}" stroke="var(--grid)"/><text x="${X(v)}" y="${H-B+16}" text-anchor="middle" font-size="13" font-family="var(--f-mono)" fill="var(--ink-2)">${(v/1000).toFixed(2)}</text>`;
+  o+=`<line x1="${L}" x2="${W-R}" y1="${Yv(0)}" y2="${Yv(0)}" stroke="var(--ink-2)"/>`;
+  o+=`<line x1="${X(C.d)}" x2="${X(C.d)}" y1="${T}" y2="${H-B}" stroke="var(--ink-2)" stroke-dasharray="5 4"/><text x="${X(C.d)+6}" y="${T+10}" font-size="13" fill="var(--ink-2)" font-family="var(--f-body)">y = d: face just covered</text>`;
+  const th=[],ce=[];
+  for(let v=2;v<=xmax;v+=2){th.push(X(v).toFixed(1)+','+Yv(thCP(v)).toFixed(1));ce.push(X(v).toFixed(1)+','+Yv(v-geo(v).xb).toFixed(1))}
+  o+=`<polyline points="${ce.join(' ')}" fill="none" stroke="var(--ink-2)" stroke-width="2" stroke-dasharray="6 4"/>
+  <polyline points="${th.join(' ')}" fill="none" stroke="var(--water)" stroke-width="3"/>
+  <text x="${X(xmax)-4}" y="${Yv(thCP(xmax))+36}" text-anchor="end" font-size="14" fill="var(--water)" font-family="var(--f-body)" ${halo}>centre of pressure, theory</text>
+  <text x="${X(xmax)-4}" y="${Yv(C.d/2)-8}" text-anchor="end" font-size="14" fill="var(--ink-2)" font-family="var(--f-body)" ${halo}>centroid</text>
+  <text x="${X(C.d*0.55)}" y="${Yv(thCP(C.d*0.55))+22}" font-size="13" fill="var(--water)" font-family="var(--f-body)" ${halo}>partly covered: y/3</text>`;
+  for(const p of pts){
+    const cx=X(p.y),cy=Yv(p.c.ycpE);
+    o+=`<line x1="${cx}" x2="${cx}" y1="${Yv(p.c.ycpE+p.err)}" y2="${Yv(p.c.ycpE-p.err)}" stroke="var(--force)" stroke-width="1.6"/>
+    <line x1="${cx-4}" x2="${cx+4}" y1="${Yv(p.c.ycpE+p.err)}" y2="${Yv(p.c.ycpE+p.err)}" stroke="var(--force)" stroke-width="1.6"/>
+    <line x1="${cx-4}" x2="${cx+4}" y1="${Yv(p.c.ycpE-p.err)}" y2="${Yv(p.c.ycpE-p.err)}" stroke="var(--force)" stroke-width="1.6"/>`;
+    o+=p.c.full?`<rect x="${cx-5}" y="${cy-5}" width="10" height="10" fill="var(--force)" stroke="var(--panel)" stroke-width="1.5"/>`:`<circle cx="${cx}" cy="${cy}" r="5.5" fill="var(--force)" stroke="var(--panel)" stroke-width="1.5"/>`;
+  }
+  o+=`<text x="${(L+W-R)/2}" y="${H-10}" text-anchor="middle" font-size="14" fill="var(--ink)" font-family="var(--f-body)">water level y above the bottom edge (m)</text>
+  <text transform="translate(14 ${(T+H-B)/2}) rotate(-90)" text-anchor="middle" font-size="14" fill="var(--ink)" font-family="var(--f-body)">centre of pressure above the bottom edge (m)</text></svg>`;
+  return o;
+}
+
+function refreshAll(){renderCase('p');renderCase('f');refreshResults()}
+
+/* ---------- boot ---------- */
+load();renderTable();refreshAll();
+window.__t={rows:()=>rows,work:()=>work,calc,itemsFor,evalExpr,C};
+</script>
+
+</body></html>
