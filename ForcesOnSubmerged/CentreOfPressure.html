@@ -179,6 +179,11 @@ table.res th:first-child,table.res td:first-child{text-align:left}
   <h2>All readings against theory</h2>
   <div id="results"></div>
 </section>
+
+<section class="step" id="reset">
+  <p class="say" style="margin-bottom:.6rem">Your readings and answers are saved on this device, so a refresh or closing the page does not lose them. When you finish, clear them so the next group starts fresh.</p>
+  <div id="resetbox"></div>
+</section>
 </div>
 
 <script>
@@ -544,8 +549,25 @@ function chartSVG(pts){
 
 function refreshAll(){renderCase('p');renderCase('f');refreshResults()}
 
+/* ---------- clear data ---------- */
+function renderReset(ask){
+  $('resetbox').innerHTML=ask
+    ?`<div class="banner" role="alert">Delete all readings and answers on this page? This cannot be undone.</div>
+       <div class="btnrow"><button class="btn pri" id="rs_yes" type="button">Yes, clear everything</button><button class="btn ghost" id="rs_no" type="button">Cancel</button></div>`
+    :`<div class="btnrow"><button class="btn" id="rs_ask" type="button">Clear all data and start again</button></div>`;
+  const q=id=>$(id);
+  if(ask){q('rs_yes').onclick=clearAll;q('rs_no').onclick=()=>renderReset(false);q('rs_yes').focus()}
+  else q('rs_ask').onclick=()=>renderReset(true);
+}
+function clearAll(){
+  try{localStorage.removeItem(KEY)}catch(e){}
+  rows=exampleRows();work={p:{},f:{}};example=false;
+  renderTable();refreshAll();renderReset(false);
+  window.scrollTo({top:0});
+}
+
 /* ---------- boot ---------- */
-load();renderTable();refreshAll();
+load();renderTable();refreshAll();renderReset(false);
 window.__t={rows:()=>rows,work:()=>work,calc,itemsFor,evalExpr,C};
 </script>
 
