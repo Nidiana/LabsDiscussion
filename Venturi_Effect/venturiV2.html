@@ -458,6 +458,11 @@ em{font-style:normal;font-weight:700;}
 .bx-eq-note{margin-top:8px;}
 @media (prefers-reduced-motion:reduce){.slide,.q-prog-fill{transition:none !important;}}
 @media (max-width:640px){.topbar{flex-direction:column;align-items:flex-start;gap:10px;}}
+.topbar-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px;}
+.btn-clear{font-family:var(--ff);font-size:0.95rem;font-weight:600;padding:6px 14px;min-height:40px;background:#fff;color:var(--text);border:2px solid var(--border);border-radius:20px;cursor:pointer;}
+.btn-clear:hover{border-color:var(--accent);}
+.btn-clear.confirming{border-color:var(--err);color:var(--err);background:var(--err-bg);}
+@media(max-width:640px){.topbar-right{align-items:flex-start;}}
 </style>
 </head>
 <body>
@@ -468,6 +473,7 @@ em{font-style:normal;font-weight:700;}
       <div class="topbar-title">Venturi Meter Lab</div>
       <div class="topbar-sub">Bernoulli's Principle · Flow Measurement</div>
     </div>
+    <div class="topbar-right">
     <div class="steps-row">
       <div class="step-pip active" id="sp1" onclick="goTo(1)">1</div>
       <div class="step-connector"></div>
@@ -476,6 +482,8 @@ em{font-style:normal;font-weight:700;}
       <div class="step-pip" id="sp3" onclick="goTo(3)">3</div>
       <div class="step-connector"></div>
       <div class="step-pip" id="sp4" onclick="goTo(4)">4</div>
+    </div>
+    <button type="button" class="btn-clear" id="btn-clear" onclick="clearAllData()">Clear all data</button>
     </div>
   </header>
 
@@ -594,7 +602,7 @@ em{font-style:normal;font-weight:700;}
             <div class="ch-note">Pick a trial. Ps drops at the throat while Pdyn rises. Pt should stay roughly constant.</div>
             <div class="chart-sel-row">
               <label>Trial:</label>
-              <select id="trialSel" onchange="drawPressureChart()"></select>
+              <select id="trialSel" onchange="drawPressureChart();saveState()"></select>
             </div>
             <canvas id="pressureChart" height="210"></canvas>
           </div>
@@ -817,15 +825,74 @@ const C_ST='#0072B2', C_DY='#D55E00', C_TO='#111827';
 if(window.Chart){Chart.defaults.font.family="'Atkinson Hyperlegible',system-ui,Arial,sans-serif";Chart.defaults.font.size=15;Chart.defaults.color='#2a2e35';}
 
 let trials=[], trialCount=0, charts={};
+const LS_KEY='venturi_lab_v1';
+let restoring=false;
+const persist={step:1, analysisRun:false};
 let quizAnswers={}, answeredQs=new Set();
 let uAnswers={},   answeredUs=new Set();
 
 /* ═══ BOOT ══════════════════════════════════════════════ */
 window.addEventListener('DOMContentLoaded',()=>{
+  let saved=null; try{ saved=sessionStorage.getItem(LS_KEY); }catch(e){}
+  restoring=true;           // do not overwrite the saved data while the page builds
   addTrial();
   updateProgress();
   updateUProgress();
+  restoring=false;
+  loadState(saved);
 });
+
+/* ═══ SAVE / RESTORE (survives an accidental page refresh) ═══ */
+function saveState(){
+  if(restoring) return;
+  const trs=[];
+  for(let i=1;i<=trialCount;i++){
+    if(!document.getElementById('tc-'+i)) continue;
+    trs.push(['h1','h2','h3','fl'].map(k=>document.getElementById(k+'-'+i).value));
+  }
+  const ua={}, qa={};
+  Object.keys(uAnswers).forEach(k=>{ua[k]=uAnswers[k].a;});
+  Object.keys(quizAnswers).forEach(k=>{qa[k]=quizAnswers[k].a;});
+  const sel=document.getElementById('trialSel');
+  try{ sessionStorage.setItem(LS_KEY,JSON.stringify({trials:trs,ua:ua,qa:qa,step:persist.step,analysisRun:persist.analysisRun,sel:sel?sel.value:0})); }catch(e){}
+}
+function loadState(raw){
+  let st; try{ st=JSON.parse(raw); }catch(e){}
+  if(!st) return;
+  restoring=true;
+  const _sc=Element.prototype.scrollIntoView, _al=window.alert;
+  Element.prototype.scrollIntoView=function(){};
+  window.alert=function(){};
+  try{
+    if(st.trials && st.trials.length){
+      document.getElementById('trials-wrap').innerHTML=''; trialCount=0;
+      st.trials.forEach(v=>{
+        addTrial();
+        ['h1','h2','h3','fl'].forEach((k,j)=>{ document.getElementById(k+'-'+trialCount).value=v[j]; });
+        watchTrial(trialCount);
+      });
+    }
+    Object.keys(st.ua||{}).forEach(n=>{
+      const r=document.querySelector('input[name="u'+n+'"][value="'+st.ua[n]+'"]'); if(r) r.checked=true;
+      checkU(+n,st.ua[n]);
+    });
+    Object.keys(st.qa||{}).forEach(n=>{
+      const r=document.querySelector('input[name="q'+n+'"][value="'+st.qa[n]+'"]'); if(r) r.checked=true;
+      checkQ(+n,st.qa[n]);
+    });
+    persist.analysisRun=false;
+    if(st.analysisRun){
+      runAnalysis();
+      const sel=document.getElementById('trialSel');
+      if(sel && st.sel!=null){ sel.value=st.sel; try{ drawPressureChart(); }catch(e){} }
+    }
+    goTo(st.step||1);
+  }catch(e){ try{console.error(e);}catch(_){} }
+  finally{
+    Element.prototype.scrollIntoView=_sc; window.alert=_al; restoring=false;
+  }
+  saveState();
+}
 
 /* ═══ NAVIGATION ════════════════════════════════════════ */
 function goTo(n){
@@ -844,6 +911,7 @@ function goTo(n){
     if(i<n) p.classList.add('done');
     else if(i===n) p.classList.add('active');
   }
+  persist.step=n; saveState();
 }
 
 /* ═══ TRIALS ════════════════════════════════════════════ */
@@ -869,13 +937,14 @@ function addTrial(){
   document.getElementById('trials-wrap').appendChild(tc);
   watchTrial(trialCount);
 }
-function removeTrial(id){ document.getElementById('tc-'+id)?.remove(); checkBtn(); }
+function removeTrial(id){ document.getElementById('tc-'+id)?.remove(); checkBtn(); saveState(); }
 function watchTrial(id){
   const vals=['h1','h2','h3','fl'].map(k=>{
     const el=document.getElementById(k+'-'+id); return el?parseFloat(el.value):NaN;
   });
   document.getElementById('tc-'+id)?.classList.toggle('complete',vals.every(v=>!isNaN(v)&&v>=0));
   checkBtn();
+  saveState();
 }
 function checkBtn(){
   let any=false;
@@ -907,7 +976,9 @@ function runAnalysis(){
                  Cd,Re:RHO*v2*D2/MU,Qth});
   }
   if(!trials.length){ alert('Complete at least one trial first.'); return; }
-  populateSel(); drawPressureChart(); buildFlowChart();
+  populateSel();
+  try{ drawPressureChart(); buildFlowChart(); }catch(e){}
+  persist.analysisRun=true;
   goTo(2);
 }
 function populateSel(){
@@ -995,6 +1066,7 @@ function checkU(qNum,answer){
   fb.className='q-feedback '+(ok?'fb-ok':'fb-err')+' show';
   updateUProgress();
   fb.scrollIntoView({behavior:'smooth',block:'nearest'});
+  saveState();
 }
 function updateUProgress(){
   const n=answeredUs.size;
@@ -1026,6 +1098,7 @@ function checkQ(qNum,answer){
   fb.className='q-feedback '+(ok?'fb-ok':'fb-err')+' show';
   updateProgress();
   fb.scrollIntoView({behavior:'smooth',block:'nearest'});
+  saveState();
 }
 function updateProgress(){
   const n=answeredQs.size;
@@ -1039,6 +1112,22 @@ function updateProgress(){
 
 
 
+
+/* ═══ CLEAR ALL DATA (two-click confirm, no pop-up dialogs) ═══ */
+let clearTimer=null;
+function clearAllData(){
+  const btn=document.getElementById('btn-clear');
+  if(!btn.classList.contains('confirming')){
+    btn.classList.add('confirming');
+    btn.textContent='Click again to clear everything';
+    clearTimer=setTimeout(function(){btn.classList.remove('confirming');btn.textContent='Clear all data';},5000);
+    return;
+  }
+  clearTimeout(clearTimer);
+  try{ sessionStorage.removeItem(LS_KEY); }catch(e){}
+  document.querySelectorAll('input').forEach(function(i){if(i.type==='radio'||i.type==='checkbox')i.checked=false;else i.value='';});
+  window.location.replace(window.location.href.split('#')[0]);
+}
 </script>
   <div class="copyright">
             <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" /></a><br />
