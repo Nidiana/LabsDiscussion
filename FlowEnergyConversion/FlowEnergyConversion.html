@@ -945,8 +945,11 @@ let s1DistAnswered = false;
 
 // ── LOCAL STORAGE PERSISTENCE ──────────────────────────────────────
 const LS_KEY = 'windtunnel_lab_v1';
+let restoring = false;
+const persist = {step:1, iq2Choice:null, rChoices:{}, analysisRun:false, dynqP1:'', vChecked:{}};
 
 function saveState() {
+  if (restoring) return;
   const state = {};
   // All numeric inputs with IDs
   const inputIds = [
@@ -964,13 +967,11 @@ function saveState() {
   state.s1DistAnswered = s1DistAnswered;
   state.iq2Answered    = iq2Answered;
   state.answeredRs     = [...answeredRs];
+  state.persist        = persist;
   try { sessionStorage.setItem(LS_KEY, JSON.stringify(state)); } catch(e) {}
 }
 
-function loadState() {
-  let state;
-  try { state = JSON.parse(sessionStorage.getItem(LS_KEY)); } catch(e) {}
-  if (!state) return;
+function _restoreCore(state) {
 
   // Restore numeric inputs
   const inputIds = [
@@ -985,20 +986,6 @@ function loadState() {
       if (el) el.value = state[id];
     }
   });
-
-  // Restore Bernoulli question
-  if (state.iq2Answered) {
-    // We can't know which radio was chosen, so just silently mark as answered
-    iq2Answered = true;
-  }
-
-  // Restore results-slide answers
-  if (state.answeredRs && state.answeredRs.length) {
-    state.answeredRs.forEach(n => answeredRs.add(n));
-    if (answeredRs.size === 2) {
-      document.getElementById('completion-banner').classList.add('show');
-    }
-  }
 
   // Restore Step 1 question flow
   if (state.s1SignAnswered) {
@@ -1044,6 +1031,57 @@ function loadState() {
   // Trigger derived UI updates
   checkPitotReady();
   onTapInput();
+}
+
+function loadState() {
+  let state;
+  try { state = JSON.parse(sessionStorage.getItem(LS_KEY)); } catch(e) {}
+  if (!state) return;
+  restoring = true;
+  const _sc = Element.prototype.scrollIntoView, _al = window.alert;
+  Element.prototype.scrollIntoView = function(){};
+  window.alert = function(){};
+  try {
+    try { _restoreCore(state); } catch(e) { try { console.error(e); } catch(_) {} }
+    const pr = state.persist || {};
+    // multiple-choice answers: tick the chosen option and show the feedback again
+    if (pr.iq2Choice) {
+      const r = document.querySelector('input[name="iq1"][value="'+pr.iq2Choice+'"]');
+      if (r) r.checked = true;
+      iq2Answered = false; checkIQ2(pr.iq2Choice);
+    }
+    answeredRs.clear();
+    const rc = pr.rChoices || {};
+    Object.keys(rc).forEach(n => {
+      const r = document.querySelector('input[name="r'+n+'"][value="'+rc[n]+'"]');
+      if (r) r.checked = true;
+      checkR(+n, rc[n]);
+    });
+    // velocity entries and their check feedback
+    persist.vChecked = Object.assign({}, pr.vChecked || {});
+    ['inlet','pitot','d2'].forEach(p => {
+      const el = document.getElementById(p+'-v');
+      if (el && el.value !== '') { onVel(p); if (persist.vChecked[p]) checkVel(p); }
+    });
+    // rebuild the analysis (steps 4 and 5)
+    persist.analysisRun = false;
+    if (pr.analysisRun) {
+      runAnalysis();
+      if (pr.dynqP1) {
+        const i = document.getElementById('dynq-p1-input');
+        if (i) { i.value = pr.dynqP1; checkDynQ(); }
+      }
+    }
+    let step = pr.step || 1;
+    if (step >= 4 && !persist.analysisRun) step = 3;
+    goTo(step);
+  } catch(e) { try { console.error(e); } catch(_) {} }
+  finally {
+    Element.prototype.scrollIntoView = _sc;
+    window.alert = _al;
+    restoring = false;
+  }
+  saveState();
 }
 
 // Attach saveState to all inputs that should be persisted
@@ -1231,6 +1269,7 @@ function checkIQ2(a){
   };
   fb.innerHTML=m[a];fb.className='q-feedback '+(ok?'fb-ok':'fb-err')+' show';
   c.classList.add(ok?'answered-ok':'answered-err');fb.scrollIntoView({behavior:'smooth',block:'nearest'});
+  persist.iq2Choice=a;
   saveState();
 }
 
@@ -1286,9 +1325,10 @@ function runAnalysis(){
   window._lastVt = Vt;
   const trEl=document.getElementById('traverse-results');
   if(trEl) trEl.style.display=trData.length>0?'block':'none';
-  if(trData.length>0) buildTraverseChart(trData,Vt);
+  if(trData.length>0){ try{ buildTraverseChart(trData,Vt); }catch(e){} }
   const el_vt=document.getElementById('s3-vt-display');
   if(el_vt) el_vt.textContent=Vt.toFixed(2)+' m/s';
+  persist.analysisRun=true;
   goTo(4);
 }
 
@@ -1340,6 +1380,7 @@ function checkDynQ(){
   const inp = document.getElementById('dynq-p1-input');
   const icon = document.getElementById('dynq-p1-icon');
   const hint = document.getElementById('dynq-hint');
+  if(inp){ persist.dynqP1 = inp.value; saveState(); }
   if(!inp || inp.value==='' || isNaN(parseFloat(inp.value))){
     inp.classList.remove('dq-ok','dq-err');
     icon.textContent=''; hint.classList.remove('show'); return;
@@ -1397,6 +1438,7 @@ function checkR(n, a){
     banner.scrollIntoView({behavior:'smooth', block:'nearest'});
   }
   fb.scrollIntoView({behavior:'smooth', block:'nearest'});
+  persist.rChoices[n]=a;
   saveState();
 }
 
@@ -1472,6 +1514,7 @@ function onVel(p){
 
 function checkVel(p){
   const inp=document.getElementById(p+'-v'), out=document.getElementById(p+'-fb');
+  persist.vChecked[p]=true; saveState();
   const v=evalExpr(inp.value);
   const set=(cls,txt)=>{out.className='vel-fb '+cls;out.innerHTML=txt;};
   if(v===null){set('err','Enter a number or a calculation first.');return;}
@@ -1492,7 +1535,8 @@ function goTo(n){
   document.getElementById('s'+n).classList.add('active');
   document.getElementById('s'+n).scrollTop=0;
   for(let i=1;i<=5;i++){const p=document.getElementById('sp'+i);p.classList.remove('active','done');if(i<n)p.classList.add('done');else if(i===n)p.classList.add('active');}
-  if(n===5 && window._lastRes) buildEnergyChart(window._lastRes);
+  if(n===5 && window._lastRes){ try{ buildEnergyChart(window._lastRes); }catch(e){} }
+  persist.step=n; saveState();
 }
 
 // ── SAMPLE DATA ────────────────────────────────────────────────────
