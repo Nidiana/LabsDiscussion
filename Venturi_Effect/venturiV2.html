@@ -2,40 +2,29 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Venturi Meter Lab</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg:        #f2f4f0;
-  --surface:   #ffffff;
-  --surface2:  #f7f8f6;
-  --border:    #d4d9cf;
-  --border-lt: #e2e6de;
-  --text:      #1a211a;
-  --text-md:   #4a5c4e;
-  --text-lt:   #7a9080;
-  --accent:    #2e7d32;
-  --accent-h:  #1b5e20;
-  --accent-bg: #e8f5e9;
-  --c-static:  #1a4e8c;
-  --c-dynamic: #bf360c;
-  --c-total:   #263238;
-  --cp1:       #1a4e8c;
-  --cp2:       #b71c1c;
-  --cp3:       #2e7d32;
-  --ok:        #2e7d32;
-  --ok-bg:     #e8f5e9;
-  --err:       #b71c1c;
-  --err-bg:    #fdecea;
-  --ff:        'Inter', system-ui, sans-serif;
-  --serif:     'Source Serif 4', Georgia, serif;
-  --mono:      'JetBrains Mono', 'Courier New', monospace;
-  --r:         8px;
+  --bg:#faf7f2; --surface:#ffffff; --surface2:#f5f1ea;
+  --border:#8c8579; --border-lt:#e4ded3;
+  --text:#2a2e35; --text-md:#3d4450; --text-lt:#555e6b;
+  --accent:#4a5568; --accent-h:#2d3748; --accent-bg:#efe9dd;
+  /* text-safe colour-blind-safe variants (Okabe-Ito based) */
+  --c-static:#00578a; --c-dynamic:#9a4200; --c-total:#2a2e35;
+  --cp1:#9a4200; --cp2:#00578a; --cp3:#8a3563;
+  --ok:#146c3b; --ok-bg:#e6f4ec; --err:#a61b1b; --err-bg:#fdecea;
+  --ff:'Atkinson Hyperlegible',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;
+  --serif:'Atkinson Hyperlegible',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;
+  --mono:'Atkinson Hyperlegible',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;
+  --r:8px;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { font-size: 18px; }
+@media (min-width:600px){ html { font-size: 19px; } }
+@media (min-width:900px){ html { font-size: 20px; } }
 body {
   font-family: var(--serif);
   background: var(--bg);
@@ -49,8 +38,8 @@ body {
 /* TOP BAR */
 .topbar {
   flex-shrink: 0;
-  background: #263238;
-  border-bottom: 4px solid var(--accent);
+  background: #efe9dd;
+  border-bottom: 3px solid #c9bfae;
   padding: 18px 20px 14px;
   display: flex;
   align-items: center;
@@ -61,14 +50,14 @@ body {
   font-family: var(--ff);
   font-size: clamp(1.1rem, 4vw, 1.5rem);
   font-weight: 700;
-  color: #ffffff;
+  color: #2d3748;
   line-height: 1.2;
 }
 .topbar-sub {
   font-family: var(--serif);
   font-size: clamp(0.8rem, 3vw, 0.95rem);
-  color: #90a4ae;
-  font-style: italic;
+  color: #4a5568;
+  font-style: normal;
   margin-top: 2px;
 }
 .steps-row {
@@ -81,11 +70,11 @@ body {
   cursor: pointer;
   width: 32px; height: 32px;
   border-radius: 50%;
-  border: 2px solid #455a64;
-  background: #37474f;
-  color: #78909c;
+  border: 2px solid #8c8579;
+  background: #ffffff;
+  color: #2d3748;
   font-family: var(--ff);
-  font-size: 0.8rem;
+  font-size: 0.95rem;
   font-weight: 700;
   display: flex; align-items: center; justify-content: center;
   transition: all 0.25s;
@@ -93,7 +82,7 @@ body {
 }
 .step-pip.active { border-color: var(--accent); background: var(--accent); color: #fff; }
 .step-pip.done   { border-color: var(--accent-h); background: var(--accent-bg); color: var(--accent); }
-.step-connector  { width: 18px; height: 2px; background: #455a64; flex-shrink: 0; }
+.step-connector  { width: 18px; height: 2px; background: #8c8579; flex-shrink: 0; }
 
 /* SLIDES */
 .slides-viewport { flex: 1; position: relative; overflow: hidden; }
@@ -115,9 +104,9 @@ body {
 /* HEADINGS */
 .slide-h {
   font-family: var(--ff);
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   font-weight: 700;
-  color: #263238;
+  color: #2d3748;
   margin-bottom: 6px;
   line-height: 1.3;
 }
@@ -125,7 +114,7 @@ body {
   font-family: var(--serif);
   font-size: 1rem;
   color: var(--text-md);
-  font-style: italic;
+  font-style: normal;
   margin-bottom: 22px;
   line-height: 1.7;
 }
@@ -140,10 +129,10 @@ body {
 }
 .diagram-card svg { width: 100%; height: auto; display: block; }
 .diagram-note {
-  font-size: 0.8rem;
+  font-size: 0.95rem;
   color: var(--text-lt);
-  font-style: italic;
-  font-weight: 300;
+  font-style: normal;
+  font-weight: 400;
   margin-top: 8px;
   line-height: 1.5;
 }
@@ -162,11 +151,11 @@ body {
 .trial-row-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
 .trial-label {
   font-family: var(--ff);
-  font-size: 0.8rem;
+  font-size: 0.95rem;
   font-weight: 700;
   color: var(--accent);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
 }
 .btn-rm {
   background: transparent;
@@ -176,7 +165,7 @@ body {
   border-radius: 5px;
   cursor: pointer;
   font-family: var(--ff);
-  font-size: 0.82rem;
+  font-size: 0.95rem;
   font-weight: 600;
   min-height: 40px;
   transition: background 0.15s;
@@ -187,9 +176,9 @@ body {
 .fld label {
   display: block;
   font-family: var(--ff);
-  font-size: 0.72rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font-size: 0.95rem;
+  letter-spacing: 0;
+  text-transform: none;
   margin-bottom: 6px;
   font-weight: 700;
 }
@@ -214,7 +203,7 @@ body {
 .fld input:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(46,125,50,0.15);
+  box-shadow: 0 0 0 3px rgba(74,85,104,0.3);
   background: #fff;
 }
 
@@ -291,7 +280,7 @@ body {
 .bernoulli-eq .cd { color: var(--c-dynamic); font-weight: 700; }
 .bernoulli-eq .ct { color: var(--c-total);   font-weight: 700; }
 .bernoulli-eq .cm { color: var(--text-md); }
-.bernoulli-note { font-family: var(--serif); font-size: 0.95rem; color: #1b4020; line-height: 1.7; }
+.bernoulli-note { font-family: var(--serif); font-size: 0.95rem; color: #2d3748; line-height: 1.7; }
 
 /* CHARTS */
 .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
@@ -302,20 +291,20 @@ body {
   border-radius: var(--r);
   padding: 20px 16px;
 }
-.chart-card h3 { font-family: var(--ff); font-size: 1rem; font-weight: 700; color: #263238; margin-bottom: 6px; }
-.chart-card .ch-note { font-family: var(--serif); font-size: 0.9rem; color: var(--text-md); line-height: 1.65; margin-bottom: 14px; }
+.chart-card h3 { font-family: var(--ff); font-size: 1rem; font-weight: 700; color: #2d3748; margin-bottom: 6px; }
+.chart-card .ch-note { font-family: var(--serif); font-size: 0.95rem; color: var(--text-md); line-height: 1.65; margin-bottom: 14px; }
 .chart-sel-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
 .chart-sel-row label {
   font-family: var(--ff);
-  font-size: 0.75rem;
+  font-size: 0.95rem;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  text-transform: none;
+  letter-spacing: 0;
   color: var(--text-md);
 }
 .chart-sel-row select {
   font-family: var(--ff);
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   padding: 7px 10px;
   border: 1px solid var(--border);
   border-radius: 5px;
@@ -326,7 +315,7 @@ body {
   appearance: none;
 }
 .clr-legend { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 10px; }
-.clr-item { display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--text-md); }
+.clr-item { display: flex; align-items: center; gap: 6px; font-size: 0.95rem; color: var(--text-md); }
 .clr-swatch { width: 20px; height: 4px; border-radius: 2px; flex-shrink: 0; }
 
 /* CFD UNITS */
@@ -338,17 +327,17 @@ body {
   margin-bottom: 24px;
 }
 .cfd-unit-header { padding: 16px 20px 12px; border-bottom: 1px solid var(--border-lt); }
-.cfd-unit-header h3 { font-family: var(--ff); font-size: 1rem; font-weight: 700; color: #263238; margin-bottom: 4px; }
-.cfd-unit-header p { font-family: var(--serif); font-size: 0.9rem; color: var(--text-md); font-style: italic; line-height: 1.65; }
+.cfd-unit-header h3 { font-family: var(--ff); font-size: 1rem; font-weight: 700; color: #2d3748; margin-bottom: 4px; }
+.cfd-unit-header p { font-family: var(--serif); font-size: 0.95rem; color: var(--text-md); font-style: normal; line-height: 1.65; }
 .cfd-img-area { position: relative; background: #0C1824; overflow: hidden; }
 .cfd-img-area img { width: 100%; display: block; position: relative; z-index: 1; }
 .cfd-observe {
   padding: 14px 20px;
   background: var(--accent-bg);
-  border-top: 1px solid #c8e6c9;
+  border-top: 1px solid #e4ded3;
   font-family: var(--serif);
   font-size: 0.95rem;
-  color: #1b4020;
+  color: #2d3748;
   line-height: 1.7;
 }
 .cfd-observe strong { font-family: var(--ff); }
@@ -358,23 +347,23 @@ body {
 .q-badge {
   display: inline-block;
   font-family: var(--ff);
-  font-size: 0.65rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font-size: 0.95rem;
+  letter-spacing: 0;
+  text-transform: none;
   padding: 3px 9px;
   border-radius: 20px;
   margin-bottom: 10px;
   font-weight: 700;
 }
 .q-obs { background: #e3f2fd; color: #0d47a1; }
-.q-exp { background: var(--accent-bg); color: #1b5e20; }
-.q-prd { background: #fff8e1; color: #e65100; }
-.q-stem { font-family: var(--ff); font-size: 1rem; font-weight: 700; color: #263238; margin-bottom: 8px; line-height: 1.45; }
+.q-exp { background: var(--accent-bg); color: #2d3748; }
+.q-prd { background: #fff3d6; color: #7a3300; }
+.q-stem { font-family: var(--ff); font-size: 1rem; font-weight: 700; color: #2d3748; margin-bottom: 8px; line-height: 1.45; }
 .q-context {
   font-family: var(--serif);
   font-size: 0.95rem;
   color: var(--text-md);
-  font-style: italic;
+  font-style: normal;
   line-height: 1.7;
   margin-bottom: 16px;
   padding-left: 14px;
@@ -406,12 +395,12 @@ body {
 /* FEEDBACK */
 .q-feedback { display: none; margin-top: 14px; padding: 14px 16px; border-radius: 6px; font-family: var(--serif); font-size: 0.95rem; line-height: 1.7; }
 .q-feedback.show { display: block; }
-.fb-ok  { background: var(--ok-bg);  border-left: 5px solid var(--ok);  color: #1b4020; }
+.fb-ok  { background: var(--ok-bg);  border-left: 5px solid var(--ok);  color: #2d3748; }
 .fb-err { background: var(--err-bg); border-left: 5px solid var(--err); color: #5c0a0a; }
 
 /* QUIZ META */
 .quiz-meta { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 22px; flex-wrap: wrap; }
-.q-prog-label { font-family: var(--ff); font-size: 0.78rem; color: var(--text-lt); }
+.q-prog-label { font-family: var(--ff); font-size: 0.95rem; color: var(--text-lt); }
 .q-prog-track { flex: 1; min-width: 100px; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
 .q-prog-fill  { height: 100%; background: var(--ok); border-radius: 3px; transition: width 0.35s ease; }
 
@@ -420,7 +409,7 @@ body {
 /* UNDERSTANDING QUESTION UNITS */
 .u-unit { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; margin-bottom: 16px; }
 .u-unit-body { padding: 18px 20px; }
-.u-stem { font-family: var(--ff); font-size: 1rem; font-weight: 700; color: #263238; margin-bottom: 6px; line-height: 1.45; }
+.u-stem { font-family: var(--ff); font-size: 1rem; font-weight: 700; color: #2d3748; margin-bottom: 6px; line-height: 1.45; }
 .u-desc { font-family: var(--serif); font-size: 0.95rem; color: var(--text-md); line-height: 1.7; margin-bottom: 14px; }
 
 /* ─── COMPLETION BANNER ───────────────────────────────── */
@@ -428,7 +417,7 @@ body {
   display: none;
   margin-top: 28px;
   padding: 28px 24px;
-  background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);
+  background: #efe9dd;
   border: 2px solid var(--accent);
   border-radius: var(--r);
   text-align: center;
@@ -449,11 +438,26 @@ body {
 .completion-msg {
   font-family: var(--serif);
   font-size: 1rem;
-  color: #1b4020;
+  color: #2d3748;
   line-height: 1.75;
   max-width: 540px;
   margin: 0 auto;
 }
+
+/* ---- Accessibility overrides ---- */
+.step-pip.active{border-color:#4a5568;background:#4a5568;color:#ffffff;}
+.step-pip.done{border-color:#8c8579;background:#ddd5c6;color:#2d3748;}
+:focus-visible{outline:3px solid #2d3748;outline-offset:2px;box-shadow:0 0 0 5px #fff;}
+input,button,select,.mc-opt{font-family:var(--ff);}
+body,input,table{font-variant-numeric:tabular-nums;}
+em{font-style:normal;font-weight:700;}
+.mc-opt,.u-desc,.slide-lead,.cfd-observe,.cfd-unit-header p{max-width:70ch;}
+.mc-opt{border-width:2px;}
+.cfd-observe ul{margin:6px 0 0 1.2em;}
+.cfd-observe li{margin-bottom:6px;}
+.bx-eq-note{margin-top:8px;}
+@media (prefers-reduced-motion:reduce){.slide,.q-prog-fill{transition:none !important;}}
+@media (max-width:640px){.topbar{flex-direction:column;align-items:flex-start;gap:10px;}}
 </style>
 </head>
 <body>
@@ -484,47 +488,51 @@ body {
         <div class="slide-lead">This can be completed individually. Enter piezometer heights and flow rate for each trial.</div>
 
         <div class="diagram-card">
-          <svg viewBox="0 0 660 155" xmlns="http://www.w3.org/2000/svg">
-            <rect width="660" height="155" fill="#FFFFFF"/>
-            <line x1="15" y1="77" x2="645" y2="77" stroke="#E5E0D8" stroke-width="1" stroke-dasharray="5 4"/>
-            <path d="M15,30 L160,30 Q235,30 272,63 L355,63 Q404,63 476,30 L645,30" stroke="#1E2A35" stroke-width="2.2" fill="none" stroke-linejoin="round"/>
-            <path d="M15,124 L160,124 Q235,124 272,91 L355,91 Q404,124 476,124 L645,124" stroke="#1E2A35" stroke-width="2.2" fill="none" stroke-linejoin="round"/>
-            <rect x="270" y="62" width="86" height="29" fill="rgba(201,91,59,0.08)" rx="1"/>
+          <svg viewBox="0 -14 660 176" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Venturi schematic: tap P1 at the inlet, P2 at the throat, P3 at the outlet">
+            <rect x="0" y="-14" width="660" height="176" fill="#FFFFFF"/>
+            <line x1="15" y1="77" x2="645" y2="77" stroke="#d5dbe3" stroke-width="1" stroke-dasharray="5 4"/>
+            <path d="M15,30 L160,30 Q235,30 272,63 L355,63 Q404,63 476,30 L645,30" stroke="#4a5568" stroke-width="2.4" fill="none" stroke-linejoin="round"/>
+            <path d="M15,124 L160,124 Q235,124 272,91 L355,91 Q404,124 476,124 L645,124" stroke="#4a5568" stroke-width="2.4" fill="none" stroke-linejoin="round"/>
+            <rect x="270" y="62" width="86" height="29" fill="rgba(0,114,178,0.12)" rx="1"/>
             <defs>
               <marker id="fl" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
-                <polygon points="0,0 7,3.5 0,7" fill="#2D6A9F"/>
+                <polygon points="0,0 7,3.5 0,7" fill="#4a5568"/>
               </marker>
             </defs>
-            <line x1="22" y1="77" x2="58" y2="77" stroke="#2D6A9F" stroke-width="1.8" marker-end="url(#fl)"/>
-            <text x="20" y="70" fill="#2D6A9F" font-size="9" font-weight="700" font-family="monospace">Q</text>
-            <line x1="95" y1="30" x2="95" y2="8" stroke="#1A5276" stroke-width="1.5" stroke-dasharray="3 2"/>
-            <circle cx="95" cy="30" r="4" fill="#1A5276"/>
-            <text x="83" y="6" fill="#1A5276" font-size="10" font-weight="700" font-family="monospace">P₁</text>
-            <line x1="95" y1="124" x2="95" y2="147" stroke="#1A5276" stroke-width="1.5" stroke-dasharray="3 2"/>
-            <circle cx="95" cy="124" r="4" fill="#1A5276"/>
-            <text x="70" y="154" fill="#1A5276" font-size="8" font-family="monospace">h₁ Inlet</text>
-            <line x1="313" y1="63" x2="313" y2="8" stroke="#922B21" stroke-width="1.5" stroke-dasharray="3 2"/>
-            <circle cx="313" cy="63" r="4" fill="#922B21"/>
-            <text x="301" y="6" fill="#922B21" font-size="10" font-weight="700" font-family="monospace">P₂</text>
-            <line x1="313" y1="91" x2="313" y2="147" stroke="#922B21" stroke-width="1.5" stroke-dasharray="3 2"/>
-            <circle cx="313" cy="91" r="4" fill="#922B21"/>
-            <text x="281" y="154" fill="#922B21" font-size="8" font-family="monospace">h₂ Throat</text>
-            <line x1="540" y1="30" x2="540" y2="8" stroke="#196F3D" stroke-width="1.5" stroke-dasharray="3 2"/>
-            <circle cx="540" cy="30" r="4" fill="#196F3D"/>
-            <text x="528" y="6" fill="#196F3D" font-size="10" font-weight="700" font-family="monospace">P₃</text>
-            <line x1="540" y1="124" x2="540" y2="147" stroke="#196F3D" stroke-width="1.5" stroke-dasharray="3 2"/>
-            <circle cx="540" cy="124" r="4" fill="#196F3D"/>
-            <text x="508" y="154" fill="#196F3D" font-size="8" font-family="monospace">h₃ Outlet</text>
-            <text x="17" y="80" fill="#9A9590" font-size="8" font-family="monospace">Ø 20 mm</text>
-            <text x="285" y="80" fill="#922B21" font-size="8" font-family="monospace">Ø 10</text>
-            <text x="578" y="80" fill="#9A9590" font-size="8" font-family="monospace">Ø 20 mm</text>
-            <text x="172" y="144" fill="#B8B0A6" font-size="8" font-family="monospace">converging</text>
-            <text x="372" y="144" fill="#B8B0A6" font-size="8" font-family="monospace">diverging (longer — see Step 4)</text>
+            <line x1="22" y1="77" x2="58" y2="77" stroke="#4a5568" stroke-width="1.8" marker-end="url(#fl)"/>
+            <text x="22" y="66" fill="#2d3748" font-size="15" font-weight="700" font-family="Atkinson Hyperlegible,Arial,sans-serif">Q</text>
+
+            <line x1="95" y1="30" x2="95" y2="22" stroke="#9a4200" stroke-width="1.6" stroke-dasharray="3 2"/>
+            <circle cx="95" cy="30" r="4.5" fill="#9a4200"/>
+            <text x="83" y="16" fill="#9a4200" font-size="15" font-weight="700" font-family="Atkinson Hyperlegible,Arial,sans-serif">P₁</text>
+            <line x1="95" y1="124" x2="95" y2="140" stroke="#9a4200" stroke-width="1.6" stroke-dasharray="3 2"/>
+            <circle cx="95" cy="124" r="4.5" fill="#9a4200"/>
+            <text x="70" y="157" fill="#9a4200" font-size="14" font-weight="700" font-family="Atkinson Hyperlegible,Arial,sans-serif">h₁ Inlet</text>
+
+            <line x1="313" y1="63" x2="313" y2="22" stroke="#00578a" stroke-width="1.6" stroke-dasharray="3 2"/>
+            <circle cx="313" cy="63" r="4.5" fill="#00578a"/>
+            <text x="301" y="16" fill="#00578a" font-size="15" font-weight="700" font-family="Atkinson Hyperlegible,Arial,sans-serif">P₂</text>
+            <line x1="313" y1="91" x2="313" y2="140" stroke="#00578a" stroke-width="1.6" stroke-dasharray="3 2"/>
+            <circle cx="313" cy="91" r="4.5" fill="#00578a"/>
+            <text x="278" y="157" fill="#00578a" font-size="14" font-weight="700" font-family="Atkinson Hyperlegible,Arial,sans-serif">h₂ Throat</text>
+
+            <line x1="540" y1="30" x2="540" y2="22" stroke="#8a3563" stroke-width="1.6" stroke-dasharray="3 2"/>
+            <circle cx="540" cy="30" r="4.5" fill="#8a3563"/>
+            <text x="528" y="16" fill="#8a3563" font-size="15" font-weight="700" font-family="Atkinson Hyperlegible,Arial,sans-serif">P₃</text>
+            <line x1="540" y1="124" x2="540" y2="140" stroke="#8a3563" stroke-width="1.6" stroke-dasharray="3 2"/>
+            <circle cx="540" cy="124" r="4.5" fill="#8a3563"/>
+            <text x="505" y="157" fill="#8a3563" font-size="14" font-weight="700" font-family="Atkinson Hyperlegible,Arial,sans-serif">h₃ Outlet</text>
+
+            <text x="17" y="106" fill="#4a5568" font-size="14" font-family="Atkinson Hyperlegible,Arial,sans-serif">Ø 20 mm</text>
+            <text x="276" y="83" fill="#003f66" font-size="14" font-weight="700" font-family="Atkinson Hyperlegible,Arial,sans-serif">Ø 10 mm</text>
+            <text x="578" y="106" fill="#4a5568" font-size="14" font-family="Atkinson Hyperlegible,Arial,sans-serif">Ø 20 mm</text>
+            <text x="172" y="22" fill="#4a5568" font-size="14" font-family="Atkinson Hyperlegible,Arial,sans-serif">converging</text>
+            <text x="372" y="22" fill="#4a5568" font-size="14" font-family="Atkinson Hyperlegible,Arial,sans-serif">diverging</text>
           </svg>
-          <div class="diagram-note">Schematic representation of the venturi and tapping points.</div>
+          <div class="diagram-note">Schematic of the venturi and tapping points. The diverging section is longer than the converging one (see Step 4).</div>
         </div>
 
-        <div style="margin-bottom:14px; padding:12px 16px; background:var(--accent-bg); border-left:4px solid var(--accent); border-radius:0 6px 6px 0; font-family:var(--serif); font-size:0.95rem; color:#1b4020;">
+        <div style="margin-bottom:14px; padding:12px 16px; background:var(--accent-bg); border-left:4px solid var(--accent); border-radius:0 6px 6px 0; font-family:var(--serif); font-size:0.95rem; color:#2d3748;">
           Note: Pressure can be measured in Pascal, mmH₂O, atm, bar, etc. In this experiment we are using <strong>mmH₂O</strong>.
         </div>
 
@@ -542,38 +550,36 @@ body {
     <div class="slide" id="s2">
       <div class="slide-body">
         <div class="slide-h">Your results</div>
-        <div class="slide-lead">Understanding the Bernoulli Principle</div>
-        <p>Read the following theory and understand plot belows</p>
+        <div class="slide-lead">Read the two boxes, then look at the charts.</div>
         <div class="bernoulli-box">
-          <p style="font-family:var(--serif);font-size:0.95rem;color:#1b4020;margin-bottom:10px;">
-            The Bernoulli equation for an ideal (inviscid, incompressible, steady) fluid is a conservation of energy expression:
+          <p style="font-family:var(--serif);font-size:1rem;margin-bottom:10px;">
+            <strong>Bernoulli&#8217;s equation</strong> for ideal flow (steady, no friction, constant density):
           </p>
           <div class="bernoulli-eq">
-            <span class="cs">P</span><span class="cm"> + </span><span class="cd">½ρv²</span><span class="cm"> + ρgz </span><span class="ct">= constant</span>
+            <span class="cs">Ps</span><span class="cm"> + </span><span class="cd">Pdyn</span><span class="cm"> = </span><span class="ct">Pt</span>
+            <span class="cm">&nbsp; with Pdyn = &frac12;&rho;v&sup2;</span>
           </div>
           <div class="bernoulli-note">
-            <span style="color:var(--c-static);font-weight:700;">Static pressure</span> +
-            <span style="color:var(--c-dynamic);font-weight:700;">Dynamic pressure</span> +
-            Hydrostatic = Total &nbsp;·&nbsp;
-            Valid along a streamline in <em>steady, inviscid, incompressible</em> flow.
+            <span style="color:var(--c-static);font-weight:700;">Ps</span> = static,
+            <span style="color:var(--c-dynamic);font-weight:700;">Pdyn</span> = dynamic,
+            <span style="font-weight:700;">Pt</span> = total pressure.
+            Pt stays constant along a streamline. The venturi is horizontal, so the height term &rho;gz does not change and is left out.
           </div>
         </div>
 
         <div class="bernoulli-box" style="margin-bottom:20px;">
-          <p style="font-family:var(--serif);font-size:0.95rem;color:#1b4020;margin-bottom:10px;">
-            Applying Bernoulli at points 1 and 2 of the venturi together with the continuity equation
-            (<span style="font-family:var(--mono);font-size:0.9rem;">Q = A₁v₁ = A₂v₂</span>),
-            the expression for an ideal flow rate can be obtained as follows:
+          <p style="font-family:var(--serif);font-size:1rem;margin-bottom:10px;">
+            Bernoulli between points 1 and 2, plus continuity
+            (<span style="font-family:var(--mono);">Q = A₁v₁ = A₂v₂</span>), gives the ideal flow rate:
           </p>
-          <div class="bernoulli-eq" style="font-size:1rem;line-height:1.8;">
-            <span class="ct">Q<sub>ideal</sub></span><span class="cm"> = </span><span class="cs">A₂</span><span class="cm"> &times; </span><span class="cd">√[ 2∆P / ρ(1 − (A₂/A₁)²) ]</span>
+          <div class="bernoulli-eq" style="font-size:1.05rem;line-height:1.8;">
+            <span class="ct">Q<sub>ideal</sub></span><span class="cm"> = </span><span class="cs">A₂</span><span class="cm"> &times; </span><span class="cd">&radic;[ 2&Delta;P / &rho;(1 &minus; (A₂/A₁)&sup2;) ]</span>
           </div>
           <div class="bernoulli-note" style="margin-top:10px;">
-            where <span style="font-family:var(--mono);font-size:0.88rem;">∆P = P₁ − P₂ = ρg(h₁ − h₂)</span> is the pressure drop between inlet and throat (Pa),
-            <span style="font-family:var(--mono);font-size:0.88rem;">A₂ = 78.5 mm²</span> is the throat area, and
-            <span style="font-family:var(--mono);font-size:0.88rem;">A₁/A₂ = 4</span>.
-            The coefficient of discharge <span style="font-family:var(--mono);font-size:0.88rem;">C<sub>d</sub> = Q<sub>actual</sub> / Q<sub>ideal</sub></span>
-            captures all real viscous losses not present in this ideal expression.
+            <span style="font-family:var(--mono);">&Delta;P = P₁ &minus; P₂ = &rho;g(h₁ &minus; h₂)</span> is the pressure drop from inlet to throat.
+            Throat area <span style="font-family:var(--mono);">A₂ = 78.5 mm²</span>, and <span style="font-family:var(--mono);">A₁/A₂ = 4</span>.
+            <br>The coefficient of discharge is <span style="font-family:var(--mono);">C<sub>d</sub> = Q<sub>actual</sub> / Q<sub>ideal</sub></span>.
+            It shows how much real friction reduces the flow.
           </div>
         </div>
 
@@ -581,11 +587,11 @@ body {
           <div class="chart-card">
             <h3>Pressure at each position</h3>
             <div class="clr-legend">
-              <span class="clr-item"><span class="clr-swatch" style="background:var(--c-static)"></span>Static</span>
-              <span class="clr-item"><span class="clr-swatch" style="background:var(--c-dynamic)"></span>Dynamic</span>
-              <span class="clr-item"><span class="clr-swatch" style="border-top:2px dashed var(--c-total);background:transparent;"></span>Total</span>
+              <span class="clr-item"><span class="clr-swatch" style="background:var(--c-static)"></span>Ps (static)</span>
+              <span class="clr-item"><span class="clr-swatch" style="background:var(--c-dynamic)"></span>Pdyn (dynamic)</span>
+              <span class="clr-item"><span class="clr-swatch" style="border-top:2px dashed var(--c-total);background:transparent;"></span>Pt (total)</span>
             </div>
-            <div class="ch-note">Select the test and observe static, dynamic and total pressure behaviour along the venturi.</div>
+            <div class="ch-note">Pick a trial. Ps drops at the throat while Pdyn rises. Pt should stay roughly constant.</div>
             <div class="chart-sel-row">
               <label>Trial:</label>
               <select id="trialSel" onchange="drawPressureChart()"></select>
@@ -594,7 +600,7 @@ body {
           </div>
           <div class="chart-card">
             <h3>Actual vs theoretical flow rate</h3>
-            <div class="ch-note">Light bar = Bernoulli ideal (no losses). Dark bar = your measurement. The gap is the Cd penalty — energy consumed by friction and the boundary layer.</div>
+            <div class="ch-note">Light bar: ideal flow (no losses). Dark bar: your measured flow. The gap is the loss, shown as Cd.</div>
             <canvas id="flowChart" height="210"></canvas>
           </div>
         </div>
@@ -680,7 +686,7 @@ body {
             <div class="u-stem">Q5 — Coefficient of Discharge</div>
             <div class="u-desc">The coefficient of discharge C<sub>d</sub> in a venturi meter is typically less than 1.0 because:</div>
             <label class="mc-opt"><input type="radio" name="u5" value="A" onchange="checkU(5,'A')"> A &nbsp; The piezometer readings are systematically too high</label>
-            <label class="mc-opt"><input type="radio" name="u5" value="B" onchange="checkU(5,'B')"> B &nbsp; Real flow experiences friction, boundary layers, and viscous effects not captured by the ideal equation</label>
+            <label class="mc-opt"><input type="radio" name="u5" value="B" onchange="checkU(5,'B')"> B &nbsp; Real flow has friction at the wall, which the ideal equation ignores</label>
             <label class="mc-opt"><input type="radio" name="u5" value="C" onchange="checkU(5,'C')"> C &nbsp; The rotameter overestimates the actual flow rate</label>
             <label class="mc-opt"><input type="radio" name="u5" value="D" onchange="checkU(5,'D')"> D &nbsp; Bernoulli's equation overestimates pressure differences</label>
             <div id="uFb5" class="q-feedback"></div>
@@ -698,92 +704,96 @@ body {
     <div class="slide" id="s4">
       <div class="slide-body">
         <div class="slide-h">Deep Understanding</div>
-        <div class="slide-lead">Three CFD simulations at 7 L/min, each paired with a question. These show what is happening <em>everywhere</em> in the flow field .</div>
+        <div class="slide-lead">Three CFD simulations at 7 L/min. They show the whole flow field.</div>
 
         <div class="quiz-meta">
-          <span class="q-prog-label" id="qprog-lbl">0 of 3 answered</span>
+          <span class="q-prog-label" id="qprog-lbl">0 of 2 answered</span>
           <div class="q-prog-track"><div class="q-prog-fill" id="qprog-fill" style="width:0%"></div></div>
         </div>
 
-        <!-- CFD 1: STATIC PRESSURE — correct: C -->
+        <!-- CFD 1: STATIC PRESSURE (observe only) -->
         <div class="cfd-unit">
           <div class="cfd-unit-header">
-            <h3>Static pressure field</h3>
-            <p>Blue = lowest (most negative) static pressure; red = highest. The colour gradient shows the full continuous pressure field that your three tapping points sample at just three locations.</p>
+            <h3>Static pressure field (Ps)</h3>
+            <p>Blue = lowest Ps. Red = highest Ps.</p>
           </div>
           <div class="cfd-img-area">
-            <img src="https://github.com/Nidiana/LabsDiscussion/raw/main/Venturi_Effect/StaticField7LPM.png" alt="CFD static pressure contour 7 LPM" loading="lazy">
+            <img src="https://github.com/Nidiana/LabsDiscussion/raw/main/Venturi_Effect/StaticField7LPM.png" alt="CFD static pressure contour at 7 L/min" loading="lazy">
           </div>
           <div class="cfd-observe">
-            <strong>Observe:</strong> P₁ (inlet) sits in a deep red region — high static pressure in the wide, slow-moving section. P₂ (throat) is where the colour shifts to blue, the lowest static pressure in the whole field. P₃ (outlet) shows a colour between blue and red spectrum — incomplete pressure recovery due to friction in the diverging section. The pressure varies <em>continuously</em> between the taps; your piezometers capture only three samples of this curve. Also note that near the converging and diverging transitions the contours are not perfectly parallel — this is why taps must be placed in the straight, fully developed sections.
-          </div>
-          <div class="cfd-question">
-            <span class="q-badge q-exp">Explain</span>
-            <div class="q-stem">Q1 — Why can we apply Bernoulli between these three positions, even though  Bernoulli is violated near the walls?</div>
-            <div class="q-context">Consider where P₁, P₂ and P₃ are located and what the static pressure contours tell you about those specific regions.</div>
-            <label class="mc-opt"><input type="radio" name="q1" value="A" onchange="checkQ(1,'A')"> A &nbsp; Because Bernoulli is valid everywhere in liquid flows at these velocities</label>
-            <label class="mc-opt"><input type="radio" name="q1" value="B" onchange="checkQ(1,'B')"> B &nbsp; Because pressure losses only occur at the throat, not at the tap positions</label>
-            <label class="mc-opt"><input type="radio" name="q1" value="C" onchange="checkQ(1,'C')"> C &nbsp; Because the taps are in straight sections where the pressure field is uniform across the cross-section — viscous effects are confined to a thin wall layer and the wall pressure equals the cross-sectional mean</label>
-            <label class="mc-opt"><input type="radio" name="q1" value="D" onchange="checkQ(1,'D')"> D &nbsp; Because the piezometers measure total pressure, which is conserved even with viscosity</label>
-            <div id="fb1" class="q-feedback"></div>
+            <strong>Observe:</strong>
+            <ul>
+              <li><strong>Inlet:</strong> red. Ps is highest and the water moves slowly.</li>
+              <li><strong>Throat:</strong> blue. Ps is lowest and the water moves fastest.</li>
+              <li><strong>Outlet:</strong> Ps rises again, but not back to the inlet value. Friction takes some of it.</li>
+            </ul>
           </div>
         </div>
 
         <!-- CFD 2: VELOCITY — correct: B -->
         <div class="cfd-unit">
           <div class="cfd-unit-header">
-            <h3>Velocity magnitude field</h3>
-            <p>Blue = lowest velocity; red = highest. Velocity is <em>not uniform</em> across the cross-section — it is highest on the centreline and falls to zero at the wall. This non-uniformity is the physical origin of C<sub>d</sub> &lt; 1.</p>
+            <h3>Velocity field</h3>
+            <p>Blue = slowest. Red = fastest.</p>
           </div>
           <div class="cfd-img-area">
-            <img src="https://github.com/Nidiana/LabsDiscussion/raw/main/Venturi_Effect/VelField7LPM.png" alt="CFD velocity magnitude contour 7 LPM" loading="lazy">
+            <img src="https://github.com/Nidiana/LabsDiscussion/raw/main/Venturi_Effect/VelField7LPM.png" alt="CFD velocity contour at 7 L/min" loading="lazy">
           </div>
           <div class="cfd-observe">
-            <strong>Observe:</strong> The blue region clinging to the wall is the <em>boundary layer</em> — fluid slowed almost to zero by the no-slip condition. At the throat, where the geometry is narrowest, this slow wall layer means the effective flow area is slightly smaller than the geometric 78.5 mm². Bernoulli-based theory assumes plug flow (uniform velocity across the section), so it predicts a higher Q than is actually achieved — which is exactly why C<sub>d</sub> &lt; 1. Also observe the diverging section: the boundary layer thickens as the flow decelerates against rising pressure. If the diverging angle were too steep, this layer would separate entirely from the wall, destroying pressure recovery.
+            <strong>Observe:</strong>
+            <ul>
+              <li>The fastest water (red) is in the middle of the throat.</li>
+              <li>The water next to the wall is much slower (blue). Friction at the wall holds it back. Engineers call this region the <strong>boundary layer</strong>.</li>
+              <li>This slower region is thicker in the diverging section.</li>
+              <li>The equation Q = A × v assumes all the water at a cross-section moves at the same speed. Here it does not.</li>
+            </ul>
           </div>
           <div class="cfd-question">
-            <span class="q-badge q-exp">Explain</span>
-            <div class="q-stem">Q2 — The actual flow rate in your experiment was less than the theoretical Bernoulli prediction. What does this velocity field tell you is the physical reason?</div>
-            <div class="q-context">Look at the colour distribution across the throat cross-section, not just along the centreline.</div>
-            <label class="mc-opt"><input type="radio" name="q2" value="A" onchange="checkQ(2,'A')"> A &nbsp; The fluid slows down inside the throat due to increased pressure</label>
-            <label class="mc-opt"><input type="radio" name="q2" value="B" onchange="checkQ(2,'B')"> B &nbsp; The no-slip condition at the wall creates a boundary layer of slow fluid, reducing the effective flow area below 79 mm² — so real Q is always less than Q = A₂ × v̄ assumes</label>
-            <label class="mc-opt"><input type="radio" name="q2" value="C" onchange="checkQ(2,'C')"> C &nbsp; The rotameter under-reads at high velocities</label>
-            <label class="mc-opt"><input type="radio" name="q2" value="D" onchange="checkQ(2,'D')"> D &nbsp; Bernoulli over-predicts the pressure difference between inlet and throat</label>
-            <div id="fb2" class="q-feedback"></div>
+            <span class="q-badge q-obs">Observe</span>
+            <div class="q-stem">Q1 — Look at the velocity field in the throat. How does the speed of the water change from the middle to the wall?</div>
+            <label class="mc-opt"><input type="radio" name="q1" value="A" onchange="checkQ(1,'A')"> A &nbsp; It is the same everywhere across the throat</label>
+            <label class="mc-opt"><input type="radio" name="q1" value="B" onchange="checkQ(1,'B')"> B &nbsp; It is fastest in the middle and slows down towards the wall</label>
+            <label class="mc-opt"><input type="radio" name="q1" value="C" onchange="checkQ(1,'C')"> C &nbsp; It is slowest in the middle and speeds up towards the wall</label>
+            <label class="mc-opt"><input type="radio" name="q1" value="D" onchange="checkQ(1,'D')"> D &nbsp; It is fastest at the wall and the same in the middle</label>
+            <div id="fb1" class="q-feedback"></div>
           </div>
         </div>
 
-        <!-- CFD 3: TOTAL PRESSURE — correct: D -->
+        <!-- CFD 3: TOTAL PRESSURE — correct: A -->
         <div class="cfd-unit">
           <div class="cfd-unit-header">
-            <h3>Total pressure field</h3>
-            <p>Blue = lowest total pressure; red = highest. If Bernoulli held everywhere, this map would be a single uniform colour. It is not — understanding <em>where</em> it varies and why is the key engineering insight of this experiment.</p>
+            <h3>Total pressure field (Pt)</h3>
+            <p>Blue = lowest Pt. Red = highest Pt. If Bernoulli held everywhere, this map would be one colour.</p>
           </div>
           <div class="cfd-img-area">
-            <img src="https://github.com/Nidiana/LabsDiscussion/raw/main/Venturi_Effect/TotalField7LPM.png" alt="CFD total pressure contour 7 LPM" loading="lazy">
+            <img src="https://github.com/Nidiana/LabsDiscussion/raw/main/Venturi_Effect/TotalField7LPM.png" alt="CFD total pressure contour at 7 L/min" loading="lazy">
           </div>
           <div class="cfd-observe">
-            <strong>Observe:</strong> The core of the flow is largely uniform in colour — total pressure is approximately conserved there, consistent with the Bernoulli approximation. Near the walls the colour shifts toward blue: viscosity is converting mechanical energy to heat in the boundary layer, in direct violation of Bernoulli's inviscid assumption. The total pressure also decreases slightly from inlet to outlet even in the core — this is the real friction loss your experiment measured as P₁<sub>total</sub> − P₃<sub>total</sub>. Crucially, the three tap positions sample the core where this loss is small between adjacent taps — which is why the Bernoulli approximation is usable for your measurements despite the field not being truly inviscid.
+            <strong>Observe:</strong>
+            <ul>
+              <li><strong>Inlet and converging section:</strong> one uniform red. Pt is constant, so Bernoulli works.</li>
+              <li><strong>Throat and diverging section:</strong> red in the middle, but blue and green near the walls. Friction next to the wall removes energy, so Pt is lower there. Bernoulli does not work in this region.</li>
+              <li><strong>Overall:</strong> Pt at the outlet is lower than at the inlet. This is the real friction loss.</li>
+            </ul>
           </div>
           <div class="cfd-question">
             <span class="q-badge q-prd">Predict</span>
-            <div class="q-stem">Q3 — A designer proposes reducing the diverging section length by half to make the venturi more compact. Based on what you see in the velocity and total pressure fields, what is the risk?</div>
-            <div class="q-context">Think about what happens to the boundary layer in a decelerating flow when the angle becomes steeper, and what that would do to the total pressure field and pressure recovery.</div>
-            <label class="mc-opt"><input type="radio" name="q3" value="A" onchange="checkQ(3,'A')"> A &nbsp; No risk — a shorter diffuser simply means the pressure recovers faster</label>
-            <label class="mc-opt"><input type="radio" name="q3" value="B" onchange="checkQ(3,'B')"> B &nbsp; The throat velocity would increase, improving measurement sensitivity</label>
-            <label class="mc-opt"><input type="radio" name="q3" value="C" onchange="checkQ(3,'C')"> C &nbsp; The Cd value would increase toward 1.0 because the venturi is shorter</label>
-            <label class="mc-opt"><input type="radio" name="q3" value="D" onchange="checkQ(3,'D')"> D &nbsp; The boundary layer in the diverging section would be more likely to separate from the wall, creating a recirculation zone — total pressure loss would increase sharply and pressure recovery would be severely reduced</label>
-            <div id="fb3" class="q-feedback"></div>
+            <div class="q-stem">Q2 — Where does Bernoulli work well in this venturi, and where does it fail?</div>
+            <div class="q-context">Compare the middle of the flow with the region next to the wall.</div>
+            <label class="mc-opt"><input type="radio" name="q2" value="A" onchange="checkQ(2,'A')"> A &nbsp; Works in the middle of the flow. Fails next to the wall, where friction slows the water</label>
+            <label class="mc-opt"><input type="radio" name="q2" value="B" onchange="checkQ(2,'B')"> B &nbsp; Works everywhere, because water is almost incompressible</label>
+            <label class="mc-opt"><input type="radio" name="q2" value="C" onchange="checkQ(2,'C')"> C &nbsp; Works next to the wall. Fails in the middle, where the water is fastest</label>
+            <label class="mc-opt"><input type="radio" name="q2" value="D" onchange="checkQ(2,'D')"> D &nbsp; Works at the inlet and outlet only. Fails at the throat, where the water is fastest</label>
+            <div id="fb2" class="q-feedback"></div>
           </div>
         </div>
-
 
         <div class="completion-banner" id="completion-banner">
           <div class="completion-icon">🎉</div>
           <div class="completion-title">Activity complete!</div>
           <div class="completion-msg">
             Well done — you have recorded your measurements, analysed the Bernoulli principle,
-            explored the full flow field through CFD, and answered all eight questions.
+            explored the full flow field through CFD, and answered all seven questions.
             You can revisit any section using the numbered steps above or the back button below.
           </div>
         </div>
@@ -803,7 +813,8 @@ body {
 const D1=0.020, D2=0.010, D3=0.020;
 const A1=Math.PI*(D1/2)**2, A2=Math.PI*(D2/2)**2, A3=Math.PI*(D3/2)**2;
 const G=9.81, RHO=1000, MU=0.001;
-const C_ST='#1a4e8c', C_DY='#bf360c', C_TO='#263238';
+const C_ST='#0072B2', C_DY='#D55E00', C_TO='#111827';
+if(window.Chart){Chart.defaults.font.family="'Atkinson Hyperlegible',system-ui,Arial,sans-serif";Chart.defaults.font.size=15;Chart.defaults.color='#2a2e35';}
 
 let trials=[], trialCount=0, charts={};
 let quizAnswers={}, answeredQs=new Set();
@@ -911,19 +922,19 @@ function drawPressureChart(){
     data:{
       labels:['P₁  Inlet','P₂  Throat','P₃  Outlet'],
       datasets:[
-        {label:'Static (ρgh)',data:[t.Ps1,t.Ps2,t.Ps3],backgroundColor:C_ST+'C0',stack:'s'},
-        {label:'Dynamic (½ρv²)',data:[t.Pd1,t.Pd2,t.Pd3],backgroundColor:C_DY+'C0',stack:'s'},
-        {label:'Total',type:'line',data:[t.Pt1,t.Pt2,t.Pt3],borderColor:C_TO,borderWidth:2.5,
-         pointRadius:7,pointBackgroundColor:'#fff',pointBorderColor:C_TO,pointBorderWidth:2.5,
+        {label:'Ps (ρgh)',data:[t.Ps1,t.Ps2,t.Ps3],backgroundColor:C_ST+'C0',stack:'s'},
+        {label:'Pdyn (½ρv²)',data:[t.Pd1,t.Pd2,t.Pd3],backgroundColor:C_DY+'C0',stack:'s'},
+        {label:'Pt',type:'line',data:[t.Pt1,t.Pt2,t.Pt3],borderColor:C_TO,borderWidth:2.5,
+         pointRadius:7,pointStyle:'rectRot',pointBackgroundColor:'#fff',pointBorderColor:C_TO,pointBorderWidth:2.5,
          backgroundColor:'transparent',fill:false}
       ]
     },
     options:{responsive:true,plugins:{
-      legend:{position:'bottom',labels:{boxWidth:12,font:{size:13,family:'Inter'}}},
-      title:{display:true,text:`Trial ${t.n} · ${t.fl.toFixed(1)} L/min · Cd=${isNaN(t.Cd)?'—':t.Cd.toFixed(3)}`,color:'#546e7a',font:{size:13,family:'Inter'}}
+      legend:{position:'bottom',labels:{boxWidth:12,font:{size:15,family:'Atkinson Hyperlegible'}}},
+      title:{display:true,text:`Trial ${t.n} · ${t.fl.toFixed(1)} L/min · Cd=${isNaN(t.Cd)?'—':t.Cd.toFixed(3)}`,color:'#3d4450',font:{size:15,family:'Atkinson Hyperlegible'}}
     },scales:{
-      y:{stacked:true,title:{display:true,text:'Pressure (Pa)',font:{size:13,family:'Inter'}},grid:{color:'#e0e6da'}},
-      x:{grid:{color:'#e0e6da'}}
+      y:{stacked:true,title:{display:true,text:'Pressure (Pa)',font:{size:15,family:'Atkinson Hyperlegible'}},grid:{color:'#e4ded3'}},
+      x:{grid:{color:'#e4ded3'}}
     }}
   });
 }
@@ -934,16 +945,16 @@ function buildFlowChart(){
     data:{
       labels:trials.map(t=>`T${t.n}`),
       datasets:[
-        {label:'Theoretical (Bernoulli)',data:trials.map(t=>isNaN(t.Qth)?0:+(t.Qth*60000).toFixed(2)),backgroundColor:'#A8C8E8',borderColor:C_ST,borderWidth:1.5},
-        {label:'Actual (measured)',data:trials.map(t=>+t.fl.toFixed(2)),backgroundColor:C_ST+'BB',borderColor:'#1A3F6F',borderWidth:1.5}
+        {label:'Theoretical (Bernoulli)',data:trials.map(t=>isNaN(t.Qth)?0:+(t.Qth*60000).toFixed(2)),backgroundColor:'#cfe3f1',borderColor:'#00578a',borderWidth:1.5},
+        {label:'Actual (measured)',data:trials.map(t=>+t.fl.toFixed(2)),backgroundColor:C_ST+'BB',borderColor:'#003f66',borderWidth:1.5}
       ]
     },
     options:{responsive:true,plugins:{
-      legend:{position:'bottom',labels:{boxWidth:12,font:{size:13,family:'Inter'}}},
+      legend:{position:'bottom',labels:{boxWidth:12,font:{size:15,family:'Atkinson Hyperlegible'}}},
       tooltip:{callbacks:{afterBody(items){const t=trials[items[0].dataIndex];return isNaN(t.Cd)?[]:[`Cd = ${t.Cd.toFixed(3)}`,`Loss = ${((1-t.Cd)*100).toFixed(1)}%`];}}}
     },scales:{
-      y:{beginAtZero:true,title:{display:true,text:'Flow rate (L/min)',font:{size:13,family:'Inter'}},grid:{color:'#e0e6da'}},
-      x:{grid:{color:'#e0e6da'}}
+      y:{beginAtZero:true,title:{display:true,text:'Flow rate (L/min)',font:{size:15,family:'Atkinson Hyperlegible'}},grid:{color:'#e4ded3'}},
+      x:{grid:{color:'#e4ded3'}}
     }}
   });
 }
@@ -953,24 +964,24 @@ function buildFlowChart(){
 const U_CORRECT={1:'C',2:'D',3:'A',4:'C',5:'B'};
 const U_FB={
   1:{
-    C:`<strong>✓ Correct.</strong> Real fluids have viscosity — friction converts mechanical energy to heat as fluid moves through the pipe. Total pressure therefore decreases from inlet to outlet. The drop in total pressure between P₁ and P₃ is the direct experimental measure of these viscous losses.`,
-    def:`<strong>✗ Incorrect — correct answer: C.</strong> Real fluids experience viscous friction, which dissipates mechanical energy as heat. Total pressure (static + dynamic) therefore decreases from inlet to outlet. This is the fundamental difference between real flow and the inviscid ideal assumed by Bernoulli.`
+    C:`<strong>✓ Correct.</strong> Real fluids are viscous. Friction turns some mechanical energy into heat, so Pt falls from inlet to outlet. The drop in Pt between P₁ and P₃ measures this loss.`,
+    def:`<strong>✗ Incorrect — correct answer: C.</strong> Friction turns mechanical energy into heat, so Pt (Ps + Pdyn) falls from inlet to outlet. This is the key difference between real flow and ideal Bernoulli flow.`
   },
   2:{
-    D:`<strong>✓ Correct.</strong> The piezometer only measures static pressure (the tapping hole is perpendicular to flow, so it does not sense kinetic energy). To find dynamic pressure ½ρv², we use the measured flow rate Q and the known cross-sectional area A to calculate v = Q/A at each position, then compute ½ρv². Total pressure is then P<sub>static</sub> + ½ρv².`,
-    def:`<strong>✗ Incorrect — correct answer: D.</strong> Piezometers measure static pressure only. Dynamic pressure must be computed from velocity, obtained from Q = Av using the measured flow rate and the known pipe cross-section.`
+    D:`<strong>✓ Correct.</strong> A piezometer senses Ps only. To get Pdyn, calculate v = Q/A at each position, then Pdyn = ½ρv². Pt is then Ps + Pdyn.`,
+    def:`<strong>✗ Incorrect — correct answer: D.</strong> Piezometers measure Ps only. Pdyn is calculated from v = Q/A, using your measured flow rate.`
   },
   3:{
-    A:`<strong>✓ Correct.</strong> Bernoulli's equation states that static + dynamic pressure ≈ constant. As fluid accelerates through the throat (continuity forces higher velocity in the smaller area), dynamic pressure (½ρv²) increases. For the total to stay approximately constant, static pressure must fall. This is exactly what your piezometer readings confirm: h₂ &lt; h₁.`,
-    def:`<strong>✗ Incorrect — correct answer: A.</strong> By Bernoulli's principle, as velocity increases the dynamic pressure rises, so static pressure must fall to conserve total energy along the streamline. The piezometer at the throat reads lower than at the inlet precisely because the fluid is moving faster there.`
+    A:`<strong>✓ Correct.</strong> The throat is narrower, so v is higher (continuity) and Pdyn rises. Pt stays about the same, so Ps must fall. Your readings show this: h₂ &lt; h₁.`,
+    def:`<strong>✗ Incorrect — correct answer: A.</strong> When v increases, Pdyn increases, so Ps must decrease. The throat piezometer reads lower than the inlet because the fluid moves faster there.`
   },
   4:{
-    C:`<strong>✓ Correct.</strong> In ideal (inviscid, incompressible, steady) flow Bernoulli states P + ½ρv² = constant along a streamline (horizontal venturi). Although static and dynamic pressure each change, their sum — total pressure — is conserved at all positions. Any measured decrease in your experiment is the signature of real viscous losses.`,
-    def:`<strong>✗ Incorrect — correct answer: C.</strong> Bernoulli is a statement of energy conservation for ideal flow. In a horizontal frictionless venturi, P + ½ρv² = constant everywhere, so total pressure is the same at all three positions regardless of how static and dynamic components trade off.`
+    C:`<strong>✓ Correct.</strong> In ideal horizontal flow, Ps + Pdyn is constant. Ps and Pdyn trade off, but their sum Pt is the same at every position. Any drop you measured is real viscous loss.`,
+    def:`<strong>✗ Incorrect — correct answer: C.</strong> Bernoulli is energy conservation for ideal flow. In a horizontal frictionless venturi, Pt is the same at all three positions, however Ps and Pdyn trade off.`
   },
   5:{
-    B:`<strong>✓ Correct.</strong> The ideal Q<sub>ideal</sub> is derived assuming inviscid, plug flow. Real flow has a boundary layer (no-slip at the wall creates slow fluid near the wall), viscous shear, and minor turbulent losses. These reduce the effective throat area below 78.5 mm² and dissipate energy — so Q<sub>actual</sub> &lt; Q<sub>ideal</sub>, giving C<sub>d</sub> &lt; 1.`,
-    def:`<strong>✗ Incorrect — correct answer: B.</strong> C<sub>d</sub> &lt; 1 because real fluids are viscous. The boundary layer at the throat wall reduces effective flow area, and viscous shear dissipates energy — effects not captured by the ideal Bernoulli derivation.`
+    B:`<strong>✓ Correct.</strong> The ideal equation assumes no friction. Real flow has friction, especially at the wall, so Q<sub>actual</sub> &lt; Q<sub>ideal</sub> and C<sub>d</sub> &lt; 1. Step 4 shows why.`,
+    def:`<strong>✗ Incorrect — correct answer: B.</strong> C<sub>d</sub> &lt; 1 because real flow has friction, which the ideal equation ignores.`
   }
 };
 function checkU(qNum,answer){
@@ -992,20 +1003,16 @@ function updateUProgress(){
 }
 
 /* ═══ DEEP UNDERSTANDING QUIZ (Slide 4) ════════════════
-   Correct: Q1=C  Q2=B  Q3=D                           */
-const CORRECT={1:'C',2:'B',3:'D'};
+   Correct: Q1=B  Q2=A                           */
+const CORRECT={1:'B',2:'A'};
 const FB={
   1:{
-    C:`<strong>✓ Correct.</strong> The static pressure CFD shows that in straight, fully developed sections (where P₁, P₂ and P₃ are tapped), the pressure contours are uniform across the cross-section — wall pressure equals the cross-sectional mean. Viscous losses are concentrated in the thin boundary layer at the wall, but the core flow satisfies Bernoulli. Tap locations were <em>designed</em> to exploit this.`,
-    def:`<strong>✗ Incorrect — correct answer: C.</strong> Bernoulli assumes inviscid flow, violated near the walls. However, the tap positions are in straight, fully developed sections where pressure is uniform across the cross-section and the boundary layer is thin — making Bernoulli a valid approximation between those specific points.`
+    B:`<strong>✓ Correct.</strong> The water is fastest in the middle and slows down towards the wall, because friction at the wall holds it back. So the speed is not the same across the throat, but Q = A × v assumes it is. This is one reason the real flow is a little less than Bernoulli predicts (C<sub>d</sub> &lt; 1).`,
+    def:`<strong>✗ Incorrect — correct answer: B.</strong> Look at the colours across the throat: red in the middle, blue next to the wall. Friction at the wall holds the water back.`
   },
   2:{
-    B:`<strong>✓ Correct.</strong> The velocity field shows the no-slip condition in action: zero at the wall, maximum on the centreline. This boundary layer of slow fluid reduces the effective flow area below the geometric 79 mm². Because Bernoulli theory assumes plug flow, it predicts a higher Q than is actually achieved. The ratio Q_actual / Q_ideal = Cd, and the boundary layer is exactly why Cd &lt; 1.`,
-    def:`<strong>✗ Incorrect — correct answer: B.</strong> The velocity contour shows slow fluid near the wall (boundary layer) that reduces the effective throat area below 79 mm². Real Q is therefore less than the plug-flow prediction — that is the physical meaning of Cd &lt; 1.`
-  },
-  3:{
-    D:`<strong>✓ Correct.</strong> In the diverging section, pressure rises in the flow direction — an <em>adverse pressure gradient</em>. This is inherently destabilising for the boundary layer. A steeper (shorter) diffuser angle intensifies this gradient, making boundary-layer separation more likely: the flow reverses near the wall, a recirculation zone forms, total pressure loss rises sharply, and static pressure recovery at P₃ is destroyed. The long gentle diverging section is a precision engineering decision, not arbitrary geometry.`,
-    def:`<strong>✗ Incorrect — correct answer: D.</strong> A shorter diverging section means a steeper adverse pressure gradient. The boundary layer cannot remain attached, separates from the wall, and creates a recirculation zone — total pressure loss increases dramatically and pressure recovery fails. The long diverging section exists specifically to prevent this.`
+    A:`<strong>✓ Correct.</strong> In the middle of the flow Pt is almost constant, so Bernoulli works. Next to the wall, friction removes energy and Pt falls, so Bernoulli fails there. Pt also drops a little from inlet to outlet: this is the real loss.`,
+    def:`<strong>✗ Incorrect — correct answer: A.</strong> In the Pt map the middle of the flow is one colour (Pt constant, Bernoulli works). Near the wall the colour turns blue (friction removes energy, Bernoulli fails).`
   }
 };
 function checkQ(qNum,answer){
@@ -1022,9 +1029,9 @@ function checkQ(qNum,answer){
 }
 function updateProgress(){
   const n=answeredQs.size;
-  document.getElementById('qprog-lbl').textContent=`${n} of 3 answered`;
-  document.getElementById('qprog-fill').style.width=`${(n/3)*100}%`;
-  if(n===3){
+  document.getElementById('qprog-lbl').textContent=`${n} of 2 answered`;
+  document.getElementById('qprog-fill').style.width=`${(n/2)*100}%`;
+  if(n===2){
     const banner=document.getElementById('completion-banner');
     if(banner){ banner.classList.add('show'); banner.scrollIntoView({behavior:'smooth',block:'nearest'}); }
   }
