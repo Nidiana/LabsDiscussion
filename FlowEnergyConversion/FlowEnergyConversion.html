@@ -529,6 +529,11 @@ body,input,table{font-variant-numeric:tabular-nums;}
 @media (prefers-reduced-motion:reduce){.slide,.q-prog-fill{transition:none !important;}}
 @media(max-width:640px){.topbar{flex-direction:column;align-items:flex-start;gap:10px;}}
 .sign-note{font-family:var(--ff);font-size:1rem;color:var(--text);background:var(--accent-bg);border-left:5px solid var(--accent);border-radius:0 6px 6px 0;padding:10px 14px;margin-bottom:14px;line-height:1.5;}
+.topbar-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px;}
+.btn-clear{font-family:var(--ff);font-size:0.95rem;font-weight:600;padding:6px 14px;min-height:40px;background:#fff;color:var(--text);border:2px solid var(--border);border-radius:20px;cursor:pointer;}
+.btn-clear:hover{border-color:var(--accent);}
+.btn-clear.confirming{border-color:var(--err);color:var(--err);background:var(--err-bg);}
+@media(max-width:640px){.topbar-right{align-items:flex-start;}}
 </style>
 </head>
 <body>
@@ -538,6 +543,7 @@ body,input,table{font-variant-numeric:tabular-nums;}
       <div class="topbar-title">Wind Tunnel Lab &#8212; Variable Cross-Section</div>
       <div class="topbar-sub">Continuity Equation &middot; Bernoulli&#8217;s Principle &middot; Pitot Tube</div>
     </div>
+    <div class="topbar-right">
     <div class="steps-row">
       <div class="step-pip active" id="sp1" onclick="goTo(1)">1</div>
       <div class="step-connector"></div>
@@ -548,6 +554,8 @@ body,input,table{font-variant-numeric:tabular-nums;}
       <div class="step-pip" id="sp4" onclick="goTo(4)">4</div>
       <div class="step-connector"></div>
       <div class="step-pip" id="sp5" onclick="goTo(5)">5</div>
+    </div>
+    <button type="button" class="btn-clear" id="btn-clear" onclick="clearAllData()">Clear all data</button>
     </div>
   </header>
 
@@ -1508,6 +1516,23 @@ function loadSampleData(){
       btn.style.color = 'var(--text-md)';
     }, 2000);
   }
+}
+
+// ── CLEAR ALL DATA (two-click confirm, no pop-up dialogs) ──────────
+let clearTimer=null;
+function clearAllData(){
+  const btn=document.getElementById('btn-clear');
+  if(!btn.classList.contains('confirming')){
+    btn.classList.add('confirming');
+    btn.textContent='Click again to clear everything';
+    clearTimer=setTimeout(function(){btn.classList.remove('confirming');btn.textContent='Clear all data';},5000);
+    return;
+  }
+  clearTimeout(clearTimer);
+  try{sessionStorage.removeItem(LS_KEY);}catch(e){}
+  try{localStorage.removeItem(LS_KEY);}catch(e){}
+  document.querySelectorAll('input').forEach(function(i){if(i.type==='radio'||i.type==='checkbox')i.checked=false;else if(i.type!=='hidden')i.value='';});
+  window.location.replace(window.location.href.split('#')[0]);
 }
 
 // ── INIT ───────────────────────────────────────────────────────────
